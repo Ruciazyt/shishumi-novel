@@ -14,13 +14,13 @@ import { Colors } from '../constants/colors';
 import { callAI } from '../services/api';
 import { useApp } from '../context/AppContext';
 
-interface Poetry推荐Props {
+interface PoetryRecommendProps {
   visible: boolean;
   onClose: () => void;
   onSelect: (poetry: string) => void;
 }
 
-export const Poetry推荐: React.FC<Poetry推荐Props> = ({ visible, onClose, onSelect }) => {
+export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClose, onSelect }) => {
   const { state } = useApp();
   const [scene, setScene] = useState('');
   const [loading, setLoading] = useState(false);

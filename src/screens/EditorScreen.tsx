@@ -13,7 +13,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
-import { Poetry推荐 } from '../components/Poetry推荐';
+import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
 import { updateChapter } from '../services/storage';
 import { RootStackParamList, AIAssistantType } from '../types';
@@ -261,7 +261,7 @@ export const EditorScreen: React.FC = () => {
         initialType={aiType}
       />
 
-      <Poetry推荐
+      <PoetryRecommend
         visible={poetryVisible}
         onClose={() => setPoetryVisible(false)}
         onSelect={handlePoetrySelect}
