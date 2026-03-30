@@ -44,7 +44,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const { state } = useApp();
 
   const handleSubmit = async () => {
-    if (aiType === 'poetry' || aiType === 'buddhist') {
+    if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
       if (!sceneText.trim()) {
         setError('请输入场景描述');
         return;
