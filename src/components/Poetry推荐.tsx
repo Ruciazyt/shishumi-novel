@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -20,18 +20,11 @@ interface Poetry推荐Props {
   onSelect: (poetry: string) => void;
 }
 
-interface PoetryResult {
-  name: string;
-  author: string;
-  content: string;
-  reason: string;
-}
-
 export const Poetry推荐: React.FC<Poetry推荐Props> = ({ visible, onClose, onSelect }) => {
   const { state } = useApp();
   const [scene, setScene] = useState('');
-  const [poetry, setPoetry] = useState<PoetryResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState('');
   const [error, setError] = useState('');
 
   const handleSearch = async () => {
@@ -50,22 +43,22 @@ export const Poetry推荐: React.FC<Poetry推荐Props> = ({ visible, onClose, on
 
     setLoading(false);
     if (response.success && response.data) {
-      // 简单解析AI返回的诗词结果
-      const lines = response.data.split('\n').filter((l: string) => l.trim());
-      setPoetry([{ name: '推荐诗词', author: '', content: response.data, reason: '' }]);
+      setResult(response.data);
     } else {
       setError(response.error || '查询失败');
     }
   };
 
-  const handleSelect = (item: PoetryResult) => {
-    onSelect(item.content);
-    onClose();
+  const handleSelect = () => {
+    if (result) {
+      onSelect(result);
+      onClose();
+    }
   };
 
   const handleClose = () => {
     setScene('');
-    setPoetry([]);
+    setResult('');
     setError('');
     onClose();
   };
@@ -103,23 +96,12 @@ export const Poetry推荐: React.FC<Poetry推荐Props> = ({ visible, onClose, on
               <View style={styles.loadingContainer}>
                 <Text style={styles.loadingText}>正在搜索...</Text>
               </View>
-            ) : poetry.length > 0 ? (
-              <ScrollView style={styles.resultList}>
-                {poetry.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.poetryCard}
-                    onPress={() => handleSelect(item)}
-                  >
-                    <Text style={styles.poetryTitle}>{item.name}</Text>
-                    {item.author ? <Text style={styles.poetryAuthor}>{item.author}</Text> : null}
-                    <Text style={styles.poetryContent}>{item.content}</Text>
-                    {item.reason ? (
-                      <Text style={styles.poetryReason}>推荐理由：{item.reason}</Text>
-                    ) : null}
-                    <Text style={styles.tapHint}>点击插入</Text>
-                  </TouchableOpacity>
-                ))}
+            ) : result ? (
+              <ScrollView style={styles.resultContainer}>
+                <Text style={styles.resultText}>{result}</Text>
+                <TouchableOpacity style={styles.insertButton} onPress={handleSelect}>
+                  <Text style={styles.insertButtonText}>插入诗词</Text>
+                </TouchableOpacity>
               </ScrollView>
             ) : (
               <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
@@ -198,44 +180,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
   },
-  resultList: {
-    maxHeight: 400,
-  },
-  poetryCard: {
+  resultContainer: {
     backgroundColor: Colors.backgroundCard,
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
-    marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  poetryTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.vermillion,
-    marginBottom: 4,
-  },
-  poetryAuthor: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 8,
-  },
-  poetryContent: {
+  resultText: {
     fontSize: 15,
     color: Colors.textPrimary,
-    lineHeight: 26,
-    marginBottom: 8,
+    lineHeight: 24,
   },
-  poetryReason: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    fontStyle: 'italic',
+  insertButton: {
+    backgroundColor: Colors.vermillion,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
   },
-  tapHint: {
-    fontSize: 12,
-    color: Colors.textLight,
-    textAlign: 'right',
-    marginTop: 8,
+  insertButtonText: {
+    color: Colors.textOnVermillion,
+    fontSize: 15,
+    fontWeight: '600',
   },
   searchButton: {
     backgroundColor: Colors.vermillion,

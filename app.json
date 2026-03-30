@@ -17,18 +17,13 @@
       "bundleIdentifier": "com.shishumi.novel"
     },
     "android": {
+      "package": "com.shishumi.novel",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#E8DCC8"
-      },
-      "package": "com.shishumi.novel",
-      "minSdkVersion": 24
-    },
-    "plugins": [],
-    "extra": {
-      "eas": {
-        "projectId": "shishumi-novel"
       }
-    }
+    },
+    "plugins": []
   }
 }

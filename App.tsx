@@ -1,92 +1,83 @@
-// 史书墨 - 历史小说创作辅助应用
 import React from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, StyleSheet } from 'react-native';
-
 import { AppProvider } from './src/context/AppContext';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ProjectScreen } from './src/screens/ProjectScreen';
-import { WritingScreen } from './src/screens/WritingScreen';
-import { ReferenceScreen } from './src/screens/ReferenceScreen';
+import { EditorScreen } from './src/screens/EditorScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
-import { RootStackParamList, TabParamList } from './src/types';
+import { Colors } from './src/constants/colors';
+import { RootStackParamList } from './src/types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator<TabParamList>();
+const Tab = createBottomTabNavigator();
 
-// 标签栏图标组件
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    Home: '📖',
-    Reference: '📚',
-    Settings: '⚙️',
-  };
-  return (
-    <View style={styles.tabIconContainer}>
-      <Text style={[styles.tabIcon, focused && styles.tabIconFocused]}>{icons[label] || '📄'}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
-    </View>
-  );
-}
+const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
+  <View style={styles.tabIconContainer}>
+    <Text style={[styles.tabIcon, focused && styles.tabIconFocused]}>
+      {name === '项目' ? '📚' : '⚙️'}
+    </Text>
+  </View>
+);
 
-// 底部标签导航
-function TabNavigator() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#E8DCC8',
-          borderTopColor: '#D4C4A8',
-          height: 60,
-          paddingBottom: 6,
-          paddingTop: 6,
-        },
-        tabBarShowLabel: false,
+const TabNavigator = () => (
+  <Tab.Navigator
+    screenOptions={{
+      headerShown: false,
+      tabBarStyle: styles.tabBar,
+      tabBarActiveTintColor: Colors.vermillion,
+      tabBarInactiveTintColor: Colors.textLight,
+      tabBarLabelStyle: styles.tabLabel,
+    }}
+  >
+    <Tab.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{
+        tabBarLabel: '项目',
+        tabBarIcon: ({ focused }) => <TabIcon name="项目" focused={focused} />,
       }}
-    >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Home" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="ReferenceTab"
-        component={ReferenceScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Reference" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="SettingsTab"
-        component={SettingsScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon label="Settings" focused={focused} />,
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
+    />
+    <Tab.Screen
+      name="Settings"
+      component={SettingsScreen}
+      options={{
+        tabBarLabel: '设置',
+        tabBarIcon: ({ focused }) => <TabIcon name="设置" focused={focused} />,
+      }}
+    />
+  </Tab.Navigator>
+);
 
 export default function App() {
   return (
     <AppProvider>
       <NavigationContainer>
+        <StatusBar style="dark" />
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#F5EFE0' },
+            contentStyle: { backgroundColor: Colors.background },
           }}
         >
           <Stack.Screen name="Home" component={TabNavigator} />
-          <Stack.Screen name="Project" component={ProjectScreen} />
-          <Stack.Screen name="Writing" component={WritingScreen} />
-          <Stack.Screen name="Reference" component={ReferenceScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen
+            name="Project"
+            component={ProjectScreen}
+            options={{
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="Editor"
+            component={EditorScreen}
+            options={{
+              animation: 'slide_from_right',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>
@@ -94,24 +85,27 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: Colors.backgroundCard,
+    borderTopColor: Colors.border,
+    borderTopWidth: 1,
+    paddingTop: 8,
+    paddingBottom: 8,
+    height: 60,
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
   tabIconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabIcon: {
     fontSize: 20,
-    opacity: 0.6,
+    opacity: 0.5,
   },
   tabIconFocused: {
     opacity: 1,
-  },
-  tabLabel: {
-    fontSize: 10,
-    color: '#8B7355',
-    marginTop: 2,
-  },
-  tabLabelFocused: {
-    color: '#3D2914',
-    fontWeight: '600',
   },
 });
