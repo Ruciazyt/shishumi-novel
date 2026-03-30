@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,18 +20,27 @@ interface AIAssistantProps {
   visible: boolean;
   onClose: () => void;
   onInsertText?: (text: string) => void;
+  initialType?: AIType;
 }
 
 type AIType = 'polish' | 'historical' | 'poetry' | 'buddhist';
 
-export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onInsertText }) => {
-  const { state } = useApp();
-  const [aiType, setAiType] = useState<AIType>('polish');
+export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onInsertText, initialType }) => {
+  const [aiType, setAiType] = useState<AIType>(initialType || 'polish');
   const [inputText, setInputText] = useState('');
   const [sceneText, setSceneText] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+
+  // 当 visible 变为 true 时，根据 initialType 更新 aiType
+  useEffect(() => {
+    if (visible && initialType) {
+      setAiType(initialType);
+    }
+  }, [visible, initialType]);
+
+  const { state } = useApp();
 
   const handleSubmit = async () => {
     if (aiType === 'poetry' || aiType === 'buddhist') {

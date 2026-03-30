@@ -41,11 +41,6 @@ export const ChapterList: React.FC<ChapterListProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>章节列表</Text>
-        {onAddChapter && (
-          <TouchableOpacity style={styles.addButton} onPress={onAddChapter}>
-            <Text style={styles.addButtonText}>+ 新建章节</Text>
-          </TouchableOpacity>
-        )}
       </View>
       <FlatList
         data={chapters}

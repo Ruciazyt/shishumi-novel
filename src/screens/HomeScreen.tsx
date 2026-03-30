@@ -28,6 +28,9 @@ export const HomeScreen: React.FC = () => {
   const [newDynasty, setNewDynasty] = useState('tang');
   const [newDescription, setNewDescription] = useState('');
 
+  // FAB相关状态
+  const [fabExpanded, setFabExpanded] = useState(false);
+
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
       Alert.alert('错误', '请输入书名');
@@ -74,13 +77,8 @@ export const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>我的作品</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.addButtonText}>+ 新建</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>史书墨</Text>
+        <View style={styles.headerRight} />
       </View>
 
       <FlatList
@@ -101,6 +99,15 @@ export const HomeScreen: React.FC = () => {
           </View>
         }
       />
+
+      {/* FAB - 右下角悬浮新建按钮 */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabIcon}>+</Text>
+      </TouchableOpacity>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -187,6 +194,32 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.textPrimary,
+  },
+  headerRight: {
+    width: 60,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.vermillion,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.ink,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+    zIndex: 100,
+  },
+  fabIcon: {
+    fontSize: 28,
+    color: Colors.textOnVermillion,
+    fontWeight: '300',
+    lineHeight: 30,
   },
   addButton: {
     backgroundColor: Colors.vermillion,

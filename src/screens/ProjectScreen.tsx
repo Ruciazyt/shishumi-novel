@@ -141,8 +141,16 @@ export const ProjectScreen: React.FC = () => {
         chapters={project.chapters}
         onChapterPress={handleChapterPress}
         onChapterLongPress={handleChapterLongPress}
-        onAddChapter={handleAddChapter}
       />
+
+      {/* FAB - 右下角悬浮新建章节按钮 */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={handleAddChapter}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabIcon}>+</Text>
+      </TouchableOpacity>
 
       <Modal visible={chapterModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -222,6 +230,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 20,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.vermillion,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.ink,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
+    zIndex: 100,
+  },
+  fabIcon: {
+    fontSize: 28,
+    color: Colors.textOnVermillion,
+    fontWeight: '300',
+    lineHeight: 30,
   },
   errorText: {
     fontSize: 16,

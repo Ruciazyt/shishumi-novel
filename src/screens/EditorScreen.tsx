@@ -32,8 +32,14 @@ export const EditorScreen: React.FC = () => {
 
   const [content, setContent] = useState(chapter?.content || '');
   const [aiVisible, setAiVisible] = useState(false);
+  const [aiType, setAiType] = useState<'polish' | 'historical' | 'poetry' | 'buddhist'>('polish');
   const [poetryVisible, setPoetryVisible] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const handleAIPress = (type: 'polish' | 'historical' | 'poetry' | 'buddhist') => {
+    setAiType(type);
+    setAiVisible(true);
+  };
 
   useEffect(() => {
     if (chapter) {
@@ -118,16 +124,28 @@ export const EditorScreen: React.FC = () => {
 
       <View style={styles.toolbar}>
         <TouchableOpacity
-          style={styles.toolButton}
-          onPress={() => setAiVisible(true)}
+          style={[styles.toolButton, aiType === 'polish' && styles.toolButtonActive]}
+          onPress={() => handleAIPress('polish')}
         >
-          <Text style={styles.toolButtonText}>AI助手</Text>
+          <Text style={[styles.toolButtonText, aiType === 'polish' && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.toolButton}
-          onPress={() => setPoetryVisible(true)}
+          style={[styles.toolButton, aiType === 'historical' && styles.toolButtonActive]}
+          onPress={() => handleAIPress('historical')}
         >
-          <Text style={styles.toolButtonText}>诗词推荐</Text>
+          <Text style={[styles.toolButtonText, aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toolButton, aiType === 'poetry' && styles.toolButtonActive]}
+          onPress={() => handleAIPress('poetry')}
+        >
+          <Text style={[styles.toolButtonText, aiType === 'poetry' && styles.toolButtonTextActive]}>诗词</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toolButton, aiType === 'buddhist' && styles.toolButtonActive]}
+          onPress={() => handleAIPress('buddhist')}
+        >
+          <Text style={[styles.toolButtonText, aiType === 'buddhist' && styles.toolButtonTextActive]}>佛道</Text>
         </TouchableOpacity>
       </View>
 
@@ -135,6 +153,7 @@ export const EditorScreen: React.FC = () => {
         visible={aiVisible}
         onClose={() => setAiVisible(false)}
         onInsertText={handleInsertText}
+        initialType={aiType}
       />
 
       <Poetry推荐
@@ -204,11 +223,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     backgroundColor: Colors.paperDark,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  toolButtonActive: {
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
   },
   toolButtonText: {
-    fontSize: 14,
-    color: Colors.vermillion,
+    fontSize: 13,
+    color: Colors.textSecondary,
     fontWeight: '600',
+  },
+  toolButtonTextActive: {
+    color: Colors.textOnVermillion,
   },
   errorText: {
     fontSize: 16,
