@@ -73,24 +73,6 @@ export const EditorScreen: React.FC = () => {
     }
   }, [history, historyIndex]);
 
-  // 键盘事件处理
-  useEffect(() => {
-    const handler = (e: any) => {
-      const key = e.key || '';
-      const ctrl = e.ctrlKey || e.metaKey || false;
-      if (ctrl && key === 'z') {
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
-        e.preventDefault();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
-
   // 用户输入时记录历史
   const handleContentChange = (text: string) => {
     setContent(text);
@@ -120,6 +102,10 @@ export const EditorScreen: React.FC = () => {
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
     setAiVisible(true);
+  };
+
+  const handlePoetryPress = () => {
+    setPoetryVisible(true);
   };
 
   useEffect(() => {
@@ -235,10 +221,10 @@ export const EditorScreen: React.FC = () => {
           <Text style={[styles.toolButtonText, aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'poetry' && styles.toolButtonActive]}
-          onPress={() => handleAIPress('poetry')}
+          style={[styles.toolButton, poetryVisible && styles.toolButtonActive]}
+          onPress={handlePoetryPress}
         >
-          <Text style={[styles.toolButtonText, aiType === 'poetry' && styles.toolButtonTextActive]}>诗词</Text>
+          <Text style={[styles.toolButtonText, poetryVisible && styles.toolButtonTextActive]}>诗词</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiType === 'buddhist' && styles.toolButtonActive]}
