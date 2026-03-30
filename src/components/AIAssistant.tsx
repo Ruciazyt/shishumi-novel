@@ -15,15 +15,16 @@ import { Colors } from '../constants/colors';
 import { callAI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { DYNASTIES } from '../data/dynasties';
+import { AIAssistantType } from '../types';
 
 interface AIAssistantProps {
   visible: boolean;
   onClose: () => void;
   onInsertText?: (text: string) => void;
-  initialType?: AIType;
+  initialType?: AIAssistantType;
 }
 
-type AIType = 'polish' | 'historical' | 'poetry' | 'buddhist';
+type AIType = 'polish' | 'historical' | 'poetry' | 'buddhist' | 'taoist';
 
 export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onInsertText, initialType }) => {
   const [aiType, setAiType] = useState<AIType>(initialType || 'polish');
@@ -134,12 +135,20 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 onPress={() => setAiType('buddhist')}
               >
                 <Text style={[styles.typeButtonText, aiType === 'buddhist' && styles.typeButtonTextActive]}>
-                  佛道引用
+                  佛教引用
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.typeButton, aiType === 'taoist' && styles.typeButtonActive]}
+                onPress={() => setAiType('taoist')}
+              >
+                <Text style={[styles.typeButtonText, aiType === 'taoist' && styles.typeButtonTextActive]}>
+                  道家引用
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {aiType === 'poetry' || aiType === 'buddhist' ? (
+            {aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist' ? (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>场景描述</Text>
                 <TextInput

@@ -40,6 +40,8 @@ export interface AIResponse {
   error?: string;
 }
 
+export type AIAssistantType = 'polish' | 'historical' | 'poetry' | 'buddhist' | 'taoist';
+
 export type RootStackParamList = {
   Home: undefined;
   Project: { projectId: string };

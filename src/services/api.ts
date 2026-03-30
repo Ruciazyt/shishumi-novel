@@ -26,8 +26,9 @@ const buildPrompt = (request: AIRequest): string => {
     case 'poetry':
       return PROMPTS.poetry(request.scene || '');
     case 'buddhist':
-    case 'taoist':
       return PROMPTS.buddhist(request.scene || '');
+    case 'taoist':
+      return PROMPTS.taoist(request.scene || '');
     default:
       return request.text || '';
   }
