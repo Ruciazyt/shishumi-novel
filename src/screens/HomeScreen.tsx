@@ -25,6 +25,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen: React.FC = () => {
   const { state, dispatch } = useApp();
+  const sortedProjects = [...state.projects].sort((a, b) => b.updatedAt - a.updatedAt);
   const navigation = useNavigation<NavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -82,7 +83,7 @@ export const HomeScreen: React.FC = () => {
       </View>
 
       <FlatList
-        data={state.projects}
+        data={sortedProjects}
         renderItem={({ item }) => (
           <ProjectCard
             project={item}

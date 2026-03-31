@@ -7,7 +7,6 @@ interface ChapterListProps {
   chapters: Chapter[];
   onChapterPress: (chapter: Chapter) => void;
   onChapterLongPress?: (chapter: Chapter) => void;
-  onAddChapter?: () => void;
 }
 
 const countChars = (text: string): number => {
@@ -18,7 +17,6 @@ export const ChapterList: React.FC<ChapterListProps> = ({
   chapters,
   onChapterPress,
   onChapterLongPress,
-  onAddChapter,
 }) => {
   const totalChars = chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
 
@@ -93,17 +91,6 @@ const styles = StyleSheet.create({
   totalCount: {
     fontSize: 12,
     color: Colors.textLight,
-  },
-  addButton: {
-    backgroundColor: Colors.vermillion,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  addButtonText: {
-    color: Colors.textOnVermillion,
-    fontSize: 14,
-    fontWeight: '600',
   },
   list: {
     padding: 16,
