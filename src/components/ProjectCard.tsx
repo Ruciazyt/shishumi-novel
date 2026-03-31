@@ -4,6 +4,7 @@ import { Project } from '../types';
 import { Colors, ColorsAlpha } from '../constants/colors';
 import { formatRelativeTime } from '../utils/time';
 import { countChars } from '../utils/text';
+import { getDynastyById } from '../data/dynasties';
 
 
 interface ProjectCardProps {
@@ -28,7 +29,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
           {project.title}
         </Text>
         <View style={styles.dynastyBadge}>
-          <Text style={styles.dynastyBadgeText}>{project.dynasty}</Text>
+          <Text style={styles.dynastyBadgeText}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
         </View>
       </View>
       <Text style={styles.description} numberOfLines={2}>

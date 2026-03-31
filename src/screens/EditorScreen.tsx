@@ -292,11 +292,11 @@ export const EditorScreen: React.FC = () => {
           {chapter.title}
         </Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={undo} disabled={!canUndo} style={styles.undoRedoBtn}
+          <TouchableOpacity onPress={undo} disabled={!canUndo} style={[styles.undoRedoBtn, !canUndo && styles.undoRedoBtnDisabled]}
             accessibilityLabel="撤销" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoDisabled]}>↩</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={redo} disabled={!canRedo} style={styles.undoRedoBtn}
+          <TouchableOpacity onPress={redo} disabled={!canRedo} style={[styles.undoRedoBtn, !canRedo && styles.undoRedoBtnDisabled]}
             accessibilityLabel="重做" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
           </TouchableOpacity>
@@ -445,6 +445,11 @@ const styles = StyleSheet.create({
   },
   undoRedoBtn: {
     padding: 4,
+  },
+  undoRedoBtnDisabled: {
+    padding: 4,
+    backgroundColor: Colors.paperDark,
+    borderRadius: 4,
   },
   undoRedoText: {
     fontSize: 18,
