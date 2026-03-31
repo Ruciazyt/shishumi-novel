@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Project } from '../types';
 import { Colors } from '../constants/colors';
+import { formatRelativeTime } from '../utils/time';
 
 interface ProjectCardProps {
   project: Project;
@@ -10,6 +11,8 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLongPress }) => {
+  const relativeTime = formatRelativeTime(project.updatedAt);
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -24,9 +27,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
       <Text style={styles.description} numberOfLines={2}>
         {project.description || '暂无简介'}
       </Text>
-      <Text style={styles.chapters}>
-        {project.chapters.length}章节
-      </Text>
+      <View style={styles.meta}>
+        <Text style={styles.chapters}>
+          {project.chapters.length}章节
+        </Text>
+        {relativeTime ? (
+          <Text style={styles.updated}>· {relativeTime}更新</Text>
+        ) : null}
+      </View>
     </TouchableOpacity>
   );
 };
@@ -62,7 +70,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 20,
   },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   chapters: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  updated: {
     fontSize: 12,
     color: Colors.textLight,
   },

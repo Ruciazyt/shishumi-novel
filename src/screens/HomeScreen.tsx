@@ -8,6 +8,9 @@ import {
   Modal,
   TextInput,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,7 +30,6 @@ export const HomeScreen: React.FC = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newDynasty, setNewDynasty] = useState('tang');
   const [newDescription, setNewDescription] = useState('');
-
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -93,7 +95,7 @@ export const HomeScreen: React.FC = () => {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>暂无作品</Text>
-            <Text style={styles.emptySubtitle}>点击右上角新建作品开始创作</Text>
+            <Text style={styles.emptySubtitle}>点击右下角新建作品开始创作</Text>
           </View>
         }
       />
@@ -108,68 +110,83 @@ export const HomeScreen: React.FC = () => {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>新建作品</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <ScrollView
+            style={styles.modalScroll}
+            contentContainerStyle={styles.modalScrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>新建作品</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.closeButton}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>书名</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="请输入书名"
+                  placeholderTextColor={Colors.textLight}
+                  value={newTitle}
+                  onChangeText={setNewTitle}
+                  autoFocus
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>时代背景</Text>
+                <View style={styles.dynastySelector}>
+                  {DYNASTIES.map(d => (
+                    <TouchableOpacity
+                      key={d.id}
+                      style={[
+                        styles.dynastyButton,
+                        newDynasty === d.id && styles.dynastyButtonActive,
+                      ]}
+                      onPress={() => setNewDynasty(d.id)}
+                    >
+                      <Text
+                        style={[
+                          styles.dynastyButtonText,
+                          newDynasty === d.id && styles.dynastyButtonTextActive,
+                        ]}
+                      >
+                        {d.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>简介</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="请输入简介（可选）"
+                  placeholderTextColor={Colors.textLight}
+                  value={newDescription}
+                  onChangeText={setNewDescription}
+                  multiline
+                />
+              </View>
+
+              <TouchableOpacity style={styles.submitButton} onPress={handleCreateProject}>
+                <Text style={styles.submitButtonText}>创建作品</Text>
               </TouchableOpacity>
             </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>书名</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="请输入书名"
-                placeholderTextColor={Colors.textLight}
-                value={newTitle}
-                onChangeText={setNewTitle}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>时代背景</Text>
-              <View style={styles.dynastySelector}>
-                {DYNASTIES.map(d => (
-                  <TouchableOpacity
-                    key={d.id}
-                    style={[
-                      styles.dynastyButton,
-                      newDynasty === d.id && styles.dynastyButtonActive,
-                    ]}
-                    onPress={() => setNewDynasty(d.id)}
-                  >
-                    <Text
-                      style={[
-                        styles.dynastyButtonText,
-                        newDynasty === d.id && styles.dynastyButtonTextActive,
-                      ]}
-                    >
-                      {d.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>简介</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="请输入简介（可选）"
-                placeholderTextColor={Colors.textLight}
-                value={newDescription}
-                onChangeText={setNewDescription}
-                multiline
-              />
-            </View>
-
-            <TouchableOpacity style={styles.submitButton} onPress={handleCreateProject}>
-              <Text style={styles.submitButtonText}>创建作品</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -219,17 +236,6 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     lineHeight: 30,
   },
-  addButton: {
-    backgroundColor: Colors.vermillion,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: Colors.textOnVermillion,
-    fontSize: 15,
-    fontWeight: '600',
-  },
   list: {
     padding: 16,
   },
@@ -246,10 +252,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textLight,
   },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalScroll: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalScrollContent: {
+    paddingBottom: 40,
   },
   modalContent: {
     backgroundColor: Colors.background,
