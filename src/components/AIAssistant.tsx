@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const [loadingHint, setLoadingHint] = useState('');
+
+  // Timeout warning timer ref
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 当 visible 变为 true 时，根据 initialType 更新 aiType
   useEffect(() => {
@@ -39,6 +43,45 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       setAiType(initialType);
     }
   }, [visible, initialType]);
+
+  // 清除所有定时器
+  const clearHintTimer = () => {
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = null;
+    }
+  };
+
+  // 重置状态
+  const resetState = () => {
+    clearHintTimer();
+    setInputText('');
+    setSceneText('');
+    setResult('');
+    setError('');
+    setLoadingHint('');
+  };
+
+  // visible 关闭时重置
+  useEffect(() => {
+    if (!visible) {
+      resetState();
+    }
+  }, [visible]);
+
+  // 开始加载时启动超时提示
+  useEffect(() => {
+    if (loading) {
+      setLoadingHint('');
+      hintTimerRef.current = setTimeout(() => {
+        setLoadingHint('模型响应较慢，请稍候...');
+      }, 20000);
+    } else {
+      clearHintTimer();
+      setLoadingHint('');
+    }
+    return clearHintTimer;
+  }, [loading]);
 
   const { state } = useApp();
 
@@ -82,10 +125,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   };
 
   const handleClose = () => {
-    setInputText('');
-    setSceneText('');
-    setResult('');
-    setError('');
+    resetState();
     onClose();
   };
 
@@ -181,6 +221,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={Colors.vermillion} />
                 <Text style={styles.loadingText}>AI 思考中...</Text>
+                {loadingHint ? (
+                  <Text style={styles.loadingHint}>{loadingHint}</Text>
+                ) : null}
               </View>
             ) : result ? (
               <View style={styles.resultContainer}>
@@ -306,6 +349,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  loadingHint: {
+    marginTop: 8,
+    fontSize: 13,
+    color: Colors.warning,
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
   resultContainer: {
     backgroundColor: Colors.backgroundCard,
