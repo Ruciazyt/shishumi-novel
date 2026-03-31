@@ -119,7 +119,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       type: aiType,
       text: inputText,
       dynasty: state.dynasty,
-      scene: sceneText || inputText,
+      scene: (aiType === "poetry" || aiType === "buddhist" || aiType === "taoist") ? sceneText : inputText,
     });
 
     setLoading(false);

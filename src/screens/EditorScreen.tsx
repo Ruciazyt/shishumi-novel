@@ -50,6 +50,25 @@ export const EditorScreen: React.FC = () => {
   projectRef.current = project;
   chapterRef.current = chapter;
 
+  // 用于撤销/重做的稳定引用，避免 stale closure
+  const historyRef = useRef<string[]>([]);
+  const historyIndexRef = useRef(-1);
+  historyRef.current = history;
+  historyIndexRef.current = historyIndex;
+
+  // 防抖历史记录 timer ref
+  const historyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 记录上一次推入历史的文本，避免重复记录相同内容
+  const lastRecordedRef = useRef<string>('');
+
+  // 清除历史记录防抖 timer
+  const clearHistoryTimer = () => {
+    if (historyTimerRef.current) {
+      clearTimeout(historyTimerRef.current);
+      historyTimerRef.current = null;
+    }
+  };
+
   // 初始化历史记录
   useEffect(() => {
     if (chapter) {
@@ -57,41 +76,55 @@ export const EditorScreen: React.FC = () => {
       setContent(initial);
       lastSavedContentRef.current = initial;
       pendingContentRef.current = initial;
+      lastRecordedRef.current = initial;
       setHistory([initial]);
       setHistoryIndex(0);
+      historyRef.current = [initial];
+      historyIndexRef.current = 0;
       setHasUnsavedChanges(false);
     }
+    return clearHistoryTimer;
   }, [chapter?.id]);
 
-  // 记录历史
+  // 记录历史（防抖 500ms）
   const recordHistory = useCallback((text: string) => {
-    setHistory(prev => [...prev.slice(0, historyIndex + 1), text].slice(-20));
-    setHistoryIndex(prev => Math.min(prev + 1, 19));
-  }, [historyIndex]);
+    // 内容无变化则跳过
+    if (text === lastRecordedRef.current) return;
+    clearHistoryTimer();
+    historyTimerRef.current = setTimeout(() => {
+      lastRecordedRef.current = text;
+      setHistory(prev => [...prev.slice(0, historyIndexRef.current + 1), text].slice(-20));
+      setHistoryIndex(prev => Math.min(prev + 1, 19));
+      historyIndexRef.current = Math.min(historyIndexRef.current + 1, 19);
+    }, 500);
+  }, []); // 空依赖，靠 ref 访问最新 state
 
   // 撤销
   const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setHistoryIndex(newIndex);
-      const newContent = history[newIndex];
-      setContent(newContent);
-      pendingContentRef.current = newContent;
-    }
-  }, [historyIndex, history]);
+    const idx = historyIndexRef.current;
+    if (idx <= 0) return;
+    const newIndex = idx - 1;
+    const newContent = historyRef.current[newIndex];
+    setHistoryIndex(newIndex);
+    historyIndexRef.current = newIndex;
+    setContent(newContent);
+    pendingContentRef.current = newContent;
+  }, []);
 
   // 重做
   const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setHistoryIndex(newIndex);
-      const newContent = history[newIndex];
-      setContent(newContent);
-      pendingContentRef.current = newContent;
-    }
-  }, [historyIndex, history]);
+    const idx = historyIndexRef.current;
+    const hist = historyRef.current;
+    if (idx >= hist.length - 1) return;
+    const newIndex = idx + 1;
+    const newContent = hist[newIndex];
+    setHistoryIndex(newIndex);
+    historyIndexRef.current = newIndex;
+    setContent(newContent);
+    pendingContentRef.current = newContent;
+  }, []);
 
-  // 用户输入时记录历史
+  // 用户输入时记录历史（防抖）
   const handleContentChange = (text: string) => {
     setContent(text);
     pendingContentRef.current = text;
@@ -160,7 +193,7 @@ export const EditorScreen: React.FC = () => {
       setHasUnsavedChanges(false);
       // 更新历史记录为已保存状态
       setHistory(prev => {
-        const newHistory = [...prev.slice(0, historyIndex + 1)];
+        const newHistory = [...prev.slice(0, historyIndexRef.current + 1)];
         newHistory[newHistory.length - 1] = updated.content;
         return newHistory;
       });
