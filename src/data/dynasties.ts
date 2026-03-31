@@ -113,3 +113,15 @@ export const DYNASTY_WRITING_TIPS: Record<string, string> = {
 
 经典参照：语言可用白话为主，融入北京口语，增添时代感。人物众多需各有辨识度，对白体现阶层与地域差异。细节真实可感，从衣食住行还原历史质感。`,
 };
+
+/**
+ * 简短占位符文字（编辑器 TextInput placeholder 使用）
+ * 简洁优雅，不占用视觉空间
+ */
+export const DYNASTY_PLACEHOLDERS: Record<string, string> = {
+  '唐朝': '盛唐气象，豪迈恢弘...',
+  '宋朝': '两宋风雅，含蓄精微...',
+  '元朝': '大漠风云，豪犷交融...',
+  '明朝': '江南烟雨，典雅厚重...',
+  '清朝': '末世浮世，苍凉斑驳...',
+};

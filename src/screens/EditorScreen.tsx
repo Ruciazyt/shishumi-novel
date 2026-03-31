@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,7 +16,7 @@ import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
-import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
+import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
 import { RootStackParamList, AIAssistantType } from '../types';
 
@@ -39,6 +40,7 @@ export const EditorScreen: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const [writingTipVisible, setWritingTipVisible] = useState(false);
 
   // Undo/Redo 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -256,13 +258,22 @@ export const EditorScreen: React.FC = () => {
     ? trimmed.split(/\s+/).length
     : 0;
 
-  // Dynasty-aware placeholder - provides era-specific writing inspiration
-  const dynastyTip = React.useMemo(() => {
+  // 简短占位符（用于 TextInput placeholder）
+  const dynastyPlaceholder = React.useMemo(() => {
     const dynastyData = project?.dynasty
       ? DYNASTIES.find(d => d.id === project.dynasty || d.name === project.dynasty)
       : getDynastyById(state.dynasty);
     if (!dynastyData) return '开始写作...';
-    return DYNASTY_WRITING_TIPS[dynastyData.name] || '开始写作...';
+    return DYNASTY_PLACEHOLDERS[dynastyData.name] || '开始写作...';
+  }, [project?.dynasty, state.dynasty]);
+
+  // 完整写作提示（用于弹窗）
+  const dynastyWritingTip = React.useMemo(() => {
+    const dynastyData = project?.dynasty
+      ? DYNASTIES.find(d => d.id === project.dynasty || d.name === project.dynasty)
+      : getDynastyById(state.dynasty);
+    if (!dynastyData) return '';
+    return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
   }, [project?.dynasty, state.dynasty]);
 
   // 格式化最后保存时间
@@ -296,6 +307,12 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="重做" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setWritingTipVisible(true)}
+            style={styles.tipBtn}
+            accessibilityLabel="写作提示" accessibilityRole="button">
+            <Text style={styles.tipBtnText}>📜</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleSave} disabled={isSaving}
             accessibilityLabel="保存" accessibilityRole="button">
             <Text style={[styles.saveButton, (!hasUnsavedChanges || isSaving) && styles.saveButtonDisabled]}>
@@ -323,7 +340,7 @@ export const EditorScreen: React.FC = () => {
       <ScrollView style={styles.editorContainer}>
         <TextInput
           style={styles.editor}
-          placeholder={dynastyTip}
+          placeholder={dynastyPlaceholder}
           placeholderTextColor={Colors.textLight}
           value={content}
           onChangeText={handleContentChange}
@@ -377,6 +394,28 @@ export const EditorScreen: React.FC = () => {
         onClose={() => setPoetryVisible(false)}
         onSelect={handleInsertContent}
       />
+
+      {/* 写作提示弹窗 */}
+      <Modal visible={writingTipVisible} animationType="slide" transparent>
+        <View style={styles.tipModalOverlay}>
+          <TouchableOpacity
+            style={styles.tipModalBackdrop}
+            activeOpacity={1}
+            onPress={() => setWritingTipVisible(false)}
+          />
+          <View style={styles.tipModalContent}>
+            <View style={styles.tipModalHeader}>
+              <Text style={styles.tipModalTitle}>📜 写作提示</Text>
+              <TouchableOpacity onPress={() => setWritingTipVisible(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.tipModalScroll}>
+              <Text style={styles.tipModalText}>{dynastyWritingTip}</Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -420,6 +459,12 @@ const styles = StyleSheet.create({
   },
   undoRedoDisabled: {
     color: Colors.textLight,
+  },
+  tipBtn: {
+    padding: 4,
+  },
+  tipBtnText: {
+    fontSize: 18,
   },
   saveButton: {
     fontSize: 16,
@@ -504,5 +549,46 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: 60,
+  },
+  // 写作提示弹窗样式
+  tipModalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  tipModalBackdrop: {
+    flex: 1,
+  },
+  tipModalContent: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+  },
+  tipModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  tipModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+  },
+  closeButton: {
+    fontSize: 20,
+    color: Colors.textSecondary,
+    padding: 4,
+  },
+  tipModalScroll: {
+    padding: 20,
+  },
+  tipModalText: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    lineHeight: 24,
   },
 });
