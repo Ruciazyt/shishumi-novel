@@ -18,6 +18,9 @@ import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
+import { countChars } from '../utils/text';
+import { formatLastSaved } from '../utils/time';
+
 import { RootStackParamList, AIAssistantType } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -275,16 +278,6 @@ export const EditorScreen: React.FC = () => {
     if (!dynastyData) return '';
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
   }, [project?.dynasty, state.dynasty]);
-
-  // 格式化最后保存时间
-  const formatLastSaved = (date: Date | null): string => {
-    if (!date) return '';
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    if (diffMs < 60000) return '刚刚';
-    if (diffMs < 3600000) return `${Math.floor(diffMs / 60000)}分钟前`;
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-  };
 
   return (
     <KeyboardAvoidingView

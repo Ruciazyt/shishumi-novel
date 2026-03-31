@@ -23,3 +23,17 @@ export const formatRelativeTime = (timestamp: number): string => {
   const day = date.getDate();
   return `${month}月${day}日`;
 };
+
+/**
+ * 格式化最后保存时间（EditorScreen 字数统计栏使用）
+ * @param date Date 对象或 null
+ * @returns 如 "刚刚"、"3分钟前"、"14:05"
+ */
+export const formatLastSaved = (date: Date | null): string => {
+  if (!date) return '';
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 60000) return '刚刚';
+  if (diffMs < 3600000) return `${Math.floor(diffMs / 60000)}分钟前`;
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+};
