@@ -24,10 +24,9 @@ interface AIAssistantProps {
   initialType?: AIAssistantType;
 }
 
-type AIType = 'polish' | 'historical' | 'poetry' | 'buddhist' | 'taoist';
 
 export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onInsertText, initialType }) => {
-  const [aiType, setAiType] = useState<AIType>(initialType || 'polish');
+  const [aiType, setAiType] = useState<AIAssistantType>(initialType || 'polish');
   const [inputText, setInputText] = useState('');
   const [sceneText, setSceneText] = useState('');
   const [loading, setLoading] = useState(false);

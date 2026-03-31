@@ -28,8 +28,6 @@ export const HomeScreen: React.FC = () => {
   const [newDynasty, setNewDynasty] = useState('tang');
   const [newDescription, setNewDescription] = useState('');
 
-  // FAB相关状态
-  const [fabExpanded, setFabExpanded] = useState(false);
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {

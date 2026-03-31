@@ -209,10 +209,10 @@ export const EditorScreen: React.FC = () => {
 
       <View style={styles.toolbar}>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'polish' && styles.toolButtonActive]}
+          style={[styles.toolButton, aiType === 'polish' && !poetryVisible && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
         >
-          <Text style={[styles.toolButtonText, aiType === 'polish' && styles.toolButtonTextActive]}>润色</Text>
+          <Text style={[styles.toolButtonText, aiType === 'polish' && !poetryVisible && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiType === 'historical' && styles.toolButtonActive]}
