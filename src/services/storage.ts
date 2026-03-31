@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Project } from '../types';
+import { Project, Chapter } from '../types';
 
 const PROJECTS_KEY = 'shishumi_projects';
 
@@ -50,12 +50,12 @@ export const deleteProject = async (id: string): Promise<boolean> => {
   return true;
 };
 
-export const addChapter = async (projectId: string, chapter: Omit<import('../types').Chapter, 'id' | 'createdAt' | 'updatedAt'>): Promise<import('../types').Chapter | null> => {
+export const addChapter = async (projectId: string, chapter: Omit<Chapter, 'id' | 'createdAt' | 'updatedAt'>): Promise<Chapter | null> => {
   const projects = await getProjects();
   const projectIndex = projects.findIndex(p => p.id === projectId);
   if (projectIndex === -1) return null;
 
-  const newChapter: import('../types').Chapter = {
+  const newChapter: Chapter = {
     ...chapter,
     id: Date.now().toString(),
     createdAt: Date.now(),
@@ -67,7 +67,7 @@ export const addChapter = async (projectId: string, chapter: Omit<import('../typ
   return newChapter;
 };
 
-export const updateChapter = async (projectId: string, chapterId: string, updates: Partial<import('../types').Chapter>): Promise<import('../types').Chapter | null> => {
+export const updateChapter = async (projectId: string, chapterId: string, updates: Partial<Chapter>): Promise<Chapter | null> => {
   const projects = await getProjects();
   const projectIndex = projects.findIndex(p => p.id === projectId);
   if (projectIndex === -1) return null;
