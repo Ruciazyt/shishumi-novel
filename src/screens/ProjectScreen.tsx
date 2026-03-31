@@ -14,6 +14,7 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { Colors } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
+import { DYNASTIES } from '../data/dynasties';
 import { Chapter } from '../types';
 import { RootStackParamList } from '../types';
 
@@ -30,6 +31,7 @@ export const ProjectScreen: React.FC = () => {
   const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState('');
   const [chapterContent, setChapterContent] = useState('');
+  const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
 
   if (!project) {
     return (
@@ -38,6 +40,9 @@ export const ProjectScreen: React.FC = () => {
       </View>
     );
   }
+
+  // 根据 project.dynasty 名称找到对应的 DYNASTY 对象
+  const dynastyData = DYNASTIES.find(d => d.name === project.dynasty);
 
   const handleChapterPress = (chapter: Chapter) => {
     dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
@@ -131,7 +136,15 @@ export const ProjectScreen: React.FC = () => {
       </View>
 
       <View style={styles.projectInfo}>
-        <Text style={styles.dynasty}>{project.dynasty}</Text>
+        <View style={styles.projectInfoTop}>
+          <Text style={styles.dynasty}>{project.dynasty}</Text>
+          <TouchableOpacity
+            style={styles.dynastyInfoBtn}
+            onPress={() => setDynastyModalVisible(true)}
+          >
+            <Text style={styles.dynastyInfoBtnText}>ℹ️ 时代背景</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.description} numberOfLines={2}>
           {project.description || '暂无简介'}
         </Text>
@@ -151,6 +164,49 @@ export const ProjectScreen: React.FC = () => {
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
+
+      {/* 时代背景详情弹窗 */}
+      <Modal visible={dynastyModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setDynastyModalVisible(false)}
+          />
+          <View style={styles.dynastyModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {dynastyData ? `${dynastyData.name} 时代背景` : project.dynasty}
+              </Text>
+              <TouchableOpacity onPress={() => setDynastyModalVisible(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            {dynastyData ? (
+              <View style={styles.dynastyDetails}>
+                <View style={styles.dynastyDetailItem}>
+                  <Text style={styles.dynastyDetailLabel}>语言特点</Text>
+                  <Text style={styles.dynastyDetailValue}>{dynastyData.languageFeatures}</Text>
+                </View>
+                <View style={styles.dynastyDetailItem}>
+                  <Text style={styles.dynastyDetailLabel}>服饰特征</Text>
+                  <Text style={styles.dynastyDetailValue}>{dynastyData.clothingFeatures}</Text>
+                </View>
+                <View style={styles.dynastyDetailItem}>
+                  <Text style={styles.dynastyDetailLabel}>建筑风格</Text>
+                  <Text style={styles.dynastyDetailValue}>{dynastyData.architectureFeatures}</Text>
+                </View>
+                <View style={styles.dynastyDetailItem}>
+                  <Text style={styles.dynastyDetailLabel}>礼仪制度</Text>
+                  <Text style={styles.dynastyDetailValue}>{dynastyData.etiquetteFeatures}</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={styles.noDynastyText}>暂无时代背景数据</Text>
+            )}
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={chapterModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -221,10 +277,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
+  projectInfoTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   dynasty: {
     fontSize: 14,
     color: Colors.vermillion,
-    marginBottom: 4,
+  },
+  dynastyInfoBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  dynastyInfoBtnText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
   description: {
     fontSize: 14,
@@ -265,6 +338,16 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
+  modalBackdrop: {
+    flex: 1,
+  },
+  dynastyModalContent: {
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '60%',
+  },
   modalContent: {
     backgroundColor: Colors.background,
     borderTopLeftRadius: 20,
@@ -285,6 +368,31 @@ const styles = StyleSheet.create({
   closeButton: {
     fontSize: 20,
     color: Colors.textSecondary,
+  },
+  dynastyDetails: {
+    gap: 16,
+  },
+  dynastyDetailItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+    paddingBottom: 12,
+  },
+  dynastyDetailLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.vermillion,
+    marginBottom: 4,
+  },
+  dynastyDetailValue: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    lineHeight: 22,
+  },
+  noDynastyText: {
+    fontSize: 14,
+    color: Colors.textLight,
+    textAlign: 'center',
+    paddingVertical: 20,
   },
   formGroup: {
     marginBottom: 16,

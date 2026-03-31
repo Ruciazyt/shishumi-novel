@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,48 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const [loadingHint, setLoadingHint] = useState('');
+
+  // Timeout warning timer ref
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 清除定时器
+  const clearHintTimer = () => {
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = null;
+    }
+  };
+
+  // 重置状态
+  const resetState = () => {
+    clearHintTimer();
+    setScene('');
+    setResult('');
+    setError('');
+    setLoadingHint('');
+  };
+
+  // visible 关闭时重置
+  useEffect(() => {
+    if (!visible) {
+      resetState();
+    }
+  }, [visible]);
+
+  // 开始加载时启动超时提示
+  useEffect(() => {
+    if (loading) {
+      setLoadingHint('');
+      hintTimerRef.current = setTimeout(() => {
+        setLoadingHint('模型响应较慢，请稍候...');
+      }, 20000);
+    } else {
+      clearHintTimer();
+      setLoadingHint('');
+    }
+    return clearHintTimer;
+  }, [loading]);
 
   const handleSearch = async () => {
     if (!scene.trim()) {
@@ -36,6 +78,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
 
     setLoading(true);
     setError('');
+    setResult('');
 
     const response = await callAI({
       type: 'poetry',
@@ -58,9 +101,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
   };
 
   const handleClose = () => {
-    setScene('');
-    setResult('');
-    setError('');
+    resetState();
     onClose();
   };
 
@@ -78,7 +119,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
             </TouchableOpacity>
           </View>
 
-          <View style={styles.body}>
+          <ScrollView style={styles.body} keyboardShouldPersistTaps="handled">
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>场景描述</Text>
               <TextInput
@@ -97,6 +138,9 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={Colors.vermillion} />
                 <Text style={styles.loadingText}>正在搜索...</Text>
+                {loadingHint ? (
+                  <Text style={styles.loadingHint}>{loadingHint}</Text>
+                ) : null}
               </View>
             ) : result ? (
               <ScrollView style={styles.resultContainer}>
@@ -110,7 +154,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
                 <Text style={styles.searchButtonText}>搜索诗词</Text>
               </TouchableOpacity>
             )}
-          </View>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -181,6 +225,14 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 14,
     color: Colors.textSecondary,
+    marginTop: 12,
+  },
+  loadingHint: {
+    marginTop: 8,
+    fontSize: 13,
+    color: Colors.warning,
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
   resultContainer: {
     backgroundColor: Colors.backgroundCard,
