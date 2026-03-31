@@ -521,8 +521,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   toolButton: {
-    flexShrink: 1,
-    minWidth: 60,
+    flex: 1,
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 4,
