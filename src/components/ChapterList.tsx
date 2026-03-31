@@ -28,8 +28,13 @@ export const ChapterList: React.FC<ChapterListProps> = ({
         onLongPress={() => onChapterLongPress?.(item)}
         activeOpacity={0.7}
       >
-        <View style={styles.chapterNumber}>
-          <Text style={styles.chapterNumberText}>{index + 1}</Text>
+        <View
+          style={styles.chapterNumber}
+          accessible={true}
+          accessibilityLabel={`第${index + 1}章`}
+          accessibilityRole="text"
+        >
+          <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
         </View>
         <View style={styles.chapterInfo}>
           <View style={styles.chapterTitleRow}>
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
   },
   chapterNumberText: {
     color: Colors.textOnVermillion,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   chapterInfo: {

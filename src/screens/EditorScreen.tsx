@@ -423,6 +423,7 @@ const styles = StyleSheet.create({
   },
   toolbar: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     paddingVertical: 8,
@@ -431,9 +432,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   toolButton: {
-    flex: 1,
+    flexShrink: 1,
+    minWidth: 60,
     alignItems: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 4,
     marginHorizontal: 2,
     backgroundColor: Colors.paperDark,
     borderRadius: 8,
