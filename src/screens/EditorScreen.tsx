@@ -232,8 +232,10 @@ export const EditorScreen: React.FC = () => {
 
   // 统计字数
   const charCount = content.replace(/\s/g, '').length;
-  const wordCount = content.trim()
-    ? content.trim().split(/\s+/).length
+  const trimmed = content.trim();
+  const hasWhitespace = /\s/.test(trimmed);
+  const wordCount = hasWhitespace && trimmed
+    ? trimmed.split(/\s+/).length
     : 0;
 
   return (
@@ -249,13 +251,16 @@ export const EditorScreen: React.FC = () => {
           {chapter.title}
         </Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={undo} disabled={!canUndo} style={styles.undoRedoBtn}>
+          <TouchableOpacity onPress={undo} disabled={!canUndo} style={styles.undoRedoBtn}
+            accessibilityLabel="撤销" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoDisabled]}>↩</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={redo} disabled={!canRedo} style={styles.undoRedoBtn}>
+          <TouchableOpacity onPress={redo} disabled={!canRedo} style={styles.undoRedoBtn}
+            accessibilityLabel="重做" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+          <TouchableOpacity onPress={handleSave} disabled={isSaving}
+            accessibilityLabel="保存" accessibilityRole="button">
             <Text style={[styles.saveButton, (!hasUnsavedChanges || isSaving) && styles.saveButtonDisabled]}>
               {isSaving ? '保存中' : '保存'}
             </Text>
