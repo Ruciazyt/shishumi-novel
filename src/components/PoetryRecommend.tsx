@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { Colors } from '../constants/colors';
 import { callAI } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -28,6 +29,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loadingHint, setLoadingHint] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -47,6 +49,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     setResult('');
     setError('');
     setLoadingHint('');
+    setCopied(false);
   };
 
   // visible 关闭时重置
@@ -100,10 +103,20 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     }
   };
 
+  const handleCopy = async () => {
+    if (!result) return;
+    await Clipboard.setStringAsync(result);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleClose = () => {
     resetState();
     onClose();
   };
+
+  // 复制按钮文字（显示 2 秒后恢复）
+  const copyButtonText = copied ? '已复制' : '复制';
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -143,12 +156,19 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
                 ) : null}
               </View>
             ) : result ? (
-              <ScrollView style={styles.resultContainer}>
+              <View style={styles.resultContainer}>
                 <Text style={styles.resultText}>{result}</Text>
-                <TouchableOpacity style={styles.insertButton} onPress={handleSelect}>
-                  <Text style={styles.insertButtonText}>插入诗词</Text>
-                </TouchableOpacity>
-              </ScrollView>
+                <View style={styles.resultActions}>
+                  <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+                    <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
+                      {copyButtonText}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.insertButton} onPress={handleSelect}>
+                    <Text style={styles.insertButtonText}>插入诗词</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             ) : (
               <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
                 <Text style={styles.searchButtonText}>搜索诗词</Text>
@@ -246,12 +266,33 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: 24,
   },
+  resultActions: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  copyButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.paperDark,
+  },
+  copyButtonText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  copyButtonTextCopied: {
+    color: Colors.success,
+  },
   insertButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
   },
   insertButtonText: {
     color: Colors.textOnVermillion,
