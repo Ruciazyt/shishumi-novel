@@ -38,6 +38,7 @@ export const EditorScreen: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
 
   // Undo/Redo 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -160,11 +161,19 @@ export const EditorScreen: React.FC = () => {
         dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
         setHasUnsavedChanges(false);
         setLastSavedAt(new Date());
+        setJustSaved(true);
       }
       setIsSaving(false);
     }, 10000);
     return () => clearTimeout(timer);
   }, [chapterId]); // chapterId 变化时重置 timer，防止切章节后旧 timer 仍触发
+
+  // 自动保存成功后短暂显示"已保存"提示
+  useEffect(() => {
+    if (!justSaved) return;
+    const timer = setTimeout(() => setJustSaved(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justSaved]);
 
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
@@ -200,6 +209,7 @@ export const EditorScreen: React.FC = () => {
       dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
+      setJustSaved(true);
       // 更新历史记录为已保存状态
       setHistory(prev => {
         const newHistory = [...prev.slice(0, historyIndexRef.current + 1)];
@@ -303,6 +313,8 @@ export const EditorScreen: React.FC = () => {
         </Text>
         {isSaving ? (
           <Text style={styles.savingIndicator}>● 保存中</Text>
+        ) : justSaved ? (
+          <Text style={styles.savedIndicator}>✓ 已保存</Text>
         ) : hasUnsavedChanges ? (
           <Text style={styles.unsavedIndicator}>● 未保存</Text>
         ) : null}
@@ -438,6 +450,10 @@ const styles = StyleSheet.create({
   unsavedIndicator: {
     fontSize: 12,
     color: Colors.warning,
+  },
+  savedIndicator: {
+    fontSize: 12,
+    color: Colors.success,
   },
   editorContainer: {
     flex: 1,

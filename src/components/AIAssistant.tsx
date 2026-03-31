@@ -207,7 +207,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 onPress={() => setAiType('historical')}
               >
                 <Text style={[styles.typeButtonText, aiType === 'historical' && styles.typeButtonTextActive]}>
-                  历史还原
+                  历史细节
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
