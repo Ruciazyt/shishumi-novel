@@ -127,7 +127,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       type: aiType,
       text: inputText,
       dynasty: state.dynasty,
-      scene: (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') ? sceneText : inputText,
+      scene: (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') ? sceneText : undefined,
     });
 
     if (!isMountedRef.current) return;
