@@ -157,14 +157,8 @@ export const EditorScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  const handleInsertText = (text: string) => {
+  const handleInsertContent = (text: string) => {
     const newContent = content + '\n\n' + text;
-    setContent(newContent);
-    recordHistory(newContent);
-  };
-
-  const handlePoetrySelect = (poetry: string) => {
-    const newContent = content + '\n\n' + poetry;
     setContent(newContent);
     recordHistory(newContent);
   };
@@ -271,14 +265,14 @@ export const EditorScreen: React.FC = () => {
       <AIAssistant
         visible={aiVisible}
         onClose={() => setAiVisible(false)}
-        onInsertText={handleInsertText}
+        onInsertText={handleInsertContent}
         initialType={aiType}
       />
 
       <PoetryRecommend
         visible={poetryVisible}
         onClose={() => setPoetryVisible(false)}
-        onSelect={handlePoetrySelect}
+        onSelect={handleInsertContent}
       />
     </KeyboardAvoidingView>
   );
