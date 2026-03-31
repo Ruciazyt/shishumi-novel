@@ -80,7 +80,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
         if (isMountedRef.current && requestActiveRef.current) {
           setLoadingHint('模型响应较慢，请稍候...');
         }
-      }, 25000);
+      }, 12000);
     } else {
       clearHintTimer();
       if (isMountedRef.current) {
