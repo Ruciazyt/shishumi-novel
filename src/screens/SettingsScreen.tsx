@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -146,7 +146,7 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>时代背景详情</Text>
         <View style={styles.card}>
-          {DYNASTIES.filter(d => d.id === state.dynasty).map(dynasty => (
+          {useMemo(() => DYNASTIES.filter(d => d.id === state.dynasty), [state.dynasty]).map(dynasty => (
             <View key={dynasty.id}>
               <Text style={styles.detailTitle}>{dynasty.name}</Text>
               <View style={styles.detailRow}>

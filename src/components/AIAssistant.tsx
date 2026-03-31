@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -115,6 +115,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   }, [aiType]);
 
   const { state } = useApp();
+  const dynastyDisplayName = useMemo(
+    () => DYNASTIES.find(d => d.id === state.dynasty || d.name === state.dynasty)?.name || state.dynasty,
+    [state.dynasty]
+  );
 
   const handleSubmit = async () => {
     if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
@@ -251,7 +255,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
             ) : (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>
-                  {aiType === 'historical' ? `时代背景：${DYNASTIES.find(d => d.id === state.dynasty || d.name === state.dynasty)?.name || state.dynasty}` : '输入文本'}
+                  {aiType === 'historical' ? `时代背景：${dynastyDisplayName}` : '输入文本'}
                 </Text>
                 <TextInput
                   style={styles.textInput}
