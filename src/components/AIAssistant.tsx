@@ -120,8 +120,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     [state.dynasty]
   );
 
+  const isSceneType = aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist';
+  const canSubmit = !loading && (
+    isSceneType ? sceneText.trim().length > 0 : inputText.trim().length > 0
+  );
+
   const handleSubmit = async () => {
-    if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
+    if (isSceneType) {
       if (!sceneText.trim()) {
         setError('请输入场景描述');
         return;
@@ -298,11 +303,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </View>
             ) : (
               <TouchableOpacity
-                style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                style={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
                 onPress={handleSubmit}
-                disabled={loading}
+                disabled={!canSubmit}
               >
-                <Text style={[styles.submitButtonText, loading && styles.submitButtonTextDisabled]}>提交</Text>
+                <Text style={[styles.submitButtonText, !canSubmit && styles.submitButtonTextDisabled]}>提交</Text>
               </TouchableOpacity>
             )}
           </ScrollView>
