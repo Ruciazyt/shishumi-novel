@@ -48,6 +48,11 @@ export const SettingsScreen: React.FC = () => {
     await saveDynasty(dynastyId);
   };
 
+  const selectedDynastyDetail = useMemo(
+    () => DYNASTIES.find(d => d.id === state.dynasty),
+    [state.dynasty]
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -146,27 +151,27 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>时代背景详情</Text>
         <View style={styles.card}>
-          {useMemo(() => DYNASTIES.filter(d => d.id === state.dynasty), [state.dynasty]).map(dynasty => (
-            <View key={dynasty.id}>
-              <Text style={styles.detailTitle}>{dynasty.name}</Text>
+          {selectedDynastyDetail && (
+            <View>
+              <Text style={styles.detailTitle}>{selectedDynastyDetail.name}</Text>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>语言特点：</Text>
-                <Text style={styles.detailValue}>{dynasty.languageFeatures}</Text>
+                <Text style={styles.detailValue}>{selectedDynastyDetail.languageFeatures}</Text>
               </View>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>服饰特征：</Text>
-                <Text style={styles.detailValue}>{dynasty.clothingFeatures}</Text>
+                <Text style={styles.detailValue}>{selectedDynastyDetail.clothingFeatures}</Text>
               </View>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>建筑风格：</Text>
-                <Text style={styles.detailValue}>{dynasty.architectureFeatures}</Text>
+                <Text style={styles.detailValue}>{selectedDynastyDetail.architectureFeatures}</Text>
               </View>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>礼仪制度：</Text>
-                <Text style={styles.detailValue}>{dynasty.etiquetteFeatures}</Text>
+                <Text style={styles.detailValue}>{selectedDynastyDetail.etiquetteFeatures}</Text>
               </View>
             </View>
-          ))}
+          )}
         </View>
       </View>
 

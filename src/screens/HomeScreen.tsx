@@ -43,7 +43,7 @@ export const HomeScreen: React.FC = () => {
 
     const project = await createProject({
       title: newTitle.trim(),
-      dynasty: DYNASTIES.find(d => d.id === newDynasty)?.name || newDynasty,
+      dynasty: newDynasty,
       description: newDescription.trim(),
       chapters: [],
     });

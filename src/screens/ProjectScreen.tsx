@@ -14,7 +14,7 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { Colors } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
-import { DYNASTIES } from '../data/dynasties';
+import { DYNASTIES, getDynastyById } from '../data/dynasties';
 import { Chapter } from '../types';
 import { RootStackParamList } from '../types';
 
@@ -43,7 +43,7 @@ export const ProjectScreen: React.FC = () => {
   // Derive dynasty metadata once per project (stable reference — project never
   // mutates, only gets replaced on update).
   const dynastyData = useMemo(
-    () => DYNASTIES.find(d => d.name === project.dynasty),
+    () => getDynastyById(project.dynasty) || DYNASTIES.find(d => d.name === project.dynasty),
     [project.dynasty]
   );
 
@@ -143,7 +143,7 @@ export const ProjectScreen: React.FC = () => {
 
       <View style={styles.projectInfo}>
         <View style={styles.projectInfoTop}>
-          <Text style={styles.dynasty}>{project.dynasty}</Text>
+          <Text style={styles.dynasty}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
           <TouchableOpacity
             style={styles.dynastyInfoBtn}
             onPress={() => setDynastyModalVisible(true)}
