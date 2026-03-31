@@ -38,13 +38,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Prevent state updates after component unmount
+  const isMountedRef = useRef(true);
 
   // 当 visible 变为 true 时，根据 initialType 更新 aiType
   useEffect(() => {
     if (visible && initialType) {
       setAiType(initialType);
     }
-  }, [visible, initialType]);
+  }, [visible]);
 
   // 清除所有定时器
   const clearHintTimer = () => {
@@ -56,6 +58,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
 
   // 重置状态
   const resetState = () => {
+    isMountedRef.current = false;
     clearHintTimer();
     setInputText('');
     setSceneText('');
@@ -69,6 +72,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   useEffect(() => {
     if (!visible) {
       resetState();
+    } else {
+      isMountedRef.current = true;
     }
   }, [visible]);
 
@@ -77,11 +82,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     if (loading) {
       setLoadingHint('');
       hintTimerRef.current = setTimeout(() => {
-        setLoadingHint('模型响应较慢，请稍候...');
+        if (isMountedRef.current) {
+          setLoadingHint('模型响应较慢，请稍候...');
+        }
       }, 20000);
     } else {
       clearHintTimer();
-      setLoadingHint('');
+      if (isMountedRef.current) {
+        setLoadingHint('');
+      }
     }
     return clearHintTimer;
   }, [loading]);
