@@ -33,8 +33,10 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Prevent state updates after component unmount
+  // 防止组件卸载后仍更新 state（仅在组件真正卸载时设为 false）
   const isMountedRef = useRef(true);
+  // 追踪当前是否处于有效请求周期：modal 关闭时应拒绝响应
+  const requestActiveRef = useRef(false);
 
   // 清除 hint 定时器
   const clearHintTimer = () => {
@@ -54,22 +56,28 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     setCopied(false);
   };
 
-  // visible 关闭时重置
+  // visible 关闭时重置（但保持 isMountedRef = true，因为组件未卸载）
   useEffect(() => {
     if (!visible) {
-      isMountedRef.current = false;
+      requestActiveRef.current = false;
       resetState();
-    } else {
-      isMountedRef.current = true;
     }
   }, [visible]);
+
+  // 组件卸载时标记
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 开始加载时启动超时提示
   useEffect(() => {
     if (loading) {
       setLoadingHint('');
       hintTimerRef.current = setTimeout(() => {
-        if (isMountedRef.current) {
+        if (isMountedRef.current && requestActiveRef.current) {
           setLoadingHint('模型响应较慢，请稍候...');
         }
       }, 25000);
@@ -91,13 +99,16 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     setLoading(true);
     setError('');
     setResult('');
+    requestActiveRef.current = true;
 
     const response = await callAI({
       type: 'poetry',
       scene: scene,
+      dynasty: state.dynasty,
     });
 
-    if (!isMountedRef.current) return;
+    // 只有在组件仍挂载且当前请求未被 modal 关闭阻断时才更新状态
+    if (!isMountedRef.current || !requestActiveRef.current) return;
     setLoading(false);
     if (response.success && response.data) {
       setResult(response.data);
@@ -123,7 +134,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
   };
 
   const handleClose = () => {
-    isMountedRef.current = false;
+    requestActiveRef.current = false;
     resetState();
     onClose();
   };
