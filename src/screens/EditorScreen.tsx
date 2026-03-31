@@ -209,7 +209,8 @@ export const EditorScreen: React.FC = () => {
   };
 
   const handleInsertContent = (text: string) => {
-    const newContent = content + '\n\n' + text;
+    const prefix = content.trim() ? '\n\n' : '';
+    const newContent = content + prefix + text;
     setContent(newContent);
     pendingContentRef.current = newContent;
     recordHistory(newContent);

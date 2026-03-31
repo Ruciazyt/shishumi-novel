@@ -170,8 +170,12 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
                 </View>
               </View>
             ) : (
-              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                <Text style={styles.searchButtonText}>搜索诗词</Text>
+              <TouchableOpacity
+                style={[styles.searchButton, loading && styles.searchButtonDisabled]}
+                onPress={handleSearch}
+                disabled={loading}
+              >
+                <Text style={[styles.searchButtonText, loading && styles.searchButtonTextDisabled]}>搜索诗词</Text>
               </TouchableOpacity>
             )}
           </ScrollView>
@@ -309,5 +313,11 @@ const styles = StyleSheet.create({
     color: Colors.textOnVermillion,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  searchButtonDisabled: {
+    backgroundColor: Colors.textLight,
+  },
+  searchButtonTextDisabled: {
+    color: Colors.backgroundCard,
   },
 });

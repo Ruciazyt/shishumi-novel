@@ -273,8 +273,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 </View>
               </View>
             ) : (
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>提交</Text>
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                <Text style={[styles.submitButtonText, loading && styles.submitButtonTextDisabled]}>提交</Text>
               </TouchableOpacity>
             )}
           </ScrollView>
@@ -455,5 +459,11 @@ const styles = StyleSheet.create({
     color: Colors.textOnVermillion,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  submitButtonDisabled: {
+    backgroundColor: Colors.textLight,
+  },
+  submitButtonTextDisabled: {
+    color: Colors.backgroundCard,
   },
 });
