@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { countChars } from '../utils/text';
@@ -18,17 +18,25 @@ export const ChapterList: React.FC<ChapterListProps> = ({
 }) => {
   const totalChars = chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
 
-  // Stable render: item/index come directly from FlatList, not captured in closure.
-  // Omit onChapterPress/onChapterLongPress from deps to avoid re-creation when
-  // parent re-renders with a new function reference (common with inline handlers).
+  // Store latest callbacks in refs — avoids stale closures without needing to
+  // re-create renderChapter on every parent re-render (which would waste all
+  // FlatList item render tree allocations).
+  const onChapterPressRef = useRef(onChapterPress);
+  const onChapterLongPressRef = useRef(onChapterLongPress);
+  onChapterPressRef.current = onChapterPress;
+  onChapterLongPressRef.current = onChapterLongPress;
+
+  // Stable render: item/index come directly from FlatList. We read callbacks
+  // from refs so that any parent callback change takes effect on the NEXT
+  // press (not the next parent re-render of this component).
   const renderChapter = useCallback(
     ({ item, index }: { item: Chapter; index: number }) => {
       const chars = countChars(item.content);
       return (
         <TouchableOpacity
           style={styles.chapterItem}
-          onPress={() => onChapterPress(item)}
-          onLongPress={() => onChapterLongPress?.(item)}
+          onPress={() => onChapterPressRef.current(item)}
+          onLongPress={() => onChapterLongPressRef.current?.(item)}
           activeOpacity={0.7}
         >
           <View
@@ -53,8 +61,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
         </TouchableOpacity>
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [] // item/index are FlatList params; onChapterPress/onChapterLongPress are stable refs
+    [] // stable: reads callbacks from refs
   );
 
   return (
