@@ -98,7 +98,7 @@ export const EditorScreen: React.FC = () => {
     recordHistory(text);
   };
 
-  // 30秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
+  // 10秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
   // content 变化只更新 ref，不重启 timer
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -121,7 +121,7 @@ export const EditorScreen: React.FC = () => {
         setHasUnsavedChanges(false);
       }
       setIsSaving(false);
-    }, 30000);
+    }, 10000);
     return () => clearTimeout(timer);
   }, []); // 空依赖数组，timer 在组件卸载时清理
 

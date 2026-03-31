@@ -4,6 +4,8 @@ import { Project } from '../types';
 import { Colors } from '../constants/colors';
 import { formatRelativeTime } from '../utils/time';
 
+const countChars = (text: string): number => text.replace(/\s/g, '').length;
+
 interface ProjectCardProps {
   project: Project;
   onPress: () => void;
@@ -12,6 +14,7 @@ interface ProjectCardProps {
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLongPress }) => {
   const relativeTime = formatRelativeTime(project.updatedAt);
+  const totalChars = project.chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
 
   return (
     <TouchableOpacity
@@ -31,8 +34,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
         <Text style={styles.chapters}>
           {project.chapters.length}章节
         </Text>
+        {totalChars > 0 && (
+          <Text style={styles.wordCount}> · {totalChars.toLocaleString()}字</Text>
+        )}
         {relativeTime ? (
-          <Text style={styles.updated}>· {relativeTime}更新</Text>
+          <Text style={styles.updated}> · {relativeTime}更新</Text>
         ) : null}
       </View>
     </TouchableOpacity>
@@ -75,6 +81,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chapters: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  wordCount: {
     fontSize: 12,
     color: Colors.textLight,
   },
