@@ -25,7 +25,6 @@ interface AIAssistantProps {
   initialType?: AIAssistantType;
 }
 
-
 export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onInsertText, initialType }) => {
   const [aiType, setAiType] = useState<AIAssistantType>(initialType || 'polish');
   const [inputText, setInputText] = useState('');
@@ -46,9 +45,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     if (visible && initialType) {
       setAiType(initialType);
     }
-  }, [visible]);
+  }, [visible, initialType]);
 
-  // 清除所有定时器
+  // 清除 hint 定时器
   const clearHintTimer = () => {
     if (hintTimerRef.current) {
       clearTimeout(hintTimerRef.current);
@@ -56,9 +55,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }
   };
 
-  // 重置状态
+  // 重置状态（不清除 isMountedRef，由调用方控制）
   const resetState = () => {
-    isMountedRef.current = false;
     clearHintTimer();
     setInputText('');
     setSceneText('');
@@ -71,6 +69,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   // visible 关闭时重置
   useEffect(() => {
     if (!visible) {
+      isMountedRef.current = false;
       resetState();
     } else {
       isMountedRef.current = true;
@@ -128,9 +127,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       type: aiType,
       text: inputText,
       dynasty: state.dynasty,
-      scene: (aiType === "poetry" || aiType === "buddhist" || aiType === "taoist") ? sceneText : inputText,
+      scene: (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') ? sceneText : inputText,
     });
 
+    if (!isMountedRef.current) return;
     setLoading(false);
     if (response.success && response.data) {
       setResult(response.data);
@@ -150,10 +150,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     if (!result) return;
     await Clipboard.setStringAsync(result);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => {
+      if (isMountedRef.current) setCopied(false);
+    }, 2000);
   };
 
   const handleClose = () => {
+    isMountedRef.current = false;
     resetState();
     onClose();
   };

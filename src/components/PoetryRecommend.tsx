@@ -33,8 +33,10 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Prevent state updates after component unmount
+  const isMountedRef = useRef(true);
 
-  // 清除定时器
+  // 清除 hint 定时器
   const clearHintTimer = () => {
     if (hintTimerRef.current) {
       clearTimeout(hintTimerRef.current);
@@ -55,7 +57,10 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
   // visible 关闭时重置
   useEffect(() => {
     if (!visible) {
+      isMountedRef.current = false;
       resetState();
+    } else {
+      isMountedRef.current = true;
     }
   }, [visible]);
 
@@ -64,11 +69,15 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     if (loading) {
       setLoadingHint('');
       hintTimerRef.current = setTimeout(() => {
-        setLoadingHint('模型响应较慢，请稍候...');
+        if (isMountedRef.current) {
+          setLoadingHint('模型响应较慢，请稍候...');
+        }
       }, 25000);
     } else {
       clearHintTimer();
-      setLoadingHint('');
+      if (isMountedRef.current) {
+        setLoadingHint('');
+      }
     }
     return clearHintTimer;
   }, [loading]);
@@ -88,6 +97,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
       scene: scene,
     });
 
+    if (!isMountedRef.current) return;
     setLoading(false);
     if (response.success && response.data) {
       setResult(response.data);
@@ -107,10 +117,13 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
     if (!result) return;
     await Clipboard.setStringAsync(result);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => {
+      if (isMountedRef.current) setCopied(false);
+    }, 2000);
   };
 
   const handleClose = () => {
+    isMountedRef.current = false;
     resetState();
     onClose();
   };
