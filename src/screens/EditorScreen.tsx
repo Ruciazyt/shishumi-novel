@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
+import { DYNASTIES, getDynastyById } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
 import { RootStackParamList, AIAssistantType } from '../types';
 
@@ -238,6 +239,23 @@ export const EditorScreen: React.FC = () => {
     ? trimmed.split(/\s+/).length
     : 0;
 
+  // Dynasty-aware placeholder - provides era-specific writing inspiration
+  const dynastyTip = React.useMemo(() => {
+    const dynastyData = project?.dynasty
+      ? DYNASTIES.find(d => d.name === project.dynasty)
+      : getDynastyById(state.dynasty);
+    if (!dynastyData) return '开始写作...';
+    const tips: Record<string, string> = {
+      '唐朝': '盛唐气象，万国来朝。笔下可豪放浪漫，亦可华美典雅...',
+      '宋朝': '婉约细腻，文雅含蓄。词风鼎盛，细节精致入微...',
+      '元朝': '豪迈粗犷，融合多民族风情。戏曲兴盛，语言奔放...',
+      '明朝': '典雅端庄，礼仪森严。小说繁荣，叙事宏阔...',
+      '清朝': '白话鼎盛，满汉交融。世情小说，人物众生...',
+    };
+    return tips[dynastyData.name] || '开始写作...';
+  }, [project?.dynasty, state.dynasty]);
+
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -283,7 +301,7 @@ export const EditorScreen: React.FC = () => {
       <ScrollView style={styles.editorContainer}>
         <TextInput
           style={styles.editor}
-          placeholder="开始写作..."
+          placeholder={dynastyTip}
           placeholderTextColor={Colors.textLight}
           value={content}
           onChangeText={handleContentChange}
