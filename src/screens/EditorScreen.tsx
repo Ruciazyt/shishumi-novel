@@ -18,7 +18,6 @@ import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
-import { countChars } from '../utils/text';
 import { formatLastSaved } from '../utils/time';
 
 import { RootStackParamList, AIAssistantType } from '../types';
@@ -256,8 +255,7 @@ export const EditorScreen: React.FC = () => {
   // 统计字数
   const charCount = content.replace(/\s/g, '').length;
   const trimmed = content.trim();
-  const hasWhitespace = /\s/.test(trimmed);
-  const wordCount = hasWhitespace && trimmed
+  const wordCount = trimmed
     ? trimmed.split(/\s+/).length
     : 0;
 
