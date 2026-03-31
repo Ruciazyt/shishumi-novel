@@ -35,22 +35,29 @@ export const EditorScreen: React.FC = () => {
   const [aiType, setAiType] = useState<AIAssistantType>('polish');
   const [poetryVisible, setPoetryVisible] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Undo/Redo 历史记录
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  // 用于防抖自动保存
-  const contentRef = useRef(content);
+  // 用于防抖自动保存 - 用 ref 记录上次保存的内容，避免依赖数组陷阱
+  const lastSavedContentRef = useRef<string>('');
+  const pendingContentRef = useRef<string>('');
+  const projectRef = useRef(project);
   const chapterRef = useRef(chapter);
-  contentRef.current = content;
+  pendingContentRef.current = content;
+  projectRef.current = project;
   chapterRef.current = chapter;
 
   // 初始化历史记录
   useEffect(() => {
     if (chapter) {
-      setContent(chapter.content);
-      setHistory([chapter.content]);
+      const initial = chapter.content;
+      setContent(initial);
+      lastSavedContentRef.current = initial;
+      pendingContentRef.current = initial;
+      setHistory([initial]);
       setHistoryIndex(0);
       setHasUnsavedChanges(false);
     }
@@ -67,7 +74,9 @@ export const EditorScreen: React.FC = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      setContent(history[newIndex]);
+      const newContent = history[newIndex];
+      setContent(newContent);
+      pendingContentRef.current = newContent;
     }
   }, [historyIndex, history]);
 
@@ -76,38 +85,45 @@ export const EditorScreen: React.FC = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      setContent(history[newIndex]);
+      const newContent = history[newIndex];
+      setContent(newContent);
+      pendingContentRef.current = newContent;
     }
   }, [historyIndex, history]);
 
   // 用户输入时记录历史
   const handleContentChange = (text: string) => {
     setContent(text);
+    pendingContentRef.current = text;
     recordHistory(text);
   };
 
-  // 30秒防抖自动保存：每次内容变化后等待30秒无操作再保存
+  // 30秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
+  // content 变化只更新 ref，不重启 timer
   useEffect(() => {
     const timer = setTimeout(async () => {
-      const latestContent = contentRef.current;
+      const latestContent = pendingContentRef.current;
       const currentChapter = chapterRef.current;
-      if (!project || !currentChapter) return;
-      if (latestContent !== currentChapter.content) {
-        const updated = await updateChapter(project.id, currentChapter.id, { content: latestContent });
-        if (updated) {
-          const updatedProject = {
-            ...project,
-            chapters: project.chapters.map(c =>
-              c.id === currentChapter.id ? updated : c
-            ),
-          };
-          dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-          setHasUnsavedChanges(false);
-        }
+      const currentProject = projectRef.current;
+      if (!currentProject || !currentChapter) return;
+      if (latestContent === lastSavedContentRef.current) return; // 无变化则跳过
+      setIsSaving(true);
+      const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
+      if (updated) {
+        lastSavedContentRef.current = latestContent;
+        const updatedProject = {
+          ...currentProject,
+          chapters: currentProject.chapters.map(c =>
+            c.id === currentChapter.id ? updated : c
+          ),
+        };
+        dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+        setHasUnsavedChanges(false);
       }
+      setIsSaving(false);
     }, 30000);
     return () => clearTimeout(timer);
-  }, [content, project, dispatch]);
+  }, []); // 空依赖数组，timer 在组件卸载时清理
 
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
@@ -120,8 +136,7 @@ export const EditorScreen: React.FC = () => {
 
   useEffect(() => {
     if (chapter) {
-      const initial = chapter.content;
-      if (content !== initial) {
+      if (content !== chapter.content) {
         setHasUnsavedChanges(true);
       } else {
         setHasUnsavedChanges(false);
@@ -131,8 +146,10 @@ export const EditorScreen: React.FC = () => {
 
   const handleSave = async () => {
     if (!project || !chapter) return;
+    setIsSaving(true);
     const updated = await updateChapter(project.id, chapter.id, { content });
     if (updated) {
+      lastSavedContentRef.current = content;
       const updatedProject = {
         ...project,
         chapters: project.chapters.map(c =>
@@ -148,6 +165,7 @@ export const EditorScreen: React.FC = () => {
         return newHistory;
       });
     }
+    setIsSaving(false);
   };
 
   const handleBack = async () => {
@@ -160,6 +178,7 @@ export const EditorScreen: React.FC = () => {
   const handleInsertContent = (text: string) => {
     const newContent = content + '\n\n' + text;
     setContent(newContent);
+    pendingContentRef.current = newContent;
     recordHistory(newContent);
   };
 
@@ -199,9 +218,9 @@ export const EditorScreen: React.FC = () => {
           <TouchableOpacity onPress={redo} disabled={!canRedo} style={styles.undoRedoBtn}>
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave}>
-            <Text style={[styles.saveButton, !hasUnsavedChanges && styles.saveButtonDisabled]}>
-              保存
+          <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+            <Text style={[styles.saveButton, (!hasUnsavedChanges || isSaving) && styles.saveButtonDisabled]}>
+              {isSaving ? '保存中' : '保存'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -212,9 +231,11 @@ export const EditorScreen: React.FC = () => {
         <Text style={styles.statsText}>
           {charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
         </Text>
-        {hasUnsavedChanges && (
+        {isSaving ? (
+          <Text style={styles.savingIndicator}>● 保存中</Text>
+        ) : hasUnsavedChanges ? (
           <Text style={styles.unsavedIndicator}>● 未保存</Text>
-        )}
+        ) : null}
       </View>
 
       <ScrollView style={styles.editorContainer}>
@@ -339,6 +360,10 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: 12,
     color: Colors.textLight,
+  },
+  savingIndicator: {
+    fontSize: 12,
+    color: Colors.vermillion,
   },
   unsavedIndicator: {
     fontSize: 12,
