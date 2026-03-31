@@ -42,7 +42,9 @@ export const EditorScreen: React.FC = () => {
 
   // 用于防抖自动保存
   const contentRef = useRef(content);
+  const chapterRef = useRef(chapter);
   contentRef.current = content;
+  chapterRef.current = chapter;
 
   // 初始化历史记录
   useEffect(() => {
@@ -50,6 +52,7 @@ export const EditorScreen: React.FC = () => {
       setContent(chapter.content);
       setHistory([chapter.content]);
       setHistoryIndex(0);
+      setHasUnsavedChanges(false);
     }
   }, [chapter?.id]);
 
@@ -66,7 +69,7 @@ export const EditorScreen: React.FC = () => {
       setHistoryIndex(newIndex);
       setContent(history[newIndex]);
     }
-  }, [history, historyIndex]);
+  }, [historyIndex, history]);
 
   // 重做
   const redo = useCallback(() => {
@@ -75,7 +78,7 @@ export const EditorScreen: React.FC = () => {
       setHistoryIndex(newIndex);
       setContent(history[newIndex]);
     }
-  }, [history, historyIndex]);
+  }, [historyIndex, history]);
 
   // 用户输入时记录历史
   const handleContentChange = (text: string) => {
@@ -87,13 +90,15 @@ export const EditorScreen: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(async () => {
       const latestContent = contentRef.current;
-      if (latestContent !== (chapter?.content || '') && project && chapter) {
-        const updated = await updateChapter(project.id, chapter.id, { content: latestContent });
+      const currentChapter = chapterRef.current;
+      if (!project || !currentChapter) return;
+      if (latestContent !== currentChapter.content) {
+        const updated = await updateChapter(project.id, currentChapter.id, { content: latestContent });
         if (updated) {
           const updatedProject = {
             ...project,
             chapters: project.chapters.map(c =>
-              c.id === chapter.id ? updated : c
+              c.id === currentChapter.id ? updated : c
             ),
           };
           dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
@@ -102,7 +107,7 @@ export const EditorScreen: React.FC = () => {
       }
     }, 30000);
     return () => clearTimeout(timer);
-  }, [content, chapter, project, dispatch]);
+  }, [content, project, dispatch]);
 
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
@@ -118,9 +123,11 @@ export const EditorScreen: React.FC = () => {
       const initial = chapter.content;
       if (content !== initial) {
         setHasUnsavedChanges(true);
+      } else {
+        setHasUnsavedChanges(false);
       }
     }
-  }, [content]);
+  }, [content, chapter?.content]);
 
   const handleSave = async () => {
     if (!project || !chapter) return;
@@ -173,6 +180,12 @@ export const EditorScreen: React.FC = () => {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
+  // 统计字数（移除了中日韩字符的复杂逻辑，中文按字符数，英文按单词数）
+  const charCount = content.replace(/\s/g, '').length;
+  const wordCount = content.trim()
+    ? content.trim().split(/\s+/).length
+    : 0;
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -198,6 +211,16 @@ export const EditorScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* 字数统计栏 */}
+      <View style={styles.statsBar}>
+        <Text style={styles.statsText}>
+          {charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
+        </Text>
+        {hasUnsavedChanges && (
+          <Text style={styles.unsavedIndicator}>● 未保存</Text>
+        )}
       </View>
 
       <ScrollView style={styles.editorContainer}>
@@ -308,6 +331,24 @@ const styles = StyleSheet.create({
   },
   saveButtonDisabled: {
     color: Colors.textLight,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: Colors.paperDark,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  statsText: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  unsavedIndicator: {
+    fontSize: 12,
+    color: Colors.warning,
   },
   editorContainer: {
     flex: 1,
