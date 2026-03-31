@@ -5,6 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DYNASTIES } from '../data/dynasties';
 
 const API_KEY_STORAGE_KEY = 'shishumi_api_key';
+const MAX_RETRIES = 3;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getApiKey = async (): Promise<string | null> => {
   try {
@@ -45,7 +48,7 @@ const buildPrompt = (request: AIRequest): string => {
   }
 };
 
-export const callAI = async (request: AIRequest): Promise<AIResponse> => {
+export const callAI = async (request: AIRequest, attempt = 1): Promise<AIResponse> => {
   try {
     const apiKey = await getApiKey();
     if (!apiKey) {
@@ -80,6 +83,20 @@ export const callAI = async (request: AIRequest): Promise<AIResponse> => {
     }
     return { success: false, error: 'AI返回内容为空' };
   } catch (error: any) {
+    // 网络错误或超时时自动重试，最多3次
+    const isRetryable =
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ENOTFOUND' ||
+      error.code === 'ECONNREFUSED' ||
+      !error.response;
+
+    if (isRetryable && attempt < MAX_RETRIES) {
+      const delay = attempt * 2000; // 2s, 4s 递增退避
+      await sleep(delay);
+      return callAI(request, attempt + 1);
+    }
+
     if (error.response?.status === 401) {
       return { success: false, error: 'API密钥无效，请检查设置' };
     }

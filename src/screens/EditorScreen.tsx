@@ -83,7 +83,8 @@ export const EditorScreen: React.FC = () => {
       historyIndexRef.current = 0;
       setHasUnsavedChanges(false);
     }
-    return clearHistoryTimer;
+    clearHistoryTimer(); // 切换章节时清除旧历史 timer
+    return () => clearHistoryTimer();
   }, [chapter?.id]);
 
   // 记录历史（防抖 500ms）
@@ -156,7 +157,7 @@ export const EditorScreen: React.FC = () => {
       setIsSaving(false);
     }, 10000);
     return () => clearTimeout(timer);
-  }, []); // 空依赖数组，timer 在组件卸载时清理
+  }, [chapterId]); // chapterId 变化时重置 timer，防止切章节后旧 timer 仍触发
 
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
