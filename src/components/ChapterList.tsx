@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { Colors } from '../constants/colors';
+
+// 提到模块层，避免每次渲染重新创建函数
+const countChars = (text: string): number => {
+  return text.replace(/\s/g, '').length;
+};
 
 interface ChapterListProps {
   chapters: Chapter[];
   onChapterPress: (chapter: Chapter) => void;
   onChapterLongPress?: (chapter: Chapter) => void;
 }
-
-const countChars = (text: string): number => {
-  return text.replace(/\s/g, '').length;
-};
 
 export const ChapterList: React.FC<ChapterListProps> = ({
   chapters,
@@ -20,7 +21,8 @@ export const ChapterList: React.FC<ChapterListProps> = ({
 }) => {
   const totalChars = chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
 
-  const renderChapter = ({ item, index }: { item: Chapter; index: number }) => {
+  // 用 useCallback 包裹 renderChapter，稳定函数引用，减少 FlatList 不必要的重渲染
+  const renderChapter = useCallback(({ item, index }: { item: Chapter; index: number }) => {
     const chars = countChars(item.content);
     return (
       <TouchableOpacity
@@ -45,7 +47,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [onChapterPress, onChapterLongPress]);
 
   return (
     <View style={styles.container}>
