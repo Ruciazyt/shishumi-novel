@@ -32,7 +32,6 @@ export const Colors = {
   error: '#F44336',
 } as const;
 
-export type ColorKey = keyof typeof Colors;
 
 export const Theme = {
   dark: false,

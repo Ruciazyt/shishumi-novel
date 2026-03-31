@@ -181,6 +181,5 @@ ${text}
 
 export const API_CONFIG = {
   baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-  model: 'qwen-turbo',
 };
 

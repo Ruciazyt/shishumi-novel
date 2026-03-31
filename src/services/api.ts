@@ -154,15 +154,20 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     }
     return { success: false, error: 'AI返回内容为空' };
   } catch (error: unknown) {
-    // 网络错误或超时时自动重试，最多3次
+    // 网络错误、超时、限流、服务器错误时自动重试，最多3次
     const err = error as Record<string, unknown>;
     const code = err.code as string | undefined;
+    // 提取 HTTP 状态码（axios 错误响应结构）
+    const httpStatus = (err.response as Record<string, unknown> | undefined)?.status as number | undefined;
     const isRetryable =
       code === 'ECONNABORTED' ||
       code === 'ERR_NETWORK' ||
       code === 'ENOTFOUND' ||
       code === 'ECONNREFUSED' ||
-      !err.response;
+      !err.response ||
+      // 429 限流和 5xx 服务器错误也应重试（带退避）
+      httpStatus === 429 ||
+      (httpStatus !== undefined && httpStatus >= 500);
 
     if (isRetryable && attempt < MAX_RETRIES) {
       const delay = attempt * 2000; // 2s, 4s 递增退避
