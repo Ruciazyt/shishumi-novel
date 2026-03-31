@@ -262,7 +262,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </View>
             ) : result ? (
               <View style={styles.resultContainer}>
-                <Text style={styles.resultLabel}>AI 返回结果</Text>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultLabel}>AI 返回结果</Text>
+                  <Text style={styles.resultCount}>{result.length} 字</Text>
+                </View>
                 <Text style={styles.resultText}>{result}</Text>
                 <View style={styles.resultActions}>
                   <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
@@ -408,11 +411,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   resultLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: 8,
+  },
+  resultCount: {
+    fontSize: 12,
+    color: Colors.textLight,
   },
   resultText: {
     fontSize: 15,
