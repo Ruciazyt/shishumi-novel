@@ -234,8 +234,10 @@ export const EditorScreen: React.FC = () => {
   const handleInsertContent = (text: string) => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
-    const prefix = content.trim() ? '\n\n' : '';
-    const newContent = content + prefix + trimmedText;
+    // 去除内容末尾的换行，避免与前缀的 \n\n 重复积累产生多余空行
+    const baseContent = content.replace(/\n+$/, '');
+    const prefix = baseContent ? '\n\n' : '';
+    const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
     pendingContentRef.current = newContent;
     recordHistory(newContent);

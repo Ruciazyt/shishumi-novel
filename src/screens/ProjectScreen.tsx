@@ -234,6 +234,7 @@ export const ProjectScreen: React.FC = () => {
                 placeholderTextColor={Colors.textLight}
                 value={chapterTitle}
                 onChangeText={setChapterTitle}
+                autoFocus
               />
             </View>
 
