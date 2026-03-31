@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -40,48 +40,57 @@ export const ProjectScreen: React.FC = () => {
     );
   }
 
-  // 根据 project.dynasty 名称找到对应的 DYNASTY 对象
-  const dynastyData = DYNASTIES.find(d => d.name === project.dynasty);
+  // Derive dynasty metadata once per project (stable reference — project never
+  // mutates, only gets replaced on update).
+  const dynastyData = useMemo(
+    () => DYNASTIES.find(d => d.name === project.dynasty),
+    [project.dynasty]
+  );
 
-  const handleChapterPress = (chapter: Chapter) => {
-    dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
-    navigation.navigate('Editor', { chapterId: chapter.id });
-  };
+  const handleChapterPress = useCallback(
+    (chapter: Chapter) => {
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
+      navigation.navigate('Editor', { chapterId: chapter.id });
+    },
+    [dispatch, navigation, project]
+  );
 
-  const handleChapterLongPress = (chapter: Chapter) => {
-    Alert.alert('章节操作', `《${chapter.title}》`, [
-      { text: '取消', style: 'cancel' },
-      {
-        text: '编辑',
-        onPress: () => {
-          setEditingChapter(chapter);
-          setChapterTitle(chapter.title);
-          // content preserved via editingChapter
-          setChapterModalVisible(true);
+  const handleChapterLongPress = useCallback(
+    (chapter: Chapter) => {
+      Alert.alert('章节操作', `《${chapter.title}》`, [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '编辑',
+          onPress: () => {
+            setEditingChapter(chapter);
+            setChapterTitle(chapter.title);
+            setChapterModalVisible(true);
+          },
         },
-      },
-      {
-        text: '删除',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteChapter(project.id, chapter.id);
-          const updatedProject = {
-            ...project,
-            chapters: project.chapters.filter(c => c.id !== chapter.id),
-          };
-          dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+        {
+          text: '删除',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteChapter(project.id, chapter.id);
+            const updatedProject = {
+              ...project,
+              chapters: project.chapters.filter(c => c.id !== chapter.id),
+            };
+            dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+          },
         },
-      },
-    ]);
-  };
+      ]);
+    },
+    [dispatch, project]
+  );
 
-  const handleAddChapter = () => {
+  const handleAddChapter = useCallback(() => {
     setEditingChapter(null);
     setChapterTitle('');
-        setChapterModalVisible(true);
-  };
+    setChapterModalVisible(true);
+  }, []);
 
-  const handleSaveChapter = async () => {
+  const handleSaveChapter = useCallback(async () => {
     if (!chapterTitle.trim()) {
       Alert.alert('错误', '请输入章节标题');
       return;
@@ -117,8 +126,8 @@ export const ProjectScreen: React.FC = () => {
 
     setChapterModalVisible(false);
     setChapterTitle('');
-        setEditingChapter(null);
-  };
+    setEditingChapter(null);
+  }, [chapterTitle, editingChapter, dispatch, project]);
 
   return (
     <View style={styles.container}>
