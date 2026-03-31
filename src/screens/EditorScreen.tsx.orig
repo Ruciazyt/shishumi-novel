@@ -249,7 +249,7 @@ export const EditorScreen: React.FC = () => {
   // Dynasty-aware placeholder - provides era-specific writing inspiration
   const dynastyTip = React.useMemo(() => {
     const dynastyData = project?.dynasty
-      ? DYNASTIES.find(d => d.id === project.dynasty || d.name === project.dynasty)
+      ? DYNASTIES.find(d => d.name === project.dynasty)
       : getDynastyById(state.dynasty);
     if (!dynastyData) return '开始写作...';
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '开始写作...';

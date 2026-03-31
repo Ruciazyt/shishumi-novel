@@ -23,10 +23,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
       onLongPress={onLongPress}
       activeOpacity={0.7}
     >
-      <Text style={styles.title} numberOfLines={1}>
-        {project.title}
-      </Text>
-      <Text style={styles.dynasty}>{project.dynasty}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title} numberOfLines={1}>
+          {project.title}
+        </Text>
+        <View style={styles.dynastyBadge}>
+          <Text style={styles.dynastyBadgeText}>{project.dynasty}</Text>
+        </View>
+      </View>
       <Text style={styles.description} numberOfLines={2}>
         {project.description || '暂无简介'}
       </Text>
@@ -59,16 +63,32 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.textPrimary,
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 8,
   },
-  dynasty: {
-    fontSize: 14,
+  dynastyBadge: {
+    backgroundColor: Colors.vermillion + '15',
+    borderWidth: 1,
+    borderColor: Colors.vermillion + '40',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    flexShrink: 0,
+  },
+  dynastyBadgeText: {
+    fontSize: 12,
     color: Colors.vermillion,
-    marginBottom: 8,
+    fontWeight: '600',
   },
   description: {
     fontSize: 14,
