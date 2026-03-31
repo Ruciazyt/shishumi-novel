@@ -45,3 +45,18 @@ export const Theme = {
     notification: Colors.vermillion,
   },
 };
+
+/** 工具函数：hex 颜色 + alpha → rgba 字符串（用于 backgroundColor/borderColor 等） */
+const rgba = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
+export const ColorsAlpha = {
+  /** 朱砂红 8% 透明度 — 用于朝代徽章背景 */
+  vermillionBadgeBg: rgba(Colors.vermillion, 0.08),
+  /** 朱砂红 25% 透明度 — 用于朝代徽章边框 */
+  vermillionBadgeBorder: rgba(Colors.vermillion, 0.25),
+} as const;

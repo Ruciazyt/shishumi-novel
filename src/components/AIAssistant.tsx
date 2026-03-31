@@ -192,7 +192,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.body}>
+          <ScrollView style={styles.body} keyboardShouldPersistTaps="handled">
             <View style={styles.typeSelector}>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'polish' && styles.typeButtonActive]}

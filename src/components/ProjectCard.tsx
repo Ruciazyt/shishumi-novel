@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Project } from '../types';
-import { Colors } from '../constants/colors';
+import { Colors, ColorsAlpha } from '../constants/colors';
 import { formatRelativeTime } from '../utils/time';
 import { countChars } from '../utils/text';
 
@@ -77,9 +77,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   dynastyBadge: {
-    backgroundColor: Colors.vermillion + '15',
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
     borderWidth: 1,
-    borderColor: Colors.vermillion + '40',
+    borderColor: ColorsAlpha.vermillionBadgeBorder,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
