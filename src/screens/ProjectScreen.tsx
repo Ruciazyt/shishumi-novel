@@ -143,7 +143,7 @@ export const ProjectScreen: React.FC = () => {
 
       <View style={styles.projectInfo}>
         <View style={styles.projectInfoTop}>
-          <Text style={styles.dynasty}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
+          <Text style={styles.dynasty}>{dynastyData?.name || project.dynasty}</Text>
           <TouchableOpacity
             style={styles.dynastyInfoBtn}
             onPress={() => setDynastyModalVisible(true)}

@@ -42,7 +42,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
           <View
             style={styles.chapterNumber}
             accessible={true}
-            accessibilityLabel={`第${index + 1}章`}
+            accessibilityLabel={`第${index + 1}章 ${item.title}`}
             accessibilityRole="text"
           >
             <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
