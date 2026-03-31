@@ -103,3 +103,18 @@ export const deleteChapter = async (projectId: string, chapterId: string): Promi
   await saveProjects(projects);
   return true;
 };
+
+const DYNASTY_KEY = 'shishumi_dynasty';
+
+export const getDynasty = async (): Promise<string> => {
+  try {
+    const data = await AsyncStorage.getItem(DYNASTY_KEY);
+    return data || 'tang';
+  } catch {
+    return 'tang';
+  }
+};
+
+export const saveDynasty = async (dynasty: string): Promise<void> => {
+  await AsyncStorage.setItem(DYNASTY_KEY, dynasty);
+};

@@ -12,6 +12,7 @@ import { useApp } from '../context/AppContext';
 import { Colors } from '../constants/colors';
 import { getApiKey, setApiKey } from '../services/api';
 import { DYNASTIES } from '../data/dynasties';
+import { saveDynasty } from '../services/storage';
 
 export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -37,8 +38,9 @@ export const SettingsScreen: React.FC = () => {
     Alert.alert('成功', 'API密钥已保存');
   };
 
-  const handleDynastyChange = (dynastyId: string) => {
+  const handleDynastyChange = async (dynastyId: string) => {
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
+    await saveDynasty(dynastyId);
   };
 
   return (

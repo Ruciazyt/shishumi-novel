@@ -69,11 +69,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
-    const loadProjects = async () => {
-      const projects = await getProjects();
+    const loadData = async () => {
+      const [projects, dynasty] = await Promise.all([
+        getProjects(),
+        import('../services/storage').then(m => m.getDynasty()),
+      ]);
       dispatch({ type: 'SET_PROJECTS', payload: projects });
+      dispatch({ type: 'SET_DYNASTY', payload: dynasty });
     };
-    loadProjects();
+    loadData();
   }, []);
 
   useEffect(() => {
