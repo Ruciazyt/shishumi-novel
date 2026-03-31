@@ -19,7 +19,7 @@ import { ProjectCard } from '../components/ProjectCard';
 import { Colors } from '../constants/colors';
 import { DYNASTIES } from '../data/dynasties';
 import { createProject, deleteProject } from '../services/storage';
-import { RootStackParamList } from '../types';
+import { Project, RootStackParamList } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -51,12 +51,12 @@ export const HomeScreen: React.FC = () => {
     setNewDescription('');
   };
 
-  const handleProjectPress = (project: any) => {
+  const handleProjectPress = (project: Project) => {
     dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
     navigation.navigate('Project', { projectId: project.id });
   };
 
-  const handleProjectLongPress = (project: any) => {
+  const handleProjectLongPress = (project: Project) => {
     Alert.alert(
       '删除项目',
       `确定要删除《${project.title}》吗？`,
