@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { v4 as uuidv4 } from 'uuid';
 import { Project, Chapter } from '../types';
 
 const PROJECTS_KEY = 'shishumi_projects';
@@ -26,7 +27,7 @@ export const createProject = async (project: Omit<Project, 'id' | 'createdAt' | 
   const projects = await getProjects();
   const newProject: Project = {
     ...project,
-    id: Date.now().toString(),
+    id: uuidv4(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -74,7 +75,7 @@ export const addChapter = async (projectId: string, chapter: Omit<Chapter, 'id' 
 
     const newChapter: Chapter = {
       ...chapter,
-      id: Date.now().toString(),
+      id: uuidv4(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };

@@ -523,7 +523,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 4,
-    marginHorizontal: 2,
     backgroundColor: Colors.paperDark,
     borderRadius: 8,
     borderWidth: 1,
