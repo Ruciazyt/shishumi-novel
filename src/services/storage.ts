@@ -16,11 +16,6 @@ export const saveProjects = async (projects: Project[]): Promise<void> => {
   await AsyncStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
 };
 
-export const getProjectById = async (id: string): Promise<Project | null> => {
-  const projects = await getProjects();
-  return projects.find(p => p.id === id) || null;
-};
-
 export const createProject = async (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> => {
   const projects = await getProjects();
   const newProject: Project = {

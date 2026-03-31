@@ -174,7 +174,7 @@ export const EditorScreen: React.FC = () => {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
-  // 统计字数（移除了中日韩字符的复杂逻辑，中文按字符数，英文按单词数）
+  // 统计字数
   const charCount = content.replace(/\s/g, '').length;
   const wordCount = content.trim()
     ? content.trim().split(/\s+/).length
@@ -231,16 +231,16 @@ export const EditorScreen: React.FC = () => {
 
       <View style={styles.toolbar}>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'polish' && !poetryVisible && styles.toolButtonActive]}
+          style={[styles.toolButton, aiVisible && aiType === 'polish' && !poetryVisible && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
         >
-          <Text style={[styles.toolButtonText, aiType === 'polish' && !poetryVisible && styles.toolButtonTextActive]}>润色</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'polish' && !poetryVisible && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'historical' && styles.toolButtonActive]}
+          style={[styles.toolButton, aiVisible && aiType === 'historical' && styles.toolButtonActive]}
           onPress={() => handleAIPress('historical')}
         >
-          <Text style={[styles.toolButtonText, aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, poetryVisible && styles.toolButtonActive]}
@@ -249,16 +249,16 @@ export const EditorScreen: React.FC = () => {
           <Text style={[styles.toolButtonText, poetryVisible && styles.toolButtonTextActive]}>诗词</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'buddhist' && styles.toolButtonActive]}
+          style={[styles.toolButton, aiVisible && aiType === 'buddhist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('buddhist')}
         >
-          <Text style={[styles.toolButtonText, aiType === 'buddhist' && styles.toolButtonTextActive]}>佛教</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'buddhist' && styles.toolButtonTextActive]}>佛教</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toolButton, aiType === 'taoist' && styles.toolButtonActive]}
+          style={[styles.toolButton, aiVisible && aiType === 'taoist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('taoist')}
         >
-          <Text style={[styles.toolButtonText, aiType === 'taoist' && styles.toolButtonTextActive]}>道家</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'taoist' && styles.toolButtonTextActive]}>道家</Text>
         </TouchableOpacity>
       </View>
 
