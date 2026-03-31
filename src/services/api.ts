@@ -2,6 +2,7 @@ import axios from 'axios';
 import { PROMPTS, API_CONFIG } from '../constants/prompts';
 import { AIRequest, AIResponse } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DYNASTIES } from '../data/dynasties';
 
 const API_KEY_STORAGE_KEY = 'shishumi_api_key';
 
@@ -17,12 +18,22 @@ export const setApiKey = async (apiKey: string): Promise<void> => {
   await AsyncStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
 };
 
+/** 将朝代 ID 解析为显示名称 */
+const resolveDynastyName = (dynastyId?: string): string => {
+  if (!dynastyId) return '唐朝'; // 默认为唐朝
+  const found = DYNASTIES.find(d => d.id === dynastyId);
+  return found ? found.name : dynastyId;
+};
+
 const buildPrompt = (request: AIRequest): string => {
   switch (request.type) {
     case 'polish':
       return PROMPTS.polish(request.text || '');
-    case 'historical':
-      return PROMPTS.historical(request.text || '', request.dynasty || '');
+    case 'historical': {
+      // 确保传入的是朝代名称而非 ID
+      const dynastyName = resolveDynastyName(request.dynasty);
+      return PROMPTS.historical(request.text || '', dynastyName);
+    }
     case 'poetry':
       return PROMPTS.poetry(request.scene || '');
     case 'buddhist':
