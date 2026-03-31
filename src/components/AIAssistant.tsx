@@ -83,6 +83,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     return clearHintTimer;
   }, [loading]);
 
+  // 切换类型时清除无关输入，防止旧内容残留造成困惑
+  useEffect(() => {
+    if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
+      setInputText('');
+    } else {
+      setSceneText('');
+    }
+  }, [aiType]);
+
   const { state } = useApp();
 
   const handleSubmit = async () => {
