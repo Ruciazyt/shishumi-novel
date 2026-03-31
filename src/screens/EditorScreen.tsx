@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -40,6 +40,10 @@ export const EditorScreen: React.FC = () => {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
+  // 用于防抖自动保存
+  const contentRef = useRef(content);
+  contentRef.current = content;
+
   // 初始化历史记录
   useEffect(() => {
     if (chapter) {
@@ -79,11 +83,12 @@ export const EditorScreen: React.FC = () => {
     recordHistory(text);
   };
 
-  // 30秒自动保存
+  // 30秒防抖自动保存：每次内容变化后等待30秒无操作再保存
   useEffect(() => {
-    const interval = setInterval(async () => {
-      if (content !== (chapter?.content || '') && project && chapter) {
-        const updated = await updateChapter(project.id, chapter.id, { content });
+    const timer = setTimeout(async () => {
+      const latestContent = contentRef.current;
+      if (latestContent !== (chapter?.content || '') && project && chapter) {
+        const updated = await updateChapter(project.id, chapter.id, { content: latestContent });
         if (updated) {
           const updatedProject = {
             ...project,
@@ -96,7 +101,7 @@ export const EditorScreen: React.FC = () => {
         }
       }
     }, 30000);
-    return () => clearInterval(interval);
+    return () => clearTimeout(timer);
   }, [content, chapter, project, dispatch]);
 
   const handleAIPress = (type: AIAssistantType) => {
