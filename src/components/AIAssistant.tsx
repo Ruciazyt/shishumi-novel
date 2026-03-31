@@ -85,7 +85,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
         if (isMountedRef.current) {
           setLoadingHint('模型响应较慢，请稍候...');
         }
-      }, 20000);
+      }, 25000);
     } else {
       clearHintTimer();
       if (isMountedRef.current) {

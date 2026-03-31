@@ -65,7 +65,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
       setLoadingHint('');
       hintTimerRef.current = setTimeout(() => {
         setLoadingHint('模型响应较慢，请稍候...');
-      }, 20000);
+      }, 25000);
     } else {
       clearHintTimer();
       setLoadingHint('');
