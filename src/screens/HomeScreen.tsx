@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,10 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen: React.FC = () => {
   const { state, dispatch } = useApp();
-  const sortedProjects = [...state.projects].sort((a, b) => b.updatedAt - a.updatedAt);
+  const sortedProjects = useMemo(
+    () => [...state.projects].sort((a, b) => b.updatedAt - a.updatedAt),
+    [state.projects]
+  );
   const navigation = useNavigation<NavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
