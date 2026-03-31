@@ -21,7 +21,7 @@ export const setApiKey = async (apiKey: string): Promise<void> => {
 /** 将朝代 ID 解析为显示名称 */
 const resolveDynastyName = (dynastyId?: string): string => {
   if (!dynastyId) return '唐朝'; // 默认为唐朝
-  const found = DYNASTIES.find(d => d.id === dynastyId);
+  const found = DYNASTIES.find(d => d.id === dynastyId || d.name === dynastyId);
   return found ? found.name : dynastyId;
 };
 

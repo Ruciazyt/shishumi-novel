@@ -225,7 +225,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
             ) : (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>
-                  {aiType === 'historical' ? `时代背景：${DYNASTIES.find(d => d.id === state.dynasty)?.name || state.dynasty}` : '输入文本'}
+                  {aiType === 'historical' ? `时代背景：${DYNASTIES.find(d => d.id === state.dynasty || d.name === state.dynasty)?.name || state.dynasty}` : '输入文本'}
                 </Text>
                 <TextInput
                   style={styles.textInput}
