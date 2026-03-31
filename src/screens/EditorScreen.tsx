@@ -37,6 +37,7 @@ export const EditorScreen: React.FC = () => {
   const [poetryVisible, setPoetryVisible] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   // Undo/Redo 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -83,6 +84,10 @@ export const EditorScreen: React.FC = () => {
       historyRef.current = [initial];
       historyIndexRef.current = 0;
       setHasUnsavedChanges(false);
+      // 从章节的 updatedAt 初始化最后保存时间
+      if (chapter.updatedAt) {
+        setLastSavedAt(new Date(chapter.updatedAt));
+      }
     }
     clearHistoryTimer(); // 切换章节时清除旧历史 timer
     return () => clearHistoryTimer();
@@ -154,6 +159,7 @@ export const EditorScreen: React.FC = () => {
         };
         dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
         setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
       }
       setIsSaving(false);
     }, 10000);
@@ -193,6 +199,7 @@ export const EditorScreen: React.FC = () => {
       };
       dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
       setHasUnsavedChanges(false);
+      setLastSavedAt(new Date());
       // 更新历史记录为已保存状态
       setHistory(prev => {
         const newHistory = [...prev.slice(0, historyIndexRef.current + 1)];
@@ -255,6 +262,15 @@ export const EditorScreen: React.FC = () => {
     return tips[dynastyData.name] || '开始写作...';
   }, [project?.dynasty, state.dynasty]);
 
+  // 格式化最后保存时间
+  const formatLastSaved = (date: Date | null): string => {
+    if (!date) return '';
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    if (diffMs < 60000) return '刚刚';
+    if (diffMs < 3600000) return `${Math.floor(diffMs / 60000)}分钟前`;
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
 
   return (
     <KeyboardAvoidingView
@@ -290,6 +306,7 @@ export const EditorScreen: React.FC = () => {
       <View style={styles.statsBar}>
         <Text style={styles.statsText}>
           {charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
+          {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
         </Text>
         {isSaving ? (
           <Text style={styles.savingIndicator}>● 保存中</Text>
