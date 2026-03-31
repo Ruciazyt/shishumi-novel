@@ -37,8 +37,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Prevent state updates after component unmount
+  // 防止组件卸载后仍更新 state（仅在组件真正卸载时设为 false）
   const isMountedRef = useRef(true);
+  // 追踪当前是否处于有效请求周期：modal 关闭时应拒绝响应
+  const requestActiveRef = useRef(false);
 
   // 当 visible 变为 true 时，根据 initialType 更新 aiType
   useEffect(() => {
@@ -55,7 +57,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }
   };
 
-  // 重置状态（不清除 isMountedRef，由调用方控制）
+  // 重置状态
   const resetState = () => {
     clearHintTimer();
     setInputText('');
@@ -66,22 +68,29 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setCopied(false);
   };
 
-  // visible 关闭时重置
+  // visible 关闭时重置（但保持 isMountedRef = true，因为组件未卸载）
+  // 只有组件真正卸载时 isMountedRef 才变为 false
   useEffect(() => {
     if (!visible) {
-      isMountedRef.current = false;
+      requestActiveRef.current = false;
       resetState();
-    } else {
-      isMountedRef.current = true;
     }
   }, [visible]);
+
+  // 组件卸载时标记
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 开始加载时启动超时提示
   useEffect(() => {
     if (loading) {
       setLoadingHint('');
       hintTimerRef.current = setTimeout(() => {
-        if (isMountedRef.current) {
+        if (isMountedRef.current && requestActiveRef.current) {
           setLoadingHint('模型响应较慢，请稍候...');
         }
       }, 25000);
@@ -94,13 +103,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     return clearHintTimer;
   }, [loading]);
 
-  // 切换类型时清除无关输入，防止旧内容残留造成困惑
+  // 切换类型时清除无关输入，防止旧内容残留
+  // 同时重置请求状态，防止旧请求结果在切换后仍显示
   useEffect(() => {
     if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
       setInputText('');
     } else {
       setSceneText('');
     }
+    requestActiveRef.current = false;
   }, [aiType]);
 
   const { state } = useApp();
@@ -122,6 +133,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setError('');
     setResult('');
     setCopied(false);
+    // 标记当前请求处于活跃状态，modal 关闭后此标记为 false 可阻断旧响应
+    requestActiveRef.current = true;
 
     const response = await callAI({
       type: aiType,
@@ -130,7 +143,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       scene: (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') ? sceneText : undefined,
     });
 
-    if (!isMountedRef.current) return;
+    // 只有在组件仍挂载且当前请求未被 modal 关闭阻断时才更新状态
+    if (!isMountedRef.current || !requestActiveRef.current) return;
     setLoading(false);
     if (response.success && response.data) {
       setResult(response.data);
@@ -156,7 +170,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   };
 
   const handleClose = () => {
-    isMountedRef.current = false;
+    requestActiveRef.current = false;
     resetState();
     onClose();
   };
