@@ -8,6 +8,7 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
+  ActivityIndicator,
   Platform,
 } from 'react-native';
 import { Colors } from '../constants/colors';
@@ -94,6 +95,7 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
 
             {loading ? (
               <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={Colors.vermillion} />
                 <Text style={styles.loadingText}>正在搜索...</Text>
               </View>
             ) : result ? (
