@@ -181,6 +181,10 @@ export const PoetryRecommend: React.FC<PoetryRecommendProps> = ({ visible, onClo
               </View>
             ) : result ? (
               <View style={styles.resultContainer}>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultLabel}>推荐结果</Text>
+                  <Text style={styles.resultCount}>{result.length} 字</Text>
+                </View>
                 <Text style={styles.resultText}>{result}</Text>
                 <View style={styles.resultActions}>
                   <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
@@ -288,6 +292,21 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  resultLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  resultCount: {
+    fontSize: 12,
+    color: Colors.textLight,
   },
   resultText: {
     fontSize: 15,
