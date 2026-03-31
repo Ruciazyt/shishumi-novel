@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Project } from '../types';
 import { Colors } from '../constants/colors';
 import { formatRelativeTime } from '../utils/time';
+import { countChars } from '../utils/text';
 
-const countChars = (text: string): number => text.replace(/\s/g, '').length;
 
 interface ProjectCardProps {
   project: Project;

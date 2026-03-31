@@ -30,7 +30,6 @@ export const ProjectScreen: React.FC = () => {
   const [chapterModalVisible, setChapterModalVisible] = useState(false);
   const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState('');
-  const [chapterContent, setChapterContent] = useState('');
   const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
 
   if (!project) {
@@ -57,7 +56,7 @@ export const ProjectScreen: React.FC = () => {
         onPress: () => {
           setEditingChapter(chapter);
           setChapterTitle(chapter.title);
-          setChapterContent(chapter.content);
+          // content preserved via editingChapter
           setChapterModalVisible(true);
         },
       },
@@ -79,8 +78,7 @@ export const ProjectScreen: React.FC = () => {
   const handleAddChapter = () => {
     setEditingChapter(null);
     setChapterTitle('');
-    setChapterContent('');
-    setChapterModalVisible(true);
+        setChapterModalVisible(true);
   };
 
   const handleSaveChapter = async () => {
@@ -92,7 +90,7 @@ export const ProjectScreen: React.FC = () => {
     if (editingChapter) {
       const updated = await updateChapter(project.id, editingChapter.id, {
         title: chapterTitle.trim(),
-        content: chapterContent,
+        content: editingChapter?.content ?? '',
       });
       if (updated) {
         const updatedProject = {
@@ -106,7 +104,7 @@ export const ProjectScreen: React.FC = () => {
     } else {
       const newChapter = await addChapter(project.id, {
         title: chapterTitle.trim(),
-        content: chapterContent,
+        content: '',
       });
       if (newChapter) {
         const updatedProject = {
@@ -119,8 +117,7 @@ export const ProjectScreen: React.FC = () => {
 
     setChapterModalVisible(false);
     setChapterTitle('');
-    setChapterContent('');
-    setEditingChapter(null);
+        setEditingChapter(null);
   };
 
   return (

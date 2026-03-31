@@ -1,12 +1,9 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
+import { countChars } from '../utils/text';
 import { Colors } from '../constants/colors';
 
-// 提到模块层，避免每次渲染重新创建函数
-const countChars = (text: string): number => {
-  return text.replace(/\s/g, '').length;
-};
 
 interface ChapterListProps {
   chapters: Chapter[];
