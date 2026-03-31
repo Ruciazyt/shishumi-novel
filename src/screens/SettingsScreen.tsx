@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Colors } from '../constants/colors';
-import { getApiKey, setApiKey } from '../services/api';
+import { getApiKey, setApiKey, getModel, setModel, AVAILABLE_MODELS, DEFAULT_MODEL } from '../services/api';
 import { DYNASTIES } from '../data/dynasties';
 import { saveDynasty } from '../services/storage';
 
@@ -18,15 +18,15 @@ export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();
   const [apiKey, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 
   useEffect(() => {
-    const loadApiKey = async () => {
-      const key = await getApiKey();
-      if (key) {
-        setApiKeyInput(key);
-      }
+    const loadData = async () => {
+      const [key, model] = await Promise.all([getApiKey(), getModel()]);
+      if (key) setApiKeyInput(key);
+      setSelectedModel(model);
     };
-    loadApiKey();
+    loadData();
   }, []);
 
   const handleSaveApiKey = async () => {
@@ -36,6 +36,11 @@ export const SettingsScreen: React.FC = () => {
     }
     await setApiKey(apiKey.trim());
     Alert.alert('成功', 'API密钥已保存');
+  };
+
+  const handleModelChange = async (modelId: string) => {
+    setSelectedModel(modelId);
+    await setModel(modelId);
   };
 
   const handleDynastyChange = async (dynastyId: string) => {
@@ -76,6 +81,37 @@ export const SettingsScreen: React.FC = () => {
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveApiKey}>
             <Text style={styles.saveButtonText}>保存密钥</Text>
           </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>模型选择</Text>
+        <View style={styles.card}>
+          <Text style={styles.hint}>不同模型在速度、费用和生成质量上有差异</Text>
+          <View style={styles.modelList}>
+            {AVAILABLE_MODELS.map(model => (
+              <TouchableOpacity
+                key={model.id}
+                style={[
+                  styles.modelItem,
+                  selectedModel === model.id && styles.modelItemActive,
+                ]}
+                onPress={() => handleModelChange(model.id)}
+              >
+                <Text
+                  style={[
+                    styles.modelName,
+                    selectedModel === model.id && styles.modelNameActive,
+                  ]}
+                >
+                  {model.name}
+                </Text>
+                {selectedModel === model.id && (
+                  <Text style={styles.modelCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </View>
 
@@ -223,6 +259,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textLight,
     marginBottom: 12,
+  },
+  modelList: {
+    gap: 8,
+  },
+  modelItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modelItemActive: {
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
+  },
+  modelName: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  modelNameActive: {
+    color: Colors.textOnVermillion,
+    fontWeight: '600',
+  },
+  modelCheck: {
+    fontSize: 14,
+    color: Colors.textOnVermillion,
+    fontWeight: 'bold',
   },
   dynastyList: {
     flexDirection: 'row',
