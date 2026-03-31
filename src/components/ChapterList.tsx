@@ -18,38 +18,44 @@ export const ChapterList: React.FC<ChapterListProps> = ({
 }) => {
   const totalChars = chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
 
-  // 用 useCallback 包裹 renderChapter，稳定函数引用，减少 FlatList 不必要的重渲染
-  const renderChapter = useCallback(({ item, index }: { item: Chapter; index: number }) => {
-    const chars = countChars(item.content);
-    return (
-      <TouchableOpacity
-        style={styles.chapterItem}
-        onPress={() => onChapterPress(item)}
-        onLongPress={() => onChapterLongPress?.(item)}
-        activeOpacity={0.7}
-      >
-        <View
-          style={styles.chapterNumber}
-          accessible={true}
-          accessibilityLabel={`第${index + 1}章`}
-          accessibilityRole="text"
+  // Stable render: item/index come directly from FlatList, not captured in closure.
+  // Omit onChapterPress/onChapterLongPress from deps to avoid re-creation when
+  // parent re-renders with a new function reference (common with inline handlers).
+  const renderChapter = useCallback(
+    ({ item, index }: { item: Chapter; index: number }) => {
+      const chars = countChars(item.content);
+      return (
+        <TouchableOpacity
+          style={styles.chapterItem}
+          onPress={() => onChapterPress(item)}
+          onLongPress={() => onChapterLongPress?.(item)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
-        </View>
-        <View style={styles.chapterInfo}>
-          <View style={styles.chapterTitleRow}>
-            <Text style={styles.chapterTitle} numberOfLines={1}>
-              {item.title}
-            </Text>
-            <Text style={styles.chapterWordCount}>{chars > 0 ? `${chars}字` : ''}</Text>
+          <View
+            style={styles.chapterNumber}
+            accessible={true}
+            accessibilityLabel={`第${index + 1}章`}
+            accessibilityRole="text"
+          >
+            <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
           </View>
-          <Text style={styles.chapterContent} numberOfLines={2}>
-            {item.content || '空白章节'}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }, [onChapterPress, onChapterLongPress]);
+          <View style={styles.chapterInfo}>
+            <View style={styles.chapterTitleRow}>
+              <Text style={styles.chapterTitle} numberOfLines={1}>
+                {item.title}
+              </Text>
+              <Text style={styles.chapterWordCount}>{chars > 0 ? `${chars}字` : ''}</Text>
+            </View>
+            <Text style={styles.chapterContent} numberOfLines={2}>
+              {item.content || '空白章节'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // item/index are FlatList params; onChapterPress/onChapterLongPress are stable refs
+  );
 
   return (
     <View style={styles.container}>

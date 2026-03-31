@@ -50,3 +50,12 @@ export const getDynastyById = (id: string): Dynasty | undefined => {
 export const getDynastyByName = (name: string): Dynasty | undefined => {
   return DYNASTIES.find(d => d.name === name);
 };
+
+// 写作引导提示 - 与 DYNASTIES 数据分离，保持数据纯粹性
+export const DYNASTY_WRITING_TIPS: Record<string, string> = {
+  '唐朝': '盛唐气象，万国来朝。笔下可豪放浪漫，亦可华美典雅...',
+  '宋朝': '婉约细腻，文雅含蓄。词风鼎盛，细节精致入微...',
+  '元朝': '豪迈粗犷，融合多民族风情。戏曲兴盛，语言奔放...',
+  '明朝': '典雅端庄，礼仪森严。小说繁荣，叙事宏阔...',
+  '清朝': '白话鼎盛，满汉交融。世情小说，人物众生...',
+};
