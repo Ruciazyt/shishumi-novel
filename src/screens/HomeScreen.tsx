@@ -162,7 +162,9 @@ export const HomeScreen: React.FC = () => {
                   value={newTitle}
                   onChangeText={setNewTitle}
                   autoFocus
+                  maxLength={50}
                 />
+                <Text style={styles.charCount}>{newTitle.length}/50</Text>
               </View>
 
               <View style={styles.formGroup}>
@@ -199,7 +201,9 @@ export const HomeScreen: React.FC = () => {
                   value={newDescription}
                   onChangeText={setNewDescription}
                   multiline
+                  maxLength={200}
                 />
+                <Text style={styles.charCount}>{newDescription.length}/200</Text>
               </View>
 
               <TouchableOpacity
@@ -338,6 +342,12 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  charCount: {
+    fontSize: 12,
+    color: Colors.textLight,
+    textAlign: 'right',
+    marginTop: 4,
   },
   dynastySelector: {
     flexDirection: 'row',

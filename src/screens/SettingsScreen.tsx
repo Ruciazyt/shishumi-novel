@@ -178,7 +178,7 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>关于</Text>
         <View style={styles.card}>
-          <Text style={styles.aboutText}>史书墨 v0.1.0</Text>
+          <Text style={styles.aboutText}>史书墨 v1.0.0</Text>
           <Text style={styles.aboutSubtext}>历史小说AI辅助创作工具</Text>
         </View>
       </View>
