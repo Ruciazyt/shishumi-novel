@@ -4,11 +4,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, StyleSheet } from 'react-native';
-import { AppProvider } from './src/context/AppContext';
+import { AppProvider, useApp } from './src/context/AppContext';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { ProjectScreen } from './src/screens/ProjectScreen';
 import { EditorScreen } from './src/screens/EditorScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { LoadingScreen } from './src/screens/LoadingScreen';
 import { Colors } from './src/constants/colors';
 import { RootStackParamList } from './src/types';
 
@@ -52,34 +53,47 @@ const TabNavigator = () => (
   </Tab.Navigator>
 );
 
+/** 仅在数据加载完成前显示的内部包装组件 */
+const AppContent: React.FC = () => {
+  const { state } = useApp();
+
+  if (state.loading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <NavigationContainer>
+      <StatusBar style="dark" />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.background },
+        }}
+      >
+        <Stack.Screen name="Home" component={TabNavigator} />
+        <Stack.Screen
+          name="Project"
+          component={ProjectScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="Editor"
+          component={EditorScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 export default function App() {
   return (
     <AppProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: Colors.background },
-          }}
-        >
-          <Stack.Screen name="Home" component={TabNavigator} />
-          <Stack.Screen
-            name="Project"
-            component={ProjectScreen}
-            options={{
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
-            name="Editor"
-            component={EditorScreen}
-            options={{
-              animation: 'slide_from_right',
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AppContent />
     </AppProvider>
   );
 }

@@ -1,4 +1,5 @@
 import { Linking, Alert } from 'react-native';
+import * as fs from 'fs';
 
 const REPO_OWNER = 'Ruciazyt';
 const REPO_NAME = 'shishumi-novel';
@@ -13,7 +14,21 @@ export interface ReleaseInfo {
   body: string;
 }
 
+/**
+ * 动态读取 app.json 中的版本号，与构建版本保持同步
+ */
 export const getAppVersion = (): string => {
+  try {
+    // 直接读取 app.json（Expo 项目根目录）
+    const appJsonPath = `${__dirname}/../../../app.json`;
+    if (fs.existsSync(appJsonPath)) {
+      const raw = fs.readFileSync(appJsonPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      return parsed.expo?.version || '0.1.0';
+    }
+  } catch {
+    // ignore
+  }
   return '0.1.0';
 };
 
