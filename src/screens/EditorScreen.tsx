@@ -230,6 +230,7 @@ export const EditorScreen: React.FC = () => {
   const handleSave = async () => {
     if (!project || !chapter) return;
     setIsSaving(true);
+    if (!isMountedRef.current) { setIsSaving(false); return; }
     const updated = await updateChapter(project.id, chapter.id, { content });
     if (!isMountedRef.current) return;
     if (updated) {
