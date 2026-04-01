@@ -59,5 +59,5 @@ export const ColorsAlpha = {
   /** 朱砂红 8% 透明度 — 用于朝代徽章背景 */
   vermillionBadgeBg: rgba(Colors.vermillion, 0.08),
   /** 朱砂红 25% 透明度 — 用于朝代徽章边框 */
-  vermillionBadgeBorder: rgba(Colors.vermillion, 0.25),
+  vermillionBadgeBorder: rgba(Colors.vermillion, 0.55),
 } as const;

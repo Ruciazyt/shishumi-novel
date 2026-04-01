@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,7 +15,7 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { Colors } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
-import { DYNASTIES, getDynastyById } from '../data/dynasties';
+import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { Chapter } from '../types';
 import { RootStackParamList } from '../types';
 
@@ -203,24 +204,30 @@ export const ProjectScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             {dynastyData ? (
-              <View style={styles.dynastyDetails}>
-                <View style={styles.dynastyDetailItem}>
-                  <Text style={styles.dynastyDetailLabel}>语言特点</Text>
-                  <Text style={styles.dynastyDetailValue}>{dynastyData.languageFeatures}</Text>
-                </View>
-                <View style={styles.dynastyDetailItem}>
-                  <Text style={styles.dynastyDetailLabel}>服饰特征</Text>
-                  <Text style={styles.dynastyDetailValue}>{dynastyData.clothingFeatures}</Text>
-                </View>
-                <View style={styles.dynastyDetailItem}>
-                  <Text style={styles.dynastyDetailLabel}>建筑风格</Text>
-                  <Text style={styles.dynastyDetailValue}>{dynastyData.architectureFeatures}</Text>
-                </View>
-                <View style={styles.dynastyDetailItem}>
-                  <Text style={styles.dynastyDetailLabel}>礼仪制度</Text>
-                  <Text style={styles.dynastyDetailValue}>{dynastyData.etiquetteFeatures}</Text>
-                </View>
-              </View>
+              <ScrollView style={styles.dynastyTipsScroll} showsVerticalScrollIndicator={false}>
+                {DYNASTY_WRITING_TIPS[dynastyData.name] ? (
+                  <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name]}</Text>
+                ) : (
+                  <View style={styles.dynastyDetails}>
+                    <View style={styles.dynastyDetailItem}>
+                      <Text style={styles.dynastyDetailLabel}>语言特点</Text>
+                      <Text style={styles.dynastyDetailValue}>{dynastyData.languageFeatures}</Text>
+                    </View>
+                    <View style={styles.dynastyDetailItem}>
+                      <Text style={styles.dynastyDetailLabel}>服饰特征</Text>
+                      <Text style={styles.dynastyDetailValue}>{dynastyData.clothingFeatures}</Text>
+                    </View>
+                    <View style={styles.dynastyDetailItem}>
+                      <Text style={styles.dynastyDetailLabel}>建筑风格</Text>
+                      <Text style={styles.dynastyDetailValue}>{dynastyData.architectureFeatures}</Text>
+                    </View>
+                    <View style={styles.dynastyDetailItem}>
+                      <Text style={styles.dynastyDetailLabel}>礼仪制度</Text>
+                      <Text style={styles.dynastyDetailValue}>{dynastyData.etiquetteFeatures}</Text>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
             ) : (
               <Text style={styles.noDynastyText}>暂无时代背景数据</Text>
             )}
@@ -398,6 +405,14 @@ const styles = StyleSheet.create({
   },
   dynastyDetails: {
     gap: 16,
+  },
+  dynastyTipsScroll: {
+    maxHeight: 400,
+  },
+  dynastyWritingTips: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    lineHeight: 24,
   },
   dynastyDetailItem: {
     borderBottomWidth: 1,
