@@ -4,9 +4,21 @@ import { Project, Chapter } from '../types';
 
 const PROJECTS_KEY = 'shishumi_projects';
 
+/** 内存缓存：避免每次操作都解析全量 JSON（Read-through cache） */
+let _cachedRaw: string | null = null;
+
 export const getProjects = async (): Promise<Project[]> => {
+  // 缓存命中：直接解析缓存字符串，避免重复 AsyncStorage I/O
+  if (_cachedRaw !== null) {
+    try {
+      return JSON.parse(_cachedRaw) as Project[];
+    } catch {
+      _cachedRaw = null; // 缓存损坏则降级到 I/O
+    }
+  }
   try {
     const data = await AsyncStorage.getItem(PROJECTS_KEY);
+    _cachedRaw = data;
     return data ? JSON.parse(data) : [];
   } catch (err) {
     console.error('[storage] getProjects failed:', err);
@@ -16,7 +28,9 @@ export const getProjects = async (): Promise<Project[]> => {
 
 export const saveProjects = async (projects: Project[]): Promise<void> => {
   try {
-    await AsyncStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+    const raw = JSON.stringify(projects);
+    _cachedRaw = raw; // 写入缓存，避免下次读取重新解析
+    await AsyncStorage.setItem(PROJECTS_KEY, raw);
   } catch (err) {
     console.error('[storage] saveProjects failed:', err);
     throw err; // re-throw so caller knows save failed

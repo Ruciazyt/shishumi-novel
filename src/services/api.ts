@@ -132,19 +132,12 @@ const extractErrorMessage = (error: unknown): string => {
     if (data && typeof data === 'object') {
       const d = data as Record<string, unknown>;
       // 通义千问标准错误格式: { error: { message: "..." } }
+      // OpenAI 兼容格式: { error: { message: "..." } } 或 { message: "..." }
       const errorObj = d['error'];
-      if (errorObj && typeof errorObj === 'object') {
-        const e = errorObj as Record<string, unknown>;
-        if (typeof e['message'] === 'string') return e['message'] as string;
-      }
-      // OpenAI 兼容格式: { message: "..." }
-      if (typeof d['message'] === 'string') return d['message'] as string;
-      // OpenAI error format: { error: { message: "..." } }
-      const openaiError = d['error'];
-      if (openaiError && typeof openaiError === 'object') {
-        const e = openaiError as Record<string, unknown>;
-        if (typeof e['message'] === 'string') return e['message'] as string;
-      }
+      const msg = (errorObj && typeof errorObj === 'object')
+        ? (errorObj as Record<string, unknown>)['message']
+        : d['message'];
+      if (typeof msg === 'string') return msg;
     }
     if (typeof data === 'string' && data.length > 0) return data;
     if (typeof resp.status === 'number') {
