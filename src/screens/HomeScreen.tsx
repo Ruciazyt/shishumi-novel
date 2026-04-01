@@ -225,7 +225,11 @@ export const HomeScreen: React.FC = () => {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>时代背景</Text>
-                <View style={styles.dynastySelector}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.dynastySelectorContent}
+                >
                   {DYNASTIES.map(d => (
                     <TouchableOpacity
                       key={d.id}
@@ -245,7 +249,7 @@ export const HomeScreen: React.FC = () => {
                       </Text>
                     </TouchableOpacity>
                   ))}
-                </View>
+                </ScrollView>
               </View>
 
               <View style={styles.formGroup}>
@@ -466,7 +470,10 @@ const styles = StyleSheet.create({
   },
   dynastySelector: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+  },
+  dynastySelectorContent: {
+    flexDirection: 'row',
+    paddingVertical: Spacing.xs,
   },
   dynastyButton: {
     paddingHorizontal: Spacing.md,

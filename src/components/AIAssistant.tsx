@@ -334,7 +334,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   <Text style={styles.resultLabel}>AI 返回结果</Text>
                   <Text style={styles.resultCount}>{result.length} 字</Text>
                 </View>
-                <Text style={styles.resultText}>{result}</Text>
+                <ScrollView style={styles.resultScroll} showsVerticalScrollIndicator={false}>
+                  <Text style={styles.resultText}>{result}</Text>
+                </ScrollView>
                 <View style={styles.resultActions}>
                   <TouchableOpacity style={styles.resetButton} onPress={resetState}>
                     <Text style={styles.resetButtonText}>重新输入</Text>
@@ -522,6 +524,9 @@ const styles = StyleSheet.create({
   resultCount: {
     fontSize: FontSize.xs,
     color: Colors.textLight,
+  },
+  resultScroll: {
+    maxHeight: 280,
   },
   resultText: {
     fontSize: FontSize.md,
