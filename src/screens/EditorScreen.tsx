@@ -300,17 +300,17 @@ export const EditorScreen: React.FC = () => {
 
   const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : '';
   // 简短占位符（用于 TextInput placeholder）
-  const handlePrevChapter = () => {
+  const handlePrevChapter = async () => {
     if (canGoPrev && prevChapterId) {
-      if (hasUnsavedChanges) handleSave();
+      if (hasUnsavedChanges) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: prevChapterId });
     }
   };
 
-  const handleNextChapter = () => {
+  const handleNextChapter = async () => {
     if (canGoNext && nextChapterId) {
-      if (hasUnsavedChanges) handleSave();
+      if (hasUnsavedChanges) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: nextChapterId });
     }
