@@ -339,30 +339,35 @@ export const EditorScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'polish' && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
+          accessibilityLabel="润色当前文本" accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'polish' && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'historical' && styles.toolButtonActive]}
           onPress={() => handleAIPress('historical')}
+          accessibilityLabel="添加历史细节" accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'poetry' && styles.toolButtonActive]}
           onPress={() => handleAIPress('poetry')}
+          accessibilityLabel="推荐相关诗词" accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'poetry' && styles.toolButtonTextActive]}>诗词</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'buddhist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('buddhist')}
+          accessibilityLabel="推荐佛教经典引用" accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'buddhist' && styles.toolButtonTextActive]}>佛教</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'taoist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('taoist')}
+          accessibilityLabel="推荐道家经典引用" accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'taoist' && styles.toolButtonTextActive]}>道家</Text>
         </TouchableOpacity>
