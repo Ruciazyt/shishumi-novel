@@ -8,6 +8,7 @@ import {
   ScrollView,
   Modal,
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -187,6 +188,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   };
 
   const handleClose = () => {
+    Keyboard.dismiss();
     requestActiveRef.current = false;
     resetState();
     onClose();
