@@ -147,6 +147,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       }
     }
 
+    Keyboard.dismiss();
     setLoading(true);
     setError('');
     setResult('');

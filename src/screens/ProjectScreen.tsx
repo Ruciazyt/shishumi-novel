@@ -77,16 +77,16 @@ export const ProjectScreen: React.FC = () => {
             try {
               const ok = await deleteChapter(project.id, chapter.id);
               if (!ok) throw new Error('deleteChapter returned false');
+              // delete 成功后才更新 UI，避免失败时留下不一致状态
+              const updatedProject = {
+                ...project,
+                chapters: project.chapters.filter(c => c.id !== chapter.id),
+              };
+              dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
             } catch (err) {
               console.error('[ProjectScreen] deleteChapter failed:', err);
               Alert.alert('错误', '删除章节失败，请重试');
-              return;
             }
-            const updatedProject = {
-              ...project,
-              chapters: project.chapters.filter(c => c.id !== chapter.id),
-            };
-            dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
           },
         },
       ]);
