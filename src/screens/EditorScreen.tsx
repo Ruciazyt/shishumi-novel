@@ -14,7 +14,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
@@ -294,29 +294,47 @@ export const EditorScreen: React.FC = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButtonContainer}>
           <Text style={styles.backButton}>← 返回</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {chapter.title}
         </Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={undo} disabled={!canUndo} style={[styles.undoRedoBtn, !canUndo && styles.undoRedoBtnDisabled]}
-            accessibilityLabel="撤销" accessibilityRole="button">
+          <TouchableOpacity
+            onPress={undo}
+            disabled={!canUndo}
+            style={[styles.undoRedoBtn, !canUndo && styles.undoRedoBtnDisabled]}
+            accessibilityLabel="撤销"
+            accessibilityRole="button"
+          >
             <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoTextDisabled]}>↩</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={redo} disabled={!canRedo} style={[styles.undoRedoBtn, !canRedo && styles.undoRedoBtnDisabled]}
-            accessibilityLabel="重做" accessibilityRole="button">
+          <TouchableOpacity
+            onPress={redo}
+            disabled={!canRedo}
+            style={[styles.undoRedoBtn, !canRedo && styles.undoRedoBtnDisabled]}
+            accessibilityLabel="重做"
+            accessibilityRole="button"
+          >
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoTextDisabled]}>↪</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setWritingTipVisible(true)}
+          <TouchableOpacity
+            onPress={() => setWritingTipVisible(true)}
             style={styles.tipBtn}
-            accessibilityLabel="写作提示" accessibilityRole="button">
+            accessibilityLabel="写作提示"
+            accessibilityRole="button"
+          >
             <Text style={styles.tipBtnText}>📜</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSave} disabled={isSaving}
-            accessibilityLabel="保存" accessibilityRole="button">
+          <TouchableOpacity
+            onPress={handleSave}
+            disabled={isSaving}
+            accessibilityLabel="保存"
+            accessibilityRole="button"
+          >
             <Text style={[styles.saveButton, (!hasUnsavedChanges || isSaving) && styles.saveButtonDisabled]}>
               {isSaving ? '保存中' : '保存'}
             </Text>
@@ -339,6 +357,7 @@ export const EditorScreen: React.FC = () => {
         ) : null}
       </View>
 
+      {/* Editor */}
       <ScrollView style={styles.editorContainer}>
         <TextInput
           style={styles.editor}
@@ -351,39 +370,45 @@ export const EditorScreen: React.FC = () => {
         />
       </ScrollView>
 
+      {/* Toolbar */}
       <View style={styles.toolbar}>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'polish' && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
-          accessibilityLabel="润色当前文本" accessibilityRole="button"
+          accessibilityLabel="润色当前文本"
+          accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'polish' && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'historical' && styles.toolButtonActive]}
           onPress={() => handleAIPress('historical')}
-          accessibilityLabel="添加历史细节" accessibilityRole="button"
+          accessibilityLabel="添加历史细节"
+          accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'poetry' && styles.toolButtonActive]}
           onPress={() => handleAIPress('poetry')}
-          accessibilityLabel="推荐相关诗词" accessibilityRole="button"
+          accessibilityLabel="推荐相关诗词"
+          accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'poetry' && styles.toolButtonTextActive]}>诗词</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'buddhist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('buddhist')}
-          accessibilityLabel="推荐佛教经典引用" accessibilityRole="button"
+          accessibilityLabel="推荐佛教经典引用"
+          accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'buddhist' && styles.toolButtonTextActive]}>佛教</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'taoist' && styles.toolButtonActive]}
           onPress={() => handleAIPress('taoist')}
-          accessibilityLabel="推荐道家经典引用" accessibilityRole="button"
+          accessibilityLabel="推荐道家经典引用"
+          accessibilityRole="button"
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'taoist' && styles.toolButtonTextActive]}>道家</Text>
         </TouchableOpacity>
@@ -407,8 +432,11 @@ export const EditorScreen: React.FC = () => {
           <View style={styles.tipModalContent}>
             <View style={styles.tipModalHeader}>
               <Text style={styles.tipModalTitle}>📜 写作提示</Text>
-              <TouchableOpacity onPress={() => setWritingTipVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setWritingTipVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.tipModalScroll}>
@@ -426,113 +454,123 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
+  },
+  backButtonContainer: {
+    padding: Spacing.xs,
   },
   backButton: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.vermillion,
+    fontWeight: '500',
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     fontWeight: 'bold',
     color: Colors.textPrimary,
     flex: 1,
     textAlign: 'center',
-    marginHorizontal: 8,
+    marginHorizontal: Spacing.sm,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   undoRedoBtn: {
-    padding: 4,
+    padding: Spacing.xs,
   },
   undoRedoBtnDisabled: {
-    padding: 4,
+    padding: Spacing.xs,
     backgroundColor: Colors.paperDark,
-    borderRadius: 4,
+    borderRadius: BorderRadius.sm,
   },
   undoRedoText: {
-    fontSize: 18,
+    fontSize: 20,
     color: Colors.vermillion,
   },
   undoRedoTextDisabled: {
     opacity: 0.35,
   },
   tipBtn: {
-    padding: 4,
+    padding: Spacing.xs,
   },
   tipBtnText: {
-    fontSize: 18,
+    fontSize: 20,
   },
   saveButton: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.vermillion,
     fontWeight: '600',
   },
   saveButtonDisabled: {
     opacity: 0.35,
   },
+  // Stats Bar
   statsBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     backgroundColor: Colors.paperDark,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
   statsText: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.textSecondary,
   },
   savingIndicator: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.vermillion,
   },
   unsavedIndicator: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.warning,
   },
   savedIndicator: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.success,
   },
+  // Editor
   editorContainer: {
     flex: 1,
-    padding: 16,
+    padding: Spacing.md,
   },
   editor: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
-    lineHeight: 28,
+    lineHeight: 30,
     minHeight: 400,
   },
+  // Toolbar
   toolbar: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    borderTopColor: ColorsAlpha.goldBorder,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
     backgroundColor: Colors.backgroundCard,
-    gap: 4,
+    gap: Spacing.xs,
   },
   toolButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingVertical: Spacing.sm + 2,
+    paddingHorizontal: Spacing.xs,
     backgroundColor: Colors.paperDark,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -541,20 +579,21 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   toolButtonText: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.textSecondary,
     fontWeight: '600',
   },
   toolButtonTextActive: {
     color: Colors.textOnVermillion,
   },
+  // Error
   errorText: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginTop: 60,
+    marginTop: Spacing.xxl,
   },
-  // 写作提示弹窗样式
+  // Writing Tip Modal
   tipModalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -565,34 +604,36 @@ const styles = StyleSheet.create({
   },
   tipModalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
     maxHeight: '70%',
   },
   tipModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   tipModalTitle: {
-    fontSize: 18,
+    fontSize: FontSize.lg,
     fontWeight: 'bold',
     color: Colors.textPrimary,
   },
   closeButton: {
+    padding: Spacing.xs,
+  },
+  closeButtonText: {
     fontSize: 20,
     color: Colors.textSecondary,
-    padding: 4,
   },
   tipModalScroll: {
-    padding: 20,
+    padding: Spacing.lg,
   },
   tipModalText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textPrimary,
-    lineHeight: 24,
+    lineHeight: 26,
   },
 });

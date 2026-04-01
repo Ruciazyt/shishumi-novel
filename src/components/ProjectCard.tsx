@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Project } from '../types';
-import { Colors, ColorsAlpha } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { formatRelativeTime } from '../utils/time';
 import { countChars } from '../utils/text';
 import { getDynastyById } from '../data/dynasties';
@@ -22,29 +22,45 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
       style={styles.container}
       onPress={onPress}
       onLongPress={onLongPress}
-      activeOpacity={0.7}
+      activeOpacity={0.75}
     >
-      <View style={styles.titleRow}>
-        <Text style={styles.title} numberOfLines={1}>
-          {project.title}
-        </Text>
-        <View style={styles.dynastyBadge}>
-          <Text style={styles.dynastyBadgeText}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
+      {/* 装饰边框 - 古籍装帧风格 */}
+      <View style={styles.decorationBorder} />
+
+      <View style={styles.content}>
+        <View style={styles.titleRow}>
+          <Text style={styles.title} numberOfLines={1}>
+            {project.title}
+          </Text>
+          <View style={styles.dynastyBadge}>
+            <Text style={styles.dynastyBadgeText}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
+          </View>
         </View>
-      </View>
-      <Text style={styles.description} numberOfLines={2}>
-        {project.description || '暂无简介'}
-      </Text>
-      <View style={styles.meta}>
-        <Text style={styles.chapters}>
-          {project.chapters.length}章节
+
+        <Text style={styles.description} numberOfLines={2}>
+          {project.description || '暂无简介'}
         </Text>
-        {totalChars > 0 && (
-          <Text style={styles.wordCount}> · {totalChars.toLocaleString()}字</Text>
-        )}
-        {relativeTime ? (
-          <Text style={styles.updated}> · {relativeTime}更新</Text>
-        ) : null}
+
+        <View style={styles.meta}>
+          <View style={styles.metaItem}>
+            <Text style={styles.metaIcon}>📄</Text>
+            <Text style={styles.metaText}>
+              {project.chapters.length}章节
+            </Text>
+          </View>
+          {totalChars > 0 && (
+            <View style={styles.metaItem}>
+              <Text style={styles.metaIcon}>✍️</Text>
+              <Text style={styles.metaText}>{totalChars.toLocaleString()}字</Text>
+            </View>
+          )}
+          {relativeTime && (
+            <View style={styles.metaItem}>
+              <Text style={styles.metaIcon}>🕐</Text>
+              <Text style={styles.metaText}>{relativeTime}</Text>
+            </View>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -53,64 +69,80 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLo
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.backgroundCard,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: ColorsAlpha.goldBorder,
     shadowColor: Colors.ink,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  decorationBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: Colors.vermillion,
+  },
+  content: {
+    padding: Spacing.lg,
+    paddingTop: Spacing.lg + 4,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: Spacing.sm,
   },
   title: {
-    fontSize: 18,
+    fontSize: FontSize.lg,
     fontWeight: 'bold',
     color: Colors.textPrimary,
     flex: 1,
-    marginRight: 8,
+    marginRight: Spacing.sm,
+    letterSpacing: 1,
   },
   dynastyBadge: {
     backgroundColor: ColorsAlpha.vermillionBadgeBg,
     borderWidth: 1,
     borderColor: ColorsAlpha.vermillionBadgeBorder,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    borderRadius: BorderRadius.round,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
     flexShrink: 0,
   },
   dynastyBadgeText: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.vermillion,
     fontWeight: '600',
+    letterSpacing: 1,
   },
   description: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginBottom: 8,
-    lineHeight: 20,
+    marginBottom: Spacing.md,
+    lineHeight: 22,
   },
   meta: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
   },
-  chapters: {
-    fontSize: 12,
-    color: Colors.textLight,
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
-  wordCount: {
-    fontSize: 12,
-    color: Colors.textLight,
+  metaIcon: {
+    fontSize: FontSize.xs,
   },
-  updated: {
-    fontSize: 12,
+  metaText: {
+    fontSize: FontSize.xs,
     color: Colors.textLight,
   },
 });

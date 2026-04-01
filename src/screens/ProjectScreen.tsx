@@ -8,12 +8,13 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { Chapter } from '../types';
@@ -153,8 +154,9 @@ export const ProjectScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonContainer}>
           <Text style={styles.backButton}>← 返回</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -163,21 +165,25 @@ export const ProjectScreen: React.FC = () => {
         <View style={styles.headerRight} />
       </View>
 
+      {/* Project Info - 时代背景信息 */}
       <View style={styles.projectInfo}>
-        <View style={styles.projectInfoTop}>
-          <Text style={styles.dynasty}>{dynastyData?.name || project.dynasty}</Text>
-          <TouchableOpacity
-            style={styles.dynastyInfoBtn}
-            onPress={() => setDynastyModalVisible(true)}
-          >
-            <Text style={styles.dynastyInfoBtnText}>ℹ️ 时代背景</Text>
-          </TouchableOpacity>
+        <View style={styles.projectInfoContent}>
+          <View style={styles.dynastyBadge}>
+            <Text style={styles.dynastyBadgeText}>{dynastyData?.name || project.dynasty}</Text>
+          </View>
+          <Text style={styles.description} numberOfLines={2}>
+            {project.description || '暂无简介'}
+          </Text>
         </View>
-        <Text style={styles.description} numberOfLines={2}>
-          {project.description || '暂无简介'}
-        </Text>
+        <TouchableOpacity
+          style={styles.dynastyInfoBtn}
+          onPress={() => setDynastyModalVisible(true)}
+        >
+          <Text style={styles.dynastyInfoBtnText}>时代背景</Text>
+        </TouchableOpacity>
       </View>
 
+      {/* Chapter List */}
       <ChapterList
         chapters={project.chapters}
         onChapterPress={handleChapterPress}
@@ -188,7 +194,7 @@ export const ProjectScreen: React.FC = () => {
       <TouchableOpacity
         style={styles.fab}
         onPress={handleAddChapter}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
@@ -206,8 +212,11 @@ export const ProjectScreen: React.FC = () => {
               <Text style={styles.modalTitle}>
                 {dynastyData ? `${dynastyData.name} 时代背景` : project.dynasty}
               </Text>
-              <TouchableOpacity onPress={() => setDynastyModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setDynastyModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
             {dynastyData ? (
@@ -221,6 +230,7 @@ export const ProjectScreen: React.FC = () => {
         </View>
       </Modal>
 
+      {/* 章节创建/编辑弹窗 */}
       <Modal visible={chapterModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -228,8 +238,11 @@ export const ProjectScreen: React.FC = () => {
               <Text style={styles.modalTitle}>
                 {editingChapter ? '编辑章节' : '新建章节'}
               </Text>
-              <TouchableOpacity onPress={() => setChapterModalVisible(false)}>
-                <Text style={styles.closeButton}>✕</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setChapterModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
 
@@ -252,9 +265,13 @@ export const ProjectScreen: React.FC = () => {
               onPress={handleSaveChapter}
               disabled={isSavingChapter}
             >
-              <Text style={[styles.submitButtonText, isSavingChapter && styles.submitButtonTextDisabled]}>
-                {isSavingChapter ? '保存中...' : editingChapter ? '保存' : '创建'}
-              </Text>
+              {isSavingChapter ? (
+                <ActivityIndicator color={Colors.textOnVermillion} size="small" />
+              ) : (
+                <Text style={styles.submitButtonText}>
+                  {editingChapter ? '保存' : '创建'}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -268,76 +285,98 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
+  },
+  backButtonContainer: {
+    padding: Spacing.xs,
   },
   backButton: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.vermillion,
+    fontWeight: '500',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: FontSize.lg,
     fontWeight: 'bold',
     color: Colors.textPrimary,
     flex: 1,
     textAlign: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: Spacing.md,
   },
   headerRight: {
     width: 60,
   },
+  // Project Info - 古籍装帧风格
   projectInfo: {
-    padding: 16,
-    backgroundColor: Colors.paperDark,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  projectInfoTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    padding: Spacing.lg,
+    backgroundColor: Colors.paperDark,
+    borderBottomWidth: 1,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
-  dynasty: {
-    fontSize: 14,
-    color: Colors.vermillion,
+  projectInfoContent: {
+    flex: 1,
+    marginRight: Spacing.md,
   },
-  dynastyInfoBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: 12,
+  dynastyBadge: {
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: ColorsAlpha.vermillionBadgeBorder,
+    borderRadius: BorderRadius.round,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.sm,
   },
-  dynastyInfoBtnText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+  dynastyBadgeText: {
+    fontSize: FontSize.sm,
+    color: Colors.vermillion,
+    fontWeight: '600',
   },
   description: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 22,
   },
+  dynastyInfoBtn: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.round,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+  },
+  dynastyInfoBtnText: {
+    fontSize: FontSize.sm,
+    color: Colors.gold,
+    fontWeight: '500',
+  },
+  // FAB
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 24,
+    right: Spacing.lg,
+    bottom: Spacing.lg,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.vermillion,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.ink,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
     elevation: 8,
     zIndex: 100,
   },
@@ -347,12 +386,14 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     lineHeight: 30,
   },
+  // Error
   errorText: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginTop: 60,
+    marginTop: Spacing.xxl,
   },
+  // Modal
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -363,29 +404,35 @@ const styles = StyleSheet.create({
   },
   dynastyModalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
+    padding: Spacing.lg,
     maxHeight: '60%',
   },
   modalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
+    padding: Spacing.lg,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: FontSize.xl,
     fontWeight: 'bold',
     color: Colors.textPrimary,
   },
   closeButton: {
+    padding: Spacing.xs,
+  },
+  closeButtonText: {
     fontSize: 20,
     color: Colors.textSecondary,
   },
@@ -393,54 +440,55 @@ const styles = StyleSheet.create({
     maxHeight: 400,
   },
   dynastyWritingTips: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textPrimary,
-    lineHeight: 24,
+    lineHeight: 26,
   },
   noDynastyText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textLight,
     textAlign: 'center',
-    paddingVertical: 20,
+    paddingVertical: Spacing.lg,
   },
+  // Form
   formGroup: {
-    marginBottom: 8,
+    marginBottom: Spacing.md,
   },
   charCount: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.textLight,
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
   label: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+    fontWeight: '500',
   },
   input: {
     backgroundColor: Colors.backgroundCard,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
+    marginTop: Spacing.sm,
   },
   submitButtonDisabled: {
     opacity: 0.7,
   },
   submitButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: 16,
+    fontSize: FontSize.md,
     fontWeight: 'bold',
-  },
-  submitButtonTextDisabled: {
-    color: Colors.backgroundCard,
+    letterSpacing: 2,
   },
 });

@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { countChars } from '../utils/text';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 
 
 interface ChapterListProps {
@@ -37,8 +37,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({
           style={styles.chapterItem}
           onPress={() => onChapterPressRef.current(item)}
           onLongPress={() => onChapterLongPressRef.current?.(item)}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
+          {/* 章节序号徽章 */}
           <View
             style={styles.chapterNumber}
             accessible={true}
@@ -47,12 +48,15 @@ export const ChapterList: React.FC<ChapterListProps> = ({
           >
             <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
           </View>
+
           <View style={styles.chapterInfo}>
             <View style={styles.chapterTitleRow}>
               <Text style={styles.chapterTitle} numberOfLines={1}>
                 {item.title}
               </Text>
-              <Text style={styles.chapterWordCount}>{chars > 0 ? `${chars}字` : ''}</Text>
+              {chars > 0 && (
+                <Text style={styles.chapterWordCount}>{chars}字</Text>
+              )}
             </View>
             <Text style={styles.chapterContent} numberOfLines={2}>
               {item.content || '空白章节'}
@@ -69,7 +73,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({
       <View style={styles.header}>
         <Text style={styles.headerTitle}>章节列表</Text>
         {chapters.length > 0 && (
-          <Text style={styles.totalCount}>共 {totalChars} 字</Text>
+          <View style={styles.totalBadge}>
+            <Text style={styles.totalCount}>共 {totalChars.toLocaleString()} 字</Text>
+          </View>
         )}
       </View>
       <FlatList
@@ -79,7 +85,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty} accessible accessibilityLabel="暂无章节列表，点击右下角按钮新建章节">
-            <Text style={styles.emptyText}>暂无章节</Text>
+            <Text style={styles.emptyText}>暂无章节，点击 + 新建</Text>
           </View>
         }
       />
@@ -95,44 +101,61 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     fontWeight: 'bold',
     color: Colors.textPrimary,
+    letterSpacing: 2,
+  },
+  totalBadge: {
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.round,
   },
   totalCount: {
-    fontSize: 12,
-    color: Colors.textLight,
+    fontSize: FontSize.xs,
+    color: Colors.vermillion,
+    fontWeight: '500',
   },
   list: {
-    padding: 16,
+    padding: Spacing.md,
+    paddingBottom: 100,
   },
+  // Chapter Card - 古籍装帧风格
   chapterItem: {
     flexDirection: 'row',
     backgroundColor: Colors.backgroundCard,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border,
+    shadowColor: Colors.ink,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   chapterNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.vermillion,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
+    flexShrink: 0,
   },
   chapterNumberText: {
     color: Colors.textOnVermillion,
-    fontSize: 12,
+    fontSize: FontSize.sm,
     fontWeight: 'bold',
   },
   chapterInfo: {
@@ -142,30 +165,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   chapterTitle: {
-    fontSize: 15,
+    fontSize: FontSize.md,
     fontWeight: '600',
     color: Colors.textPrimary,
     flex: 1,
   },
   chapterWordCount: {
-    fontSize: 11,
+    fontSize: FontSize.xs,
     color: Colors.textLight,
-    marginLeft: 8,
+    marginLeft: Spacing.sm,
   },
   chapterContent: {
-    fontSize: 13,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 20,
   },
+  // Empty
   empty: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: Spacing.xxl,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textLight,
   },
 });

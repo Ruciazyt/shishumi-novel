@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { callAI } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { DYNASTIES } from '../data/dynasties';
@@ -234,7 +234,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 onPress={() => setAiType('poetry')}
               >
                 <Text style={[styles.typeButtonText, aiType === 'poetry' && styles.typeButtonTextActive]}>
-                  诗词推荐
+                  诗词
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -242,7 +242,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 onPress={() => setAiType('buddhist')}
               >
                 <Text style={[styles.typeButtonText, aiType === 'buddhist' && styles.typeButtonTextActive]}>
-                  佛教引用
+                  佛教
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -250,7 +250,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 onPress={() => setAiType('taoist')}
               >
                 <Text style={[styles.typeButtonText, aiType === 'taoist' && styles.typeButtonTextActive]}>
-                  道家引用
+                  道家
                 </Text>
               </TouchableOpacity>
             </View>
@@ -262,7 +262,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               accessibilityLabel="收起键盘"
               accessibilityRole="button"
             >
-              <Text style={styles.keyboardDismissText}>⌨️ 收起键盘</Text>
+              <Text style={styles.keyboardDismissText}>⌨️ 收起</Text>
             </TouchableOpacity>
 
             {aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist' ? (
@@ -348,51 +348,52 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
     maxHeight: '85%',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: FontSize.xl,
     fontWeight: 'bold',
     color: Colors.textPrimary,
+    letterSpacing: 2,
   },
   closeButton: {
     fontSize: 20,
     color: Colors.textSecondary,
-    padding: 4,
+    padding: Spacing.xs,
   },
   keyboardDismiss: {
     alignSelf: 'flex-end',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    marginBottom: 8,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   keyboardDismissText: {
-    fontSize: 13,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   body: {
-    padding: 16,
+    padding: Spacing.lg,
   },
   typeSelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 16,
-    gap: 8,
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
   },
   typeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   typeButtonText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   typeButtonTextActive: {
@@ -410,20 +411,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+    fontWeight: '500',
   },
   textInput: {
     backgroundColor: Colors.backgroundCard,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
     minHeight: 120,
     textAlignVertical: 'top',
@@ -432,91 +434,91 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundCard,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
     minHeight: 80,
     textAlignVertical: 'top',
   },
   errorText: {
     color: Colors.error,
-    fontSize: 14,
-    marginBottom: 16,
+    fontSize: FontSize.sm,
+    marginBottom: Spacing.md,
   },
   loadingContainer: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: Spacing.xxl,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 14,
+    marginTop: Spacing.md,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   loadingHint: {
-    marginTop: 8,
-    fontSize: 13,
+    marginTop: Spacing.sm,
+    fontSize: FontSize.sm,
     color: Colors.warning,
     textAlign: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.lg,
   },
   resultContainer: {
     backgroundColor: Colors.backgroundCard,
-    borderRadius: 8,
-    padding: 16,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: ColorsAlpha.goldBorder,
   },
   resultHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   resultLabel: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
   resultCount: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.textLight,
   },
   resultText: {
-    fontSize: 15,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
-    lineHeight: 24,
+    lineHeight: 26,
   },
   resultActions: {
-    marginTop: 16,
+    marginTop: Spacing.lg,
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    gap: 10,
+    gap: Spacing.md,
   },
   resetButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.paperDark,
   },
   resetButtonText: {
     color: Colors.textSecondary,
-    fontSize: 14,
+    fontSize: FontSize.sm,
     fontWeight: '600',
   },
   copyButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.paperDark,
   },
   copyButtonText: {
     color: Colors.textSecondary,
-    fontSize: 14,
+    fontSize: FontSize.sm,
     fontWeight: '600',
   },
   copyButtonTextCopied: {
@@ -524,28 +526,29 @@ const styles = StyleSheet.create({
   },
   insertButton: {
     backgroundColor: Colors.vermillion,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
   },
   insertButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: 15,
+    fontSize: FontSize.md,
     fontWeight: '600',
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
   },
   submitButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: 16,
+    fontSize: FontSize.md,
     fontWeight: 'bold',
-  },
-  submitButtonDisabled: {
-    backgroundColor: Colors.paperDark,
+    letterSpacing: 2,
   },
   submitButtonTextDisabled: {
     color: Colors.backgroundCard,

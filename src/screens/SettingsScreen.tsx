@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import {
   getApiKey, setApiKey, getApiType, setApiType,
   getApiBaseUrl, setApiBaseUrl,
@@ -94,6 +94,7 @@ export const SettingsScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>设置</Text>
       </View>
@@ -158,8 +159,8 @@ export const SettingsScreen: React.FC = () => {
           {/* OpenAI 类型需要自定义 URL */}
           {apiType === 'openai' && (
             <>
-              <View style={[styles.label, { marginTop: 16 }]}>
-                <Text style={styles.label}>接口地址（OpenAI 兼容）</Text>
+              <View style={[styles.label, { marginTop: Spacing.lg }]}>
+                <Text style={styles.labelText}>接口地址（OpenAI 兼容）</Text>
               </View>
               <TextInput
                 style={styles.input}
@@ -273,6 +274,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* 关于 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>关于</Text>
         <View style={styles.card}>
@@ -290,41 +292,45 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 16,
+    padding: Spacing.lg,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: FontSize.xxl,
     fontWeight: 'bold',
     color: Colors.textPrimary,
+    letterSpacing: 4,
   },
   section: {
-    padding: 16,
+    padding: Spacing.md,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: FontSize.xs,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: Colors.backgroundCard,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: ColorsAlpha.goldBorder,
   },
+  // API Type Selector
   apiTypeSelector: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Spacing.sm,
   },
   apiTypeItem: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -335,7 +341,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   apiTypeName: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
     fontWeight: '500',
   },
@@ -343,10 +349,17 @@ const styles = StyleSheet.create({
     color: Colors.textOnVermillion,
     fontWeight: '600',
   },
+  // API Config
   label: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+  },
+  labelText: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+    fontWeight: '500',
   },
   inputRow: {
     flexDirection: 'row',
@@ -357,49 +370,51 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
   },
   visibilityButton: {
-    marginLeft: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    marginLeft: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
     backgroundColor: Colors.paperDark,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
   },
   visibilityButtonText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   saveButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: Spacing.md,
   },
   saveButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: 15,
+    fontSize: FontSize.md,
     fontWeight: '600',
+    letterSpacing: 2,
   },
+  // Model List
   hint: {
-    fontSize: 13,
+    fontSize: FontSize.sm,
     color: Colors.textLight,
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   modelList: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   modelItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -409,7 +424,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   modelName: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
     flex: 1,
   },
@@ -418,19 +433,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modelCheck: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textOnVermillion,
     fontWeight: 'bold',
   },
+  // Dynasty List
   dynastyList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.sm,
   },
   dynastyItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -440,41 +456,43 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   dynastyName: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   dynastyNameActive: {
     color: Colors.textOnVermillion,
     fontWeight: '600',
   },
+  // Detail
   detailTitle: {
-    fontSize: 18,
+    fontSize: FontSize.xl,
     fontWeight: 'bold',
     color: Colors.vermillion,
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   detailRow: {
-    marginBottom: 8,
+    marginBottom: Spacing.md,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: 2,
+    marginBottom: Spacing.xs,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 22,
   },
+  // About
   aboutText: {
-    fontSize: 16,
+    fontSize: FontSize.lg,
     color: Colors.textPrimary,
     fontWeight: '600',
   },
   aboutSubtext: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
 });
