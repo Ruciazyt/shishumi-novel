@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
+import { Colors } from '../constants/colors';
 import {
   getApiKey, setApiKey, getApiType, setApiType,
   getApiBaseUrl, setApiBaseUrl,
@@ -17,6 +19,11 @@ import {
   getAvailableModels, DEFAULT_MODEL,
   API_PROVIDERS, type ApiType
 } from '../services/api';
+import {
+  checkForUpdate, showUpdateDialog, downloadAndInstall,
+  openReleasePage, getAppVersion, compareVersions,
+  type ReleaseInfo
+} from '../services/update';
 import { DYNASTIES } from '../data/dynasties';
 import { saveDynasty } from '../services/storage';
 
@@ -27,7 +34,10 @@ export const SettingsScreen: React.FC = () => {
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [customBaseUrl, setCustomBaseUrl] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [latestRelease, setLatestRelease] = useState<ReleaseInfo | null>(null);
   const availableModels = getAvailableModels(apiType);
+  const currentVersion = getAppVersion();
 
   useEffect(() => {
     const loadData = async () => {
@@ -39,7 +49,6 @@ export const SettingsScreen: React.FC = () => {
       ]);
       setApiTypeState(type);
       if (key) setApiKeyInput(key);
-      // 如果是 OpenAI 类型，显示自定义 URL
       if (type === 'openai') {
         setCustomBaseUrl(url);
       }
@@ -48,14 +57,68 @@ export const SettingsScreen: React.FC = () => {
     loadData();
   }, []);
 
+  // 每次进入设置页面时检查更新
+  useFocusEffect(
+    useCallback(() => {
+      checkUpdate();
+    }, [])
+  );
+
+  const checkUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const release = await checkForUpdate();
+      if (release) {
+        setLatestRelease(release);
+      }
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const handleUpdatePress = () => {
+    if (!latestRelease) {
+      // 没有检测到新版本，手动检查
+      checkUpdate();
+      return;
+    }
+
+    const comparison = compareVersions(currentVersion, latestRelease.version);
+    if (comparison < 0) {
+      // 有新版本
+      const downloadUrl = latestRelease.downloadUrl;
+      if (downloadUrl) {
+        showUpdateDialog(
+          latestRelease,
+          () => downloadAndInstall(downloadUrl),
+          () => {}
+        );
+      } else {
+        // 没有 APK，直接打开 release 页面
+        Alert.alert(
+          '发现新版本',
+          `${latestRelease.version}\n\n点击确定查看更新详情`,
+          [
+            { text: '取消', style: 'cancel' },
+            {
+              text: '确定',
+              onPress: () => openReleasePage(latestRelease.htmlUrl),
+            },
+          ]
+        );
+      }
+    } else {
+      // 已是最新版本
+      Alert.alert('已是最新版本', `当前版本 ${currentVersion} 已是最新版本`);
+    }
+  };
+
   const handleApiTypeChange = async (newType: ApiType) => {
     setApiTypeState(newType);
     await setApiType(newType);
-    // 切换后重置模型为默认值
     const newDefault = DEFAULT_MODEL(newType);
     setSelectedModel(newDefault);
     await setModel(newDefault);
-    // 如果切换到千问，设置默认 URL
     if (newType === 'qwen') {
       const qwenUrl = API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
       await setApiBaseUrl(qwenUrl);
@@ -92,11 +155,39 @@ export const SettingsScreen: React.FC = () => {
 
   const selectedDynastyDetail = DYNASTIES.find(d => d.id === state.dynasty);
 
+  // 判断是否有可用更新
+  const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) < 0;
+
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>设置</Text>
+      </View>
+
+      {/* 版本与更新 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>版本与更新</Text>
+        <View style={styles.card}>
+          <View style={styles.versionRow}>
+            <View>
+              <Text style={styles.versionLabel}>当前版本</Text>
+              <Text style={styles.versionValue}>v{currentVersion}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.updateButton, hasUpdate && styles.updateButtonNew]}
+              onPress={handleUpdatePress}
+              disabled={checkingUpdate}
+            >
+              {checkingUpdate ? (
+                <ActivityIndicator size="small" color={Colors.textOnVermillion} />
+              ) : (
+                <Text style={styles.updateButtonText}>
+                  {hasUpdate ? `发现新版本 ${latestRelease!.version}` : '检查更新'}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* API 类型选择 */}
@@ -156,11 +247,10 @@ export const SettingsScreen: React.FC = () => {
             <Text style={styles.saveButtonText}>保存密钥</Text>
           </TouchableOpacity>
 
-          {/* OpenAI 类型需要自定义 URL */}
           {apiType === 'openai' && (
             <>
-              <View style={[styles.label, { marginTop: Spacing.lg }]}>
-                <Text style={styles.labelText}>接口地址（OpenAI 兼容）</Text>
+              <View style={[styles.label, { marginTop: 16 }]}>
+                <Text style={styles.label}>接口地址（OpenAI 兼容）</Text>
               </View>
               <TextInput
                 style={styles.input}
@@ -274,11 +364,10 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 关于 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>关于</Text>
         <View style={styles.card}>
-          <Text style={styles.aboutText}>史书墨 v1.0.1</Text>
+          <Text style={styles.aboutText}>史书墨 v{currentVersion}</Text>
           <Text style={styles.aboutSubtext}>历史小说AI辅助创作工具</Text>
         </View>
       </View>
@@ -292,45 +381,75 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: Spacing.lg,
-    backgroundColor: Colors.backgroundCard,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: ColorsAlpha.goldBorder,
+    borderBottomColor: Colors.border,
   },
   headerTitle: {
-    fontSize: FontSize.xxl,
+    fontSize: 24,
     fontWeight: 'bold',
     color: Colors.textPrimary,
-    letterSpacing: 4,
   },
   section: {
-    padding: Spacing.md,
+    padding: 16,
   },
   sectionTitle: {
-    fontSize: FontSize.xs,
+    fontSize: 14,
     color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    fontWeight: '600',
+    letterSpacing: 1,
   },
   card: {
     backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
-    borderColor: ColorsAlpha.goldBorder,
+    borderColor: Colors.border,
   },
-  // API Type Selector
+  versionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  versionLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  versionValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  updateButton: {
+    backgroundColor: Colors.paperDark,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  updateButtonNew: {
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
+  },
+  updateButtonText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
   apiTypeSelector: {
     flexDirection: 'row',
-    gap: Spacing.sm,
+    gap: 8,
   },
   apiTypeItem: {
     flex: 1,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -341,7 +460,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   apiTypeName: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
     fontWeight: '500',
   },
@@ -349,17 +468,10 @@ const styles = StyleSheet.create({
     color: Colors.textOnVermillion,
     fontWeight: '600',
   },
-  // API Config
   label: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-  },
-  labelText: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-    fontWeight: '500',
+    marginBottom: 8,
   },
   inputRow: {
     flexDirection: 'row',
@@ -370,51 +482,49 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    fontSize: FontSize.md,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
     color: Colors.textPrimary,
   },
   visibilityButton: {
-    marginLeft: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    marginLeft: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     backgroundColor: Colors.paperDark,
-    borderRadius: BorderRadius.md,
+    borderRadius: 8,
   },
   visibilityButtonText: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
   },
   saveButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: Spacing.md,
+    marginTop: 12,
   },
   saveButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: FontSize.md,
+    fontSize: 15,
     fontWeight: '600',
-    letterSpacing: 2,
   },
-  // Model List
   hint: {
-    fontSize: FontSize.sm,
+    fontSize: 13,
     color: Colors.textLight,
-    marginBottom: Spacing.md,
+    marginBottom: 12,
   },
   modelList: {
-    gap: Spacing.sm,
+    gap: 8,
   },
   modelItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -424,7 +534,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   modelName: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
     flex: 1,
   },
@@ -433,20 +543,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   modelCheck: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textOnVermillion,
     fontWeight: 'bold',
   },
-  // Dynasty List
   dynastyList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.sm,
+    gap: 8,
   },
   dynastyItem: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm + 2,
-    borderRadius: BorderRadius.round,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -456,43 +565,41 @@ const styles = StyleSheet.create({
     borderColor: Colors.vermillion,
   },
   dynastyName: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
   },
   dynastyNameActive: {
     color: Colors.textOnVermillion,
     fontWeight: '600',
   },
-  // Detail
   detailTitle: {
-    fontSize: FontSize.xl,
+    fontSize: 18,
     fontWeight: 'bold',
     color: Colors.vermillion,
-    marginBottom: Spacing.md,
+    marginBottom: 12,
   },
   detailRow: {
-    marginBottom: Spacing.md,
+    marginBottom: 8,
   },
   detailLabel: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   detailValue: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 20,
   },
-  // About
   aboutText: {
-    fontSize: FontSize.lg,
+    fontSize: 16,
     color: Colors.textPrimary,
     fontWeight: '600',
   },
   aboutSubtext: {
-    fontSize: FontSize.sm,
+    fontSize: 14,
     color: Colors.textSecondary,
-    marginTop: Spacing.xs,
+    marginTop: 4,
   },
 });
