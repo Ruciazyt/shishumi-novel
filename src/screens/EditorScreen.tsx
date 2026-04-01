@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   },
   statsText: {
     fontSize: 12,
-    opacity: 0.35,
+    color: Colors.textSecondary,
   },
   savingIndicator: {
     fontSize: 12,

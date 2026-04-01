@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButtonDisabled: {
-    backgroundColor: Colors.textLight,
+    backgroundColor: Colors.paperDark,
   },
   submitButtonTextDisabled: {
     color: Colors.backgroundCard,
