@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -134,7 +134,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     isSceneType ? sceneText.trim().length > 0 : inputText.trim().length > 0
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (isSceneType) {
       if (!sceneText.trim()) {
         setError('请输入场景描述');
@@ -169,7 +169,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     } else {
       setError(response.error || '调用失败');
     }
-  };
+  }, [aiType, inputText, sceneText, state.dynasty]);
 
   const handleInsert = () => {
     if (result && onInsertText) {

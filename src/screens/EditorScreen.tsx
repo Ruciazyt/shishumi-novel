@@ -58,6 +58,10 @@ export const EditorScreen: React.FC = () => {
   chapterRef.current = chapter;
   chapterIdRef.current = chapterId;
 
+  // 用于 handleInsertContent — 始终读取最新 content，避免 stale closure
+  const contentForInsertRef = useRef(content);
+  contentForInsertRef.current = content;
+
   // 用于撤销/重做的稳定引用，避免 stale closure
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef(-1);
@@ -239,7 +243,7 @@ export const EditorScreen: React.FC = () => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
     // 去除内容末尾的换行，避免与前缀的 \n\n 重复积累产生多余空行
-    const baseContent = content.replace(/\n+$/, '');
+    const baseContent = contentForInsertRef.current.replace(/\n+$/, '');
     const prefix = baseContent ? '\n\n' : '';
     const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
