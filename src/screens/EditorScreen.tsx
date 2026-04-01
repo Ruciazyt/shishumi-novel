@@ -14,7 +14,6 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
-import { PoetryRecommend } from '../components/PoetryRecommend';
 import { Colors } from '../constants/colors';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
@@ -37,7 +36,6 @@ export const EditorScreen: React.FC = () => {
   const [content, setContent] = useState(chapter?.content || '');
   const [aiVisible, setAiVisible] = useState(false);
   const [aiType, setAiType] = useState<AIAssistantType>('polish');
-  const [poetryVisible, setPoetryVisible] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -184,10 +182,6 @@ export const EditorScreen: React.FC = () => {
     setAiVisible(true);
   };
 
-  const handlePoetryPress = () => {
-    setPoetryVisible(true);
-  };
-
   useEffect(() => {
     if (chapter) {
       if (content !== chapter.content) {
@@ -300,8 +294,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="重做" accessibilityRole="button">
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setWritingTipVisible(true)}
+          <TouchableOpacity onPress={() => setWritingTipVisible(true)}
             style={styles.tipBtn}
             accessibilityLabel="写作提示" accessibilityRole="button">
             <Text style={styles.tipBtnText}>📜</Text>
@@ -344,10 +337,10 @@ export const EditorScreen: React.FC = () => {
 
       <View style={styles.toolbar}>
         <TouchableOpacity
-          style={[styles.toolButton, aiVisible && aiType === 'polish' && !poetryVisible && styles.toolButtonActive]}
+          style={[styles.toolButton, aiVisible && aiType === 'polish' && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
         >
-          <Text style={[styles.toolButtonText, aiVisible && aiType === 'polish' && !poetryVisible && styles.toolButtonTextActive]}>润色</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'polish' && styles.toolButtonTextActive]}>润色</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'historical' && styles.toolButtonActive]}
@@ -356,10 +349,10 @@ export const EditorScreen: React.FC = () => {
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'historical' && styles.toolButtonTextActive]}>历史细节</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toolButton, poetryVisible && styles.toolButtonActive]}
-          onPress={handlePoetryPress}
+          style={[styles.toolButton, aiVisible && aiType === 'poetry' && styles.toolButtonActive]}
+          onPress={() => handleAIPress('poetry')}
         >
-          <Text style={[styles.toolButtonText, poetryVisible && styles.toolButtonTextActive]}>诗词</Text>
+          <Text style={[styles.toolButtonText, aiVisible && aiType === 'poetry' && styles.toolButtonTextActive]}>诗词</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'buddhist' && styles.toolButtonActive]}
@@ -380,12 +373,6 @@ export const EditorScreen: React.FC = () => {
         onClose={() => setAiVisible(false)}
         onInsertText={handleInsertContent}
         initialType={aiType}
-      />
-
-      <PoetryRecommend
-        visible={poetryVisible}
-        onClose={() => setPoetryVisible(false)}
-        onSelect={handleInsertContent}
       />
 
       {/* 写作提示弹窗 */}
