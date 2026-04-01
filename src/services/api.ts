@@ -137,7 +137,7 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
             content: prompt,
           },
         ],
-        max_tokens: request.type === 'poetry' || request.type === 'buddhist' || request.type === 'taoist' ? 1500 : 800,
+        max_tokens: request.type === 'poetry' || request.type === 'buddhist' || request.type === 'taoist' ? 2000 : 800,
       },
       {
         headers: {
