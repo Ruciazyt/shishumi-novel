@@ -178,8 +178,3 @@ ${text}
 
 请分点陈述，语言简洁准确。`,
 };
-
-export const API_CONFIG = {
-  baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-};
-
