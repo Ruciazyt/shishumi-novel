@@ -11,6 +11,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -34,6 +35,7 @@ export const HomeScreen: React.FC = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newDynasty, setNewDynasty] = useState('tang');
   const [newDescription, setNewDescription] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -41,18 +43,26 @@ export const HomeScreen: React.FC = () => {
       return;
     }
 
-    const project = await createProject({
-      title: newTitle.trim(),
-      dynasty: newDynasty,
-      description: newDescription.trim(),
-      chapters: [],
-    });
+    setIsCreating(true);
+    try {
+      const project = await createProject({
+        title: newTitle.trim(),
+        dynasty: newDynasty,
+        description: newDescription.trim(),
+        chapters: [],
+      });
 
-    dispatch({ type: 'ADD_PROJECT', payload: project });
-    setModalVisible(false);
-    setNewTitle('');
-    setNewDynasty('tang');
-    setNewDescription('');
+      dispatch({ type: 'ADD_PROJECT', payload: project });
+      setModalVisible(false);
+      setNewTitle('');
+      setNewDynasty('tang');
+      setNewDescription('');
+    } catch (err) {
+      console.error('[HomeScreen] createProject failed:', err);
+      Alert.alert('错误', '创建作品失败，请重试');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleProjectPress = (project: Project) => {
@@ -70,8 +80,13 @@ export const HomeScreen: React.FC = () => {
           text: '删除',
           style: 'destructive',
           onPress: async () => {
-            await deleteProject(project.id);
-            dispatch({ type: 'DELETE_PROJECT', payload: project.id });
+            try {
+              await deleteProject(project.id);
+              dispatch({ type: 'DELETE_PROJECT', payload: project.id });
+            } catch (err) {
+              console.error('[HomeScreen] deleteProject failed:', err);
+              Alert.alert('错误', '删除作品失败，请重试');
+            }
           },
         },
       ]
@@ -109,6 +124,8 @@ export const HomeScreen: React.FC = () => {
         style={styles.fab}
         onPress={() => setModalVisible(true)}
         activeOpacity={0.8}
+        accessibilityLabel="新建作品"
+        accessibilityRole="button"
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
@@ -185,8 +202,16 @@ export const HomeScreen: React.FC = () => {
                 />
               </View>
 
-              <TouchableOpacity style={styles.submitButton} onPress={handleCreateProject}>
-                <Text style={styles.submitButtonText}>创建作品</Text>
+              <TouchableOpacity
+                style={[styles.submitButton, isCreating && styles.submitButtonDisabled]}
+                onPress={handleCreateProject}
+                disabled={isCreating}
+              >
+                {isCreating ? (
+                  <ActivityIndicator color={Colors.textOnVermillion} size="small" />
+                ) : (
+                  <Text style={styles.submitButtonText}>创建作品</Text>
+                )}
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -344,6 +369,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
   },
   submitButtonText: {
     color: Colors.textOnVermillion,
