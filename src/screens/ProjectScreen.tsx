@@ -235,7 +235,9 @@ export const ProjectScreen: React.FC = () => {
                 value={chapterTitle}
                 onChangeText={setChapterTitle}
                 autoFocus
+                maxLength={50}
               />
+              <Text style={styles.charCount}>{chapterTitle.length}/50</Text>
             </View>
 
             <TouchableOpacity style={styles.submitButton} onPress={handleSaveChapter}>
@@ -402,7 +404,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   formGroup: {
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  charCount: {
+    fontSize: 12,
+    color: Colors.textLight,
+    textAlign: 'right',
+    marginTop: 4,
   },
   label: {
     fontSize: 14,
