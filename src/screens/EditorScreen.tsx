@@ -357,7 +357,7 @@ export const EditorScreen: React.FC = () => {
           <Text style={styles.backButton}>← 返回</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : ''}{chapter.title}
+          {chapterDisplay}{chapter.title}
         </Text>
         <View style={styles.headerRight}>
           {canGoPrev && (

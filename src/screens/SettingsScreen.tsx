@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -59,12 +59,7 @@ export const SettingsScreen: React.FC = () => {
   }, []);
 
   // 每次进入设置页面时检查更新
-  useFocusEffect(
-    useCallback(() => {
-      checkUpdate();
-    }, [])
-  );
-
+  // checkUpdate is declared before useFocusEffect to avoid temporal dead zone
   const checkUpdate = async () => {
     setCheckingUpdate(true);
     try {
@@ -76,6 +71,12 @@ export const SettingsScreen: React.FC = () => {
       setCheckingUpdate(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      checkUpdate();
+    }, [checkUpdate])
+  );
 
   const handleUpdatePress = () => {
     if (!latestRelease) {
@@ -154,7 +155,7 @@ export const SettingsScreen: React.FC = () => {
     await saveDynasty(dynastyId);
   };
 
-  const selectedDynastyDetail = DYNASTIES.find(d => d.id === state.dynasty);
+  const selectedDynastyDetail = useMemo(() => DYNASTIES.find(d => d.id === state.dynasty), [state.dynasty]);
 
   // 判断是否有可用更新
   const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) < 0;
