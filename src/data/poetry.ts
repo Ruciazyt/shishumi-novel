@@ -753,7 +753,7 @@ export const getDynastyList = (): string[] => {
  */
 export const searchPoetry = (keyword: string): Array<{ category: string; poetry: Poetry }> => {
   const results: Array<{ category: string; poetry: Poetry }> = [];
-  const lowerKeyword = keyword.toLowerCase();
+
 
   for (const [category, poems] of Object.entries(POETRY_CATEGORIES)) {
     for (const poem of poems) {

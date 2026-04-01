@@ -32,7 +32,6 @@ export const Colors = {
   error: '#F44336',
 } as const;
 
-
 export const Theme = {
   dark: false,
   colors: {
@@ -45,7 +44,10 @@ export const Theme = {
   },
 };
 
-/** 工具函数：hex 颜色 + alpha → rgba 字符串（用于 backgroundColor/borderColor 等） */
+/**
+ * 工具函数：hex 颜色 + alpha → rgba 字符串（用于 backgroundColor/borderColor 等）
+ * 定义在 ColorsAlpha 之前，因为 ColorsAlpha 依赖此函数
+ */
 const rgba = (hex: string, alpha: number): string => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
