@@ -260,6 +260,11 @@ export const EditorScreen: React.FC = () => {
     );
   }
 
+  const chapterIndex = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
+  const canGoPrev = chapterIndex > 0;
+  const canGoNext = chapterIndex < (project?.chapters.length ?? 0) - 1;
+  const prevChapterId = canGoPrev ? project?.chapters[chapterIndex - 1].id : null;
+  const nextChapterId = canGoNext ? project?.chapters[chapterIndex + 1].id : null;
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
@@ -272,9 +277,24 @@ export const EditorScreen: React.FC = () => {
     };
   }, [content]);
 
-  const chapterIndex = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
   const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章 · ` : '';
   // 简短占位符（用于 TextInput placeholder）
+  const handlePrevChapter = () => {
+    if (canGoPrev && prevChapterId) {
+      if (hasUnsavedChanges) handleSave();
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
+      navigation.navigate('Editor', { chapterId: prevChapterId });
+    }
+  };
+
+  const handleNextChapter = () => {
+    if (canGoNext && nextChapterId) {
+      if (hasUnsavedChanges) handleSave();
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
+      navigation.navigate('Editor', { chapterId: nextChapterId });
+    }
+  };
+
   const dynastyPlaceholder = React.useMemo(() => {
     const dynastyData = project?.dynasty
       ? getDynastyById(project.dynasty)
@@ -292,6 +312,13 @@ export const EditorScreen: React.FC = () => {
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
   }, [project?.dynasty, state.dynasty]);
 
+  const dynastyDisplay = React.useMemo(() => {
+    const dynastyData = project?.dynasty
+      ? getDynastyById(project.dynasty)
+      : getDynastyById(state.dynasty);
+    return dynastyData?.name || state.dynasty;
+  }, [project?.dynasty, state.dynasty]);
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -306,6 +333,11 @@ export const EditorScreen: React.FC = () => {
           {chapter.title}
         </Text>
         <View style={styles.headerRight}>
+          {canGoPrev && (
+            <TouchableOpacity onPress={handlePrevChapter} style={styles.navBtn} accessibilityLabel="上一章">
+              <Text style={styles.navBtnText}>‹</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={undo}
             disabled={!canUndo}
@@ -324,6 +356,11 @@ export const EditorScreen: React.FC = () => {
           >
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoTextDisabled]}>↪</Text>
           </TouchableOpacity>
+          {canGoNext && (
+            <TouchableOpacity onPress={handleNextChapter} style={styles.navBtn} accessibilityLabel="下一章">
+              <Text style={styles.navBtnText}>›</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => setWritingTipVisible(true)}
             style={styles.tipBtn}
@@ -348,6 +385,9 @@ export const EditorScreen: React.FC = () => {
       {/* 字数统计栏 */}
       <View style={styles.statsBar}>
         <View style={styles.statsBarLeft}>
+          <View style={styles.statsBarDynastyBadge}>
+            <Text style={styles.statsBarDynastyText}>{dynastyDisplay}</Text>
+          </View>
           <Text style={styles.statsText}>
             {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
             {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
@@ -516,6 +556,15 @@ const styles = StyleSheet.create({
   undoRedoTextDisabled: {
     opacity: 0.35,
   },
+  navBtn: {
+    padding: Spacing.xs,
+  },
+  navBtnText: {
+    fontSize: 24,
+    color: Colors.gold,
+    fontWeight: 'bold',
+    lineHeight: 24,
+  },
   tipBtn: {
     padding: Spacing.xs,
   },
@@ -565,6 +614,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+  },
+  statsBarDynastyBadge: {
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    borderWidth: 1,
+    borderColor: ColorsAlpha.vermillionBadgeBorder,
+    borderRadius: BorderRadius.round,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    marginRight: Spacing.sm,
+    alignSelf: 'center',
+  },
+  statsBarDynastyText: {
+    fontSize: FontSize.xs - 1,
+    color: Colors.vermillion,
+    fontWeight: '600',
   },
   keyboardDismissBtn: {
     paddingVertical: Spacing.xs,
