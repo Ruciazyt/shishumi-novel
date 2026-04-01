@@ -42,6 +42,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const isMountedRef = useRef(true);
   // 追踪当前是否处于有效请求周期：modal 关闭时应拒绝响应
   const requestActiveRef = useRef(false);
+  // 追踪当前请求是否已被用户取消
+  const cancelledRef = useRef(false);
 
   // 当 initialType 变化时同步 aiType（modal 关闭/重新打开时也生效）
   useEffect(() => {
@@ -67,6 +69,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setError('');
     setLoadingHint('');
     setCopied(false);
+    cancelledRef.current = false;
   };
 
   // visible 关闭时重置（但保持 isMountedRef = true，因为组件未卸载）
@@ -74,6 +77,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   useEffect(() => {
     if (!visible) {
       requestActiveRef.current = false;
+      cancelledRef.current = false;
       resetState();
     }
   }, [visible]);
@@ -152,6 +156,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setError('');
     setResult('');
     setCopied(false);
+    cancelledRef.current = false;
     // 标记当前请求处于活跃状态，modal 关闭后此标记为 false 可阻断旧响应
     requestActiveRef.current = true;
 
@@ -163,14 +168,24 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     });
 
     // 只有在组件仍挂载且当前请求未被 modal 关闭阻断时才更新状态
-    if (!isMountedRef.current || !requestActiveRef.current) return;
+    // cancelledRef 也会阻断响应处理
+    if (!isMountedRef.current || !requestActiveRef.current || cancelledRef.current) return;
     setLoading(false);
     if (response.success && response.data) {
       setResult(response.data);
     } else {
       setError(response.error || '调用失败');
     }
-  }, [aiType, inputText, sceneText, state.dynasty]);
+  }, [aiType, inputText, sceneText, state.dynasty, isSceneType]);
+
+  // 取消当前请求：标记为已取消，loading 立即重置，阻断响应处理
+  const handleCancel = useCallback(() => {
+    cancelledRef.current = true;
+    requestActiveRef.current = false;
+    setLoading(false);
+    clearHintTimer();
+    setLoadingHint('');
+  }, []);
 
   const handleInsert = () => {
     if (result && onInsertText) {
@@ -191,6 +206,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const handleClose = () => {
     Keyboard.dismiss();
     requestActiveRef.current = false;
+    cancelledRef.current = true; // 取消任何进行中的请求
     resetState();
     onClose();
   };
@@ -303,6 +319,14 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 {loadingHint ? (
                   <Text style={styles.loadingHint}>{loadingHint}</Text>
                 ) : null}
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={handleCancel}
+                  accessibilityLabel="取消请求"
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.cancelButtonText}>取消</Text>
+                </TouchableOpacity>
               </View>
             ) : result ? (
               <View style={styles.resultContainer}>
@@ -462,6 +486,20 @@ const styles = StyleSheet.create({
     color: Colors.warning,
     textAlign: 'center',
     paddingHorizontal: Spacing.lg,
+  },
+  cancelButton: {
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.paperDark,
+  },
+  cancelButtonText: {
+    color: Colors.textSecondary,
+    fontSize: FontSize.md,
+    fontWeight: '600',
   },
   resultContainer: {
     backgroundColor: Colors.backgroundCard,
