@@ -66,6 +66,7 @@ export const EditorScreen: React.FC = () => {
   const historyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 记录上一次推入历史的文本，避免重复记录相同内容
   const lastRecordedRef = useRef<string>('');
+  const isMountedRef = useRef(true);
 
   // 清除历史记录防抖 timer
   const clearHistoryTimer = () => {
@@ -153,6 +154,7 @@ export const EditorScreen: React.FC = () => {
       if (latestContent === lastSavedContentRef.current) return; // 无变化则跳过
       setIsSaving(true);
       const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
+      if (!isMountedRef.current) { setIsSaving(false); return; }
       if (updated) {
         lastSavedContentRef.current = latestContent;
         const updatedProject = {
@@ -168,7 +170,7 @@ export const EditorScreen: React.FC = () => {
       }
       setIsSaving(false);
     }, 10000);
-    return () => clearTimeout(timer);
+    return () => { isMountedRef.current = false; clearTimeout(timer); };
   }, [chapterId]); // chapterId 变化时重置 timer，防止切章节后旧 timer 仍触发
 
   // 自动保存成功后短暂显示"已保存"提示
@@ -197,6 +199,7 @@ export const EditorScreen: React.FC = () => {
     if (!project || !chapter) return;
     setIsSaving(true);
     const updated = await updateChapter(project.id, chapter.id, { content });
+    if (!isMountedRef.current) return;
     if (updated) {
       lastSavedContentRef.current = content;
       const updatedProject = {

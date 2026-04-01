@@ -78,7 +78,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <View style={styles.empty}>
+          <View style={styles.empty} accessible accessibilityLabel="暂无章节列表，点击右下角按钮新建章节">
             <Text style={styles.emptyText}>暂无章节</Text>
           </View>
         }
