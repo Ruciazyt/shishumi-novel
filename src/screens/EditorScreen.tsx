@@ -52,9 +52,11 @@ export const EditorScreen: React.FC = () => {
   const pendingContentRef = useRef<string>('');
   const projectRef = useRef(project);
   const chapterRef = useRef(chapter);
+  const chapterIdRef = useRef(chapterId);
   pendingContentRef.current = content;
   projectRef.current = project;
   chapterRef.current = chapter;
+  chapterIdRef.current = chapterId;
 
   // 用于撤销/重做的稳定引用，避免 stale closure
   const historyRef = useRef<string[]>([]);
@@ -146,7 +148,11 @@ export const EditorScreen: React.FC = () => {
   // 10秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
   // content 变化只更新 ref，不重启 timer
   useEffect(() => {
+    // 捕获创建 timer 时的 chapterId，确保后续 callback 只在章节未切换时执行
+    const timerChapterId = chapterId;
     const timer = setTimeout(async () => {
+      // 章节已切换则跳过，避免旧章节内容被错误保存到新章节
+      if (timerChapterId !== chapterIdRef.current) return;
       const latestContent = pendingContentRef.current;
       const currentChapter = chapterRef.current;
       const currentProject = projectRef.current;
@@ -154,7 +160,7 @@ export const EditorScreen: React.FC = () => {
       if (latestContent === lastSavedContentRef.current) return; // 无变化则跳过
       setIsSaving(true);
       const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
-      if (!isMountedRef.current) { setIsSaving(false); return; }
+      if (timerChapterId !== chapterIdRef.current) { setIsSaving(false); return; }
       if (updated) {
         lastSavedContentRef.current = latestContent;
         const updatedProject = {
@@ -170,7 +176,7 @@ export const EditorScreen: React.FC = () => {
       }
       setIsSaving(false);
     }, 10000);
-    return () => { isMountedRef.current = false; clearTimeout(timer); };
+    return () => { clearTimeout(timer); };
   }, [chapterId]); // chapterId 变化时重置 timer，防止切章节后旧 timer 仍触发
 
   // 自动保存成功后短暂显示"已保存"提示
