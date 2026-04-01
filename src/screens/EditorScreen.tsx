@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Modal,
 } from 'react-native';
@@ -346,17 +347,29 @@ export const EditorScreen: React.FC = () => {
 
       {/* 字数统计栏 */}
       <View style={styles.statsBar}>
-        <Text style={styles.statsText}>
-          {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
-          {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
-        </Text>
-        {isSaving ? (
-          <Text style={styles.savingIndicator}>● 保存中</Text>
-        ) : justSaved ? (
-          <Text style={styles.savedIndicator}>✓ 已保存</Text>
-        ) : hasUnsavedChanges ? (
-          <Text style={styles.unsavedIndicator}>● 未保存</Text>
-        ) : null}
+        <View style={styles.statsBarLeft}>
+          <Text style={styles.statsText}>
+            {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
+            {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
+          </Text>
+        </View>
+        <View style={styles.statsBarRight}>
+          {isSaving ? (
+            <Text style={styles.savingIndicator}>● 保存中</Text>
+          ) : justSaved ? (
+            <Text style={styles.savedIndicator}>✓ 已保存</Text>
+          ) : hasUnsavedChanges ? (
+            <Text style={styles.unsavedIndicator}>● 未保存</Text>
+          ) : null}
+          <TouchableOpacity
+            onPress={Keyboard.dismiss}
+            style={styles.keyboardDismissBtn}
+            accessibilityLabel="收起键盘"
+            accessibilityRole="button"
+          >
+            <Text style={styles.keyboardDismissBtnText}>⌨</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Editor */}
@@ -543,6 +556,27 @@ const styles = StyleSheet.create({
   savedIndicator: {
     fontSize: FontSize.xs,
     color: Colors.success,
+  },
+  // Stats Bar - 收起键盘按钮
+  statsBarLeft: {
+    flex: 1,
+  },
+  statsBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  keyboardDismissBtn: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.backgroundCard,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  keyboardDismissBtnText: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
   },
   // Editor
   editorContainer: {
