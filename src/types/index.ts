@@ -1,9 +1,12 @@
 // 数据模型类型定义
 
+/** 朝代 ID — 仅允许预定义的五个值，TypeScript 编译期检查防止无效字符串 */
+export type DynastyId = 'tang' | 'song' | 'yuan' | 'ming' | 'qing';
+
 export interface Project {
   id: string;
   title: string;
-  dynasty: string;
+  dynasty: DynastyId;
   description: string;
   createdAt: number;
   updatedAt: number;

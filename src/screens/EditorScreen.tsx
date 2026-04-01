@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
+import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
@@ -274,7 +274,7 @@ export const EditorScreen: React.FC = () => {
   // 简短占位符（用于 TextInput placeholder）
   const dynastyPlaceholder = React.useMemo(() => {
     const dynastyData = project?.dynasty
-      ? DYNASTIES.find(d => d.id === project.dynasty || d.name === project.dynasty)
+      ? getDynastyById(project.dynasty)
       : getDynastyById(state.dynasty);
     if (!dynastyData) return '开始写作...';
     return DYNASTY_PLACEHOLDERS[dynastyData.name] || '开始写作...';
@@ -283,7 +283,7 @@ export const EditorScreen: React.FC = () => {
   // 完整写作提示（用于弹窗）
   const dynastyWritingTip = React.useMemo(() => {
     const dynastyData = project?.dynasty
-      ? DYNASTIES.find(d => d.id === project.dynasty || d.name === project.dynasty)
+      ? getDynastyById(project.dynasty)
       : getDynastyById(state.dynasty);
     if (!dynastyData) return '';
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '';

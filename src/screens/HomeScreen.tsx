@@ -21,7 +21,7 @@ import { ProjectCard } from '../components/ProjectCard';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { DYNASTIES } from '../data/dynasties';
 import { createProject, deleteProject, getProjects } from '../services/storage';
-import { Project, RootStackParamList } from '../types';
+import { Project, RootStackParamList, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -34,7 +34,7 @@ export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [newDynasty, setNewDynasty] = useState('tang');
+  const [newDynasty, setNewDynasty] = useState<DynastyId>('tang');
   const [newDescription, setNewDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -215,7 +215,7 @@ export const HomeScreen: React.FC = () => {
                         styles.dynastyButton,
                         newDynasty === d.id && styles.dynastyButtonActive,
                       ]}
-                      onPress={() => setNewDynasty(d.id)}
+                      onPress={() => setNewDynasty(d.id as DynastyId)}
                     >
                       <Text
                         style={[

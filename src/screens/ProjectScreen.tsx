@@ -16,7 +16,7 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
-import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
+import { getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { Chapter } from '../types';
 import { RootStackParamList } from '../types';
 
@@ -46,7 +46,7 @@ export const ProjectScreen: React.FC = () => {
   // Derive dynasty metadata once per project (stable reference — project never
   // mutates, only gets replaced on update).
   const dynastyData = useMemo(
-    () => getDynastyById(project.dynasty) || DYNASTIES.find(d => d.name === project.dynasty),
+    () => getDynastyById(project.dynasty),
     [project.dynasty]
   );
 
