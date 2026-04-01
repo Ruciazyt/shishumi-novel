@@ -205,28 +205,7 @@ export const ProjectScreen: React.FC = () => {
             </View>
             {dynastyData ? (
               <ScrollView style={styles.dynastyTipsScroll} showsVerticalScrollIndicator={false}>
-                {DYNASTY_WRITING_TIPS[dynastyData.name] ? (
-                  <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name]}</Text>
-                ) : (
-                  <View style={styles.dynastyDetails}>
-                    <View style={styles.dynastyDetailItem}>
-                      <Text style={styles.dynastyDetailLabel}>语言特点</Text>
-                      <Text style={styles.dynastyDetailValue}>{dynastyData.languageFeatures}</Text>
-                    </View>
-                    <View style={styles.dynastyDetailItem}>
-                      <Text style={styles.dynastyDetailLabel}>服饰特征</Text>
-                      <Text style={styles.dynastyDetailValue}>{dynastyData.clothingFeatures}</Text>
-                    </View>
-                    <View style={styles.dynastyDetailItem}>
-                      <Text style={styles.dynastyDetailLabel}>建筑风格</Text>
-                      <Text style={styles.dynastyDetailValue}>{dynastyData.architectureFeatures}</Text>
-                    </View>
-                    <View style={styles.dynastyDetailItem}>
-                      <Text style={styles.dynastyDetailLabel}>礼仪制度</Text>
-                      <Text style={styles.dynastyDetailValue}>{dynastyData.etiquetteFeatures}</Text>
-                    </View>
-                  </View>
-                )}
+                <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name]}</Text>
               </ScrollView>
             ) : (
               <Text style={styles.noDynastyText}>暂无时代背景数据</Text>
@@ -403,9 +382,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.textSecondary,
   },
-  dynastyDetails: {
-    gap: 16,
-  },
   dynastyTipsScroll: {
     maxHeight: 400,
   },
@@ -413,22 +389,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textPrimary,
     lineHeight: 24,
-  },
-  dynastyDetailItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    paddingBottom: 12,
-  },
-  dynastyDetailLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.vermillion,
-    marginBottom: 4,
-  },
-  dynastyDetailValue: {
-    fontSize: 14,
-    color: Colors.textPrimary,
-    lineHeight: 22,
   },
   noDynastyText: {
     fontSize: 14,

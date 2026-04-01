@@ -294,9 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalScroll: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    // backgroundColor, borderTopLeftRadius, borderTopRightRadius inherited from child modalContent
   },
   modalScrollContent: {
     paddingBottom: 40,
