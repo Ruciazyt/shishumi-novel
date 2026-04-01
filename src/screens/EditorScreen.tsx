@@ -16,12 +16,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
-import { updateChapter } from '../services/storage';
+import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTIES } from '../data/dynasties';
+import { updateChapter, saveDynasty } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
 
-import { RootStackParamList, AIAssistantType } from '../types';
+import { RootStackParamList, AIAssistantType, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditorScreenRouteProp = RouteProp<RootStackParamList, 'Editor'>;
@@ -43,6 +43,7 @@ export const EditorScreen: React.FC = () => {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const [writingTipVisible, setWritingTipVisible] = useState(false);
+  const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
 
   // Undo/Redo 历史记录
   const [history, setHistory] = useState<string[]>([]);
@@ -277,7 +278,7 @@ export const EditorScreen: React.FC = () => {
     };
   }, [content]);
 
-  const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章 · ` : '';
+  const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : '';
   // 简短占位符（用于 TextInput placeholder）
   const handlePrevChapter = () => {
     if (canGoPrev && prevChapterId) {
@@ -319,6 +320,12 @@ export const EditorScreen: React.FC = () => {
     return dynastyData?.name || state.dynasty;
   }, [project?.dynasty, state.dynasty]);
 
+  const handleDynastyChange = async (dynastyId: DynastyId) => {
+    dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
+    await saveDynasty(dynastyId);
+    setDynastyModalVisible(false);
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -330,7 +337,7 @@ export const EditorScreen: React.FC = () => {
           <Text style={styles.backButton}>← 返回</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {chapter.title}
+          {chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : ''}{chapter.title}
         </Text>
         <View style={styles.headerRight}>
           {canGoPrev && (
@@ -385,9 +392,14 @@ export const EditorScreen: React.FC = () => {
       {/* 字数统计栏 */}
       <View style={styles.statsBar}>
         <View style={styles.statsBarLeft}>
-          <View style={styles.statsBarDynastyBadge}>
+          <TouchableOpacity
+            style={styles.statsBarDynastyBadge}
+            onPress={() => setDynastyModalVisible(true)}
+            accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
+            accessibilityRole="button"
+          >
             <Text style={styles.statsBarDynastyText}>{dynastyDisplay}</Text>
-          </View>
+          </TouchableOpacity>
           <Text style={styles.statsText}>
             {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
             {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
@@ -475,6 +487,52 @@ export const EditorScreen: React.FC = () => {
         onInsertText={handleInsertContent}
         initialType={aiType}
       />
+
+      {/* 朝代切换弹窗 */}
+      <Modal visible={dynastyModalVisible} animationType="slide" transparent>
+        <View style={styles.tipModalOverlay}>
+          <TouchableOpacity
+            style={styles.tipModalBackdrop}
+            activeOpacity={1}
+            onPress={() => setDynastyModalVisible(false)}
+          />
+          <View style={styles.tipModalContent}>
+            <View style={styles.tipModalHeader}>
+              <Text style={styles.tipModalTitle}>📜 切换朝代</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setDynastyModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.dynastySwitchList}>
+              {DYNASTIES.map(d => (
+                <TouchableOpacity
+                  key={d.id}
+                  style={[
+                    styles.dynastySwitchItem,
+                    (project?.dynasty || state.dynasty) === d.id && styles.dynastySwitchItemActive,
+                  ]}
+                  onPress={() => handleDynastyChange(d.id as DynastyId)}
+                >
+                  <Text
+                    style={[
+                      styles.dynastySwitchText,
+                      (project?.dynasty || state.dynasty) === d.id && styles.dynastySwitchTextActive,
+                    ]}
+                  >
+                    {d.name}
+                  </Text>
+                  {(project?.dynasty || state.dynasty) === d.id && (
+                    <Text style={styles.dynastySwitchCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* 写作提示弹窗 */}
       <Modal visible={writingTipVisible} animationType="slide" transparent>
@@ -735,5 +793,38 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textPrimary,
     lineHeight: 26,
+  },
+  // Dynasty Switch Modal
+  dynastySwitchList: {
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  dynastySwitchItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  dynastySwitchItemActive: {
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    borderColor: Colors.vermillion,
+  },
+  dynastySwitchText: {
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  dynastySwitchTextActive: {
+    color: Colors.vermillion,
+  },
+  dynastySwitchCheck: {
+    fontSize: FontSize.md,
+    color: Colors.vermillion,
+    fontWeight: 'bold',
   },
 });

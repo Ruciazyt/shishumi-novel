@@ -258,7 +258,7 @@ export const SettingsScreen: React.FC = () => {
 
           {apiType === 'openai' && (
             <>
-              <View style={[styles.label, { marginTop: 16 }]}>
+              <View style={{ marginTop: Spacing.md }}>
                 <Text style={styles.label}>接口地址（OpenAI 兼容）</Text>
               </View>
               <TextInput
