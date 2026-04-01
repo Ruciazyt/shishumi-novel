@@ -82,7 +82,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     if (!state.loading) {
-      saveProjects(state.projects);
+      // 捕获保存失败，避免未处理的 Promise rejection；
+      // 数据在内存中仍可用，下次 app 重启时重新加载
+      saveProjects(state.projects).catch(err => {
+        console.error('[AppContext] saveProjects failed:', err);
+      });
     }
   }, [state.projects, state.loading]);
 
