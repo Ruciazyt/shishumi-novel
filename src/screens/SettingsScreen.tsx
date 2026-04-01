@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   section: {
-    padding: 16,
+    padding: Spacing.md,
   },
   sectionTitle: {
     fontSize: 14,
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.backgroundCard,
     borderRadius: 12,
-    padding: 16,
+    padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     backgroundColor: Colors.paperDark,
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
@@ -493,8 +493,8 @@ const styles = StyleSheet.create({
   apiTypeItem: {
     flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -567,9 +567,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.md,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dynastyItem: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: Colors.paperDark,
@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   aboutText: {
-    fontSize: 16,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
     fontWeight: '600',
   },

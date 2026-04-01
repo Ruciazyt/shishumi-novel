@@ -595,6 +595,6 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   submitButtonTextDisabled: {
-    color: Colors.backgroundCard,
+    color: Colors.textLight,
   },
 });
