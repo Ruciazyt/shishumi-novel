@@ -22,7 +22,7 @@ export interface Chapter {
 }
 
 export interface Dynasty {
-  id: string;
+  id: DynastyId;
   name: string;
   languageFeatures: string;
   clothingFeatures: string;

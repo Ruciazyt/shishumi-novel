@@ -25,6 +25,7 @@ import {
   type ReleaseInfo
 } from '../services/update';
 import { DYNASTIES } from '../data/dynasties';
+import { type DynastyId } from '../types';
 import { saveDynasty } from '../services/storage';
 
 export const SettingsScreen: React.FC = () => {
@@ -148,7 +149,7 @@ export const SettingsScreen: React.FC = () => {
     await setModel(modelId);
   };
 
-  const handleDynastyChange = async (dynastyId: string) => {
+  const handleDynastyChange = async (dynastyId: DynastyId) => {
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
     await saveDynasty(dynastyId);
   };

@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { Project } from '../types';
+import { Project, DynastyId } from '../types';
 import { getProjects, saveProjects } from '../services/storage';
 
 interface AppState {
   projects: Project[];
   loading: boolean;
   currentProject: Project | null;
-  dynasty: string;
+  dynasty: DynastyId;
 }
 
 type AppAction =
@@ -16,7 +16,7 @@ type AppAction =
   | { type: 'UPDATE_PROJECT'; payload: Project }
   | { type: 'DELETE_PROJECT'; payload: string }
   | { type: 'SET_CURRENT_PROJECT'; payload: Project | null }
-  | { type: 'SET_DYNASTY'; payload: string };
+  | { type: 'SET_DYNASTY'; payload: DynastyId };
 
 const initialState: AppState = {
   projects: [],
@@ -75,7 +75,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         import('../services/storage').then(m => m.getDynasty()),
       ]);
       dispatch({ type: 'SET_PROJECTS', payload: projects });
-      dispatch({ type: 'SET_DYNASTY', payload: dynasty });
+      dispatch({ type: 'SET_DYNASTY', payload: dynasty as DynastyId });
     };
     loadData();
   }, []);

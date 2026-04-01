@@ -143,12 +143,12 @@ export const EditorScreen: React.FC = () => {
     pendingContentRef.current = newContent;
   }, []);
 
-  // 用户输入时记录历史（防抖）
-  const handleContentChange = (text: string) => {
+  // 用户输入时记录历史（防抖）— useCallback 避免每次渲染创建新函数引用
+  const handleContentChange = useCallback((text: string) => {
     setContent(text);
     pendingContentRef.current = text;
     recordHistory(text);
-  };
+  }, [recordHistory]);
 
   // 10秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
   // content 变化只更新 ref，不重启 timer
