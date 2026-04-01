@@ -100,7 +100,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
         setLoadingHint('');
       }
     }
-    return clearHintTimer;
+    return () => clearHintTimer();
   }, [loading]);
 
   // 切换类型时清除无关输入，防止旧内容残留

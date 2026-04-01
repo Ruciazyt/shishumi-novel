@@ -334,6 +334,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundCard,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginRight: 8,
+    marginBottom: 8,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -352,7 +354,6 @@ const styles = StyleSheet.create({
   dynastySelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
   },
   dynastyButton: {
     paddingHorizontal: 16,
@@ -361,6 +362,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginRight: 8,
+    marginBottom: 8,
   },
   dynastyButtonActive: {
     backgroundColor: Colors.vermillion,
