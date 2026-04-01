@@ -1,4 +1,4 @@
-import { Linking, Alert, Platform } from 'react-native';
+import { Linking, Alert } from 'react-native';
 
 const REPO_OWNER = 'Ruciazyt';
 const REPO_NAME = 'shishumi-novel';
@@ -14,31 +14,34 @@ export interface ReleaseInfo {
 }
 
 export const getAppVersion = (): string => {
-  // 从 app.json 的 version 字段读取
-  // 这个值需要在构建时注入，暂时用硬编码
   return '0.1.0';
 };
 
+/**
+ * 将版本字符串解析为数字数组，用于精确比较。
+ * 支持: 1.0.0, 20260401, 20260401-063605, v1.2.3
+ * 返回 [major, minor, patch]，不足3段则补0。
+ */
+const parseVersion = (v: string): number[] => {
+  const normalized = v.startsWith('v') ? v.slice(1) : v;
+  const parts = normalized.split(/[.\-_]/).map(part => {
+    const num = parseInt(part, 10);
+    return isNaN(num) ? 0 : num;
+  });
+  while (parts.length < 3) parts.push(0);
+  return parts.slice(0, 3);
+};
+
+/**
+ * 比较两个版本号。
+ * @returns v2 更新返回 1，相等返回 0，v1 更新返回 -1
+ */
 export const compareVersions = (v1: string, v2: string): number => {
-  // 简单的版本比较，v2 更新返回 1，相等返回 0，v1 更新返回 -1
-  // 处理格式如: v20260401-063605 或 0.1.0
-  const normalize = (v: string) => {
-    // 移除前导 v
-    let normalized = v.startsWith('v') ? v.slice(1) : v;
-    // 如果是日期格式如 20260401-063605，转为可比较的数字
-    if (/^\d{8}-\d{6}$/.test(normalized)) {
-      // 格式: YYYYMMDD-HHMMSS
-      return normalized.replace(/-/g, '').replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1$2$3$4$5.$6');
-    }
-    // 标准语义化版本
-    return normalized.replace(/\./g, '');
-  };
-
-  const n1 = normalize(v1);
-  const n2 = normalize(v2);
-
-  if (n2 > n1) return 1;
-  if (n2 < n1) return -1;
+  const p1 = parseVersion(v1);
+  const p2 = parseVersion(v2);
+  for (let i = 0; i < 3; i++) {
+    if (p2[i] !== p1[i]) return p2[i] - p1[i];
+  }
   return 0;
 };
 
@@ -62,7 +65,6 @@ export const checkForUpdate = async (): Promise<ReleaseInfo | null> => {
     const publishedAt: string = data.published_at || '';
     const body: string = data.body || '';
 
-    // 查找 APK 资源
     let downloadUrl: string | null = null;
     if (data.assets && Array.isArray(data.assets)) {
       const apkAsset = data.assets.find((asset: { name: string }) =>
@@ -73,7 +75,6 @@ export const checkForUpdate = async (): Promise<ReleaseInfo | null> => {
       }
     }
 
-    // 从 tag 提取版本号
     const version = tagName.startsWith('v') ? tagName.slice(1) : tagName;
 
     return {
@@ -90,7 +91,11 @@ export const checkForUpdate = async (): Promise<ReleaseInfo | null> => {
   }
 };
 
-export const showUpdateDialog = (release: ReleaseInfo, onUpdate: () => void, onLater: () => void) => {
+export const showUpdateDialog = (
+  release: ReleaseInfo,
+  onUpdate: () => void,
+  onLater: () => void
+) => {
   const message = `发现新版本: ${release.version}\n\n更新时间: ${new Date(release.publishedAt).toLocaleDateString('zh-CN')}`;
 
   Alert.alert(
@@ -113,9 +118,6 @@ export const showUpdateDialog = (release: ReleaseInfo, onUpdate: () => void, onL
 
 export const downloadAndInstall = async (url: string): Promise<void> => {
   try {
-    // 直接打开下载链接，用户会下载 APK
-    // 在 Android 上，这会调用浏览器下载
-    // 安装需要用户手动确认（因为不是从 Play Store）
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
@@ -130,10 +132,7 @@ export const downloadAndInstall = async (url: string): Promise<void> => {
 
 export const openReleasePage = async (url: string): Promise<void> => {
   try {
-    const canOpen = await Linking.canOpenURL(url);
-    if (canOpen) {
-      await Linking.openURL(url);
-    }
+    await Linking.openURL(url);
   } catch (error) {
     console.error('[update] Error opening release page:', error);
   }

@@ -97,14 +97,3 @@ export const FontSize = {
   xxxl: 32,
 } as const;
 
-export const Theme = {
-  dark: false,
-  colors: {
-    primary: Colors.vermillion,
-    background: Colors.background,
-    card: Colors.backgroundCard,
-    text: Colors.textPrimary,
-    border: Colors.border,
-    notification: Colors.vermillion,
-  },
-};
