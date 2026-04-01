@@ -73,7 +73,14 @@ export const ProjectScreen: React.FC = () => {
           text: '删除',
           style: 'destructive',
           onPress: async () => {
-            await deleteChapter(project.id, chapter.id);
+            try {
+              const ok = await deleteChapter(project.id, chapter.id);
+              if (!ok) throw new Error('deleteChapter returned false');
+            } catch (err) {
+              console.error('[ProjectScreen] deleteChapter failed:', err);
+              Alert.alert('错误', '删除章节失败，请重试');
+              return;
+            }
             const updatedProject = {
               ...project,
               chapters: project.chapters.filter(c => c.id !== chapter.id),
