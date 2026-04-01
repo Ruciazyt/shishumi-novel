@@ -262,12 +262,14 @@ export const EditorScreen: React.FC = () => {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
-  // 统计字数
-  const charCount = countChars(content);
-  const trimmed = content.trim();
-  const wordCount = trimmed
-    ? trimmed.split(/\s+/).length
-    : 0;
+  // 统计字数（useMemo 避免每次按键重复计算）
+  const { charCount, wordCount } = React.useMemo(() => {
+    const trimmed = content.trim();
+    return {
+      charCount: countChars(content),
+      wordCount: trimmed ? trimmed.split(/\s+/).length : 0,
+    };
+  }, [content]);
 
   const chapterIndex = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
   const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章 · ` : '';
