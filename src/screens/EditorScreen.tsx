@@ -333,11 +333,11 @@ export const EditorScreen: React.FC = () => {
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
   }, [project?.dynasty, state.dynasty]);
 
+  // 优先使用项目级朝代；其次全局朝代；找不到对应数据时回退到原始 ID
   const dynastyDisplay = React.useMemo(() => {
-    const dynastyData = project?.dynasty
-      ? getDynastyById(project.dynasty)
-      : getDynastyById(state.dynasty);
-    return dynastyData?.name || state.dynasty;
+    const dynastyId = project?.dynasty ?? state.dynasty;
+    const dynastyData = getDynastyById(dynastyId);
+    return dynastyData?.name || dynastyId;
   }, [project?.dynasty, state.dynasty]);
 
   const handleDynastyChange = async (dynastyId: DynastyId) => {
@@ -415,10 +415,12 @@ export const EditorScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.statsBarDynastyBadge}
             onPress={() => setDynastyModalVisible(true)}
-            accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
+            accessibilityLabel={`当前朝代：${project?.dynasty ? (getDynastyById(project.dynasty)?.name || project.dynasty) : dynastyDisplay}，点击切换`}
             accessibilityRole="button"
           >
-            <Text style={styles.statsBarDynastyText}>{dynastyDisplay}</Text>
+            <Text style={styles.statsBarDynastyText}>
+              {project?.dynasty ? getDynastyById(project.dynasty)?.name || project.dynasty : dynastyDisplay}
+            </Text>
           </TouchableOpacity>
           <Text style={styles.statsText}>
             {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
