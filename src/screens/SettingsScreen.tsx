@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,24 +10,57 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Colors } from '../constants/colors';
-import { getApiKey, setApiKey, getModel, setModel, AVAILABLE_MODELS, DEFAULT_MODEL } from '../services/api';
+import {
+  getApiKey, setApiKey, getApiType, setApiType,
+  getApiBaseUrl, setApiBaseUrl,
+  getModel, setModel,
+  getAvailableModels, DEFAULT_MODEL,
+  API_PROVIDERS, type ApiType
+} from '../services/api';
 import { DYNASTIES } from '../data/dynasties';
 import { saveDynasty } from '../services/storage';
 
 export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();
+  const [apiType, setApiTypeState] = useState<ApiType>('qwen');
   const [apiKey, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [customBaseUrl, setCustomBaseUrl] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
+  const availableModels = getAvailableModels(apiType);
 
   useEffect(() => {
     const loadData = async () => {
-      const [key, model] = await Promise.all([getApiKey(), getModel()]);
+      const [type, key, url, model] = await Promise.all([
+        getApiType(),
+        getApiKey(),
+        getApiBaseUrl(),
+        getModel(),
+      ]);
+      setApiTypeState(type);
       if (key) setApiKeyInput(key);
+      // 如果是 OpenAI 类型，显示自定义 URL
+      if (type === 'openai') {
+        setCustomBaseUrl(url);
+      }
       setSelectedModel(model);
     };
     loadData();
   }, []);
+
+  const handleApiTypeChange = async (newType: ApiType) => {
+    setApiTypeState(newType);
+    await setApiType(newType);
+    // 切换后重置模型为默认值
+    const newDefault = DEFAULT_MODEL(newType);
+    setSelectedModel(newDefault);
+    await setModel(newDefault);
+    // 如果切换到千问，设置默认 URL
+    if (newType === 'qwen') {
+      const qwenUrl = API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
+      await setApiBaseUrl(qwenUrl);
+    }
+  };
 
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
@@ -36,6 +69,15 @@ export const SettingsScreen: React.FC = () => {
     }
     await setApiKey(apiKey.trim());
     Alert.alert('成功', 'API密钥已保存');
+  };
+
+  const handleSaveCustomUrl = async () => {
+    if (apiType === 'openai' && !customBaseUrl.trim()) {
+      Alert.alert('错误', '请输入API接口地址');
+      return;
+    }
+    await setApiBaseUrl(customBaseUrl.trim());
+    Alert.alert('成功', '接口地址已保存');
   };
 
   const handleModelChange = async (modelId: string) => {
@@ -48,10 +90,7 @@ export const SettingsScreen: React.FC = () => {
     await saveDynasty(dynastyId);
   };
 
-  const selectedDynastyDetail = useMemo(
-    () => DYNASTIES.find(d => d.id === state.dynasty),
-    [state.dynasty]
-  );
+  const selectedDynastyDetail = DYNASTIES.find(d => d.id === state.dynasty);
 
   return (
     <ScrollView style={styles.container}>
@@ -59,10 +98,39 @@ export const SettingsScreen: React.FC = () => {
         <Text style={styles.headerTitle}>设置</Text>
       </View>
 
+      {/* API 类型选择 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>API 接口类型</Text>
+        <View style={styles.card}>
+          <View style={styles.apiTypeSelector}>
+            {API_PROVIDERS.map(provider => (
+              <TouchableOpacity
+                key={provider.id}
+                style={[
+                  styles.apiTypeItem,
+                  apiType === provider.id && styles.apiTypeItemActive,
+                ]}
+                onPress={() => handleApiTypeChange(provider.id as ApiType)}
+              >
+                <Text
+                  style={[
+                    styles.apiTypeName,
+                    apiType === provider.id && styles.apiTypeNameActive,
+                  ]}
+                >
+                  {provider.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      {/* API 配置 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>API 配置</Text>
         <View style={styles.card}>
-          <Text style={styles.label}>通义千问 API Key</Text>
+          <Text style={styles.label}>API Key</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -86,15 +154,42 @@ export const SettingsScreen: React.FC = () => {
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveApiKey}>
             <Text style={styles.saveButtonText}>保存密钥</Text>
           </TouchableOpacity>
+
+          {/* OpenAI 类型需要自定义 URL */}
+          {apiType === 'openai' && (
+            <>
+              <View style={[styles.label, { marginTop: 16 }]}>
+                <Text style={styles.label}>接口地址（OpenAI 兼容）</Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="https://api.openai.com/v1/chat/completions"
+                placeholderTextColor={Colors.textLight}
+                value={customBaseUrl}
+                onChangeText={setCustomBaseUrl}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+              />
+              <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomUrl}>
+                <Text style={styles.saveButtonText}>保存接口地址</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
 
+      {/* 模型选择 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>模型选择</Text>
         <View style={styles.card}>
-          <Text style={styles.hint}>不同模型在速度、费用和生成质量上有差异</Text>
+          <Text style={styles.hint}>
+            {apiType === 'qwen'
+              ? '不同模型在速度、费用和生成质量上有差异'
+              : '选择您的 API 提供商支持的模型'}
+          </Text>
           <View style={styles.modelList}>
-            {AVAILABLE_MODELS.map(model => (
+            {availableModels.map(model => (
               <TouchableOpacity
                 key={model.id}
                 style={[
@@ -108,6 +203,7 @@ export const SettingsScreen: React.FC = () => {
                     styles.modelName,
                     selectedModel === model.id && styles.modelNameActive,
                   ]}
+                  numberOfLines={1}
                 >
                   {model.name}
                 </Text>
@@ -120,6 +216,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* 默认时代背景 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>默认时代背景</Text>
         <View style={styles.card}>
@@ -148,6 +245,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* 时代背景详情 */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>时代背景详情</Text>
         <View style={styles.card}>
@@ -178,7 +276,7 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>关于</Text>
         <View style={styles.card}>
-          <Text style={styles.aboutText}>史书墨 v1.0.0</Text>
+          <Text style={styles.aboutText}>史书墨 v1.0.1</Text>
           <Text style={styles.aboutSubtext}>历史小说AI辅助创作工具</Text>
         </View>
       </View>
@@ -217,6 +315,33 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  apiTypeSelector: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  apiTypeItem: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  apiTypeItemActive: {
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
+  },
+  apiTypeName: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  apiTypeNameActive: {
+    color: Colors.textOnVermillion,
+    fontWeight: '600',
   },
   label: {
     fontSize: 14,
@@ -286,6 +411,7 @@ const styles = StyleSheet.create({
   modelName: {
     fontSize: 14,
     color: Colors.textSecondary,
+    flex: 1,
   },
   modelNameActive: {
     color: Colors.textOnVermillion,
