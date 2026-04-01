@@ -468,12 +468,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: Spacing.xs,
   },
-  dynastySelector: {
-    flexDirection: 'row',
-  },
   dynastySelectorContent: {
     flexDirection: 'row',
     paddingVertical: Spacing.xs,
+    paddingRight: Spacing.lg, // avoid last button hidden behind FAB
   },
   dynastyButton: {
     paddingHorizontal: Spacing.md,

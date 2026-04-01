@@ -58,29 +58,26 @@ export const SettingsScreen: React.FC = () => {
     loadData();
   }, []);
 
-  // 防止组件卸载后 setState 的 isMountedRef
-  const isMountedRef = React.useRef(true);
   // 每次进入设置页面时检查更新
-  // 使用 useCallback 包装 checkUpdate，确保 useFocusEffect 不会因引用变化而重复执行
+  // 使用 sequenceRef 确保只有最新请求能更新 state（防止 re-focus 后旧请求覆盖新数据）
+  const sequenceRef = React.useRef(0);
   const checkUpdate = useCallback(async () => {
+    const seq = ++sequenceRef.current;
     setCheckingUpdate(true);
     try {
       const release = await checkForUpdate();
-      if (isMountedRef.current && release) {
+      if (seq === sequenceRef.current && release) {
         setLatestRelease(release);
       }
     } finally {
-      if (isMountedRef.current) setCheckingUpdate(false);
+      if (seq === sequenceRef.current) setCheckingUpdate(false);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      isMountedRef.current = true;
       checkUpdate();
-      return () => {
-        isMountedRef.current = false;
-      };
+      return () => { sequenceRef.current = -999; }; // 标记为已废弃，阻止进行中旧请求更新 state
     }, [checkUpdate])
   );
 
