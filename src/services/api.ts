@@ -183,13 +183,8 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       'Content-Type': 'application/json',
     };
 
-    // 根据 API 类型设置授权方式
-    if (apiType === 'qwen') {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    } else {
-      // OpenAI 兼容格式
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
+    // Authorization header - both qwen and OpenAI-compatible use Bearer
+    headers['Authorization'] = `Bearer ${apiKey}`;
 
     // 构建请求体
     const body: Record<string, unknown> = {

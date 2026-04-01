@@ -43,12 +43,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   // 追踪当前是否处于有效请求周期：modal 关闭时应拒绝响应
   const requestActiveRef = useRef(false);
 
-  // 当 visible 变为 true 时，根据 initialType 更新 aiType
+  // 当 initialType 变化时同步 aiType（modal 关闭/重新打开时也生效）
   useEffect(() => {
-    if (visible && initialType) {
+    if (initialType) {
       setAiType(initialType);
     }
-  }, [visible, initialType]);
+  }, [initialType]);
 
   // 清除 hint 定时器
   const clearHintTimer = () => {

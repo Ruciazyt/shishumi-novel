@@ -18,7 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { ProjectCard } from '../components/ProjectCard';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { DYNASTIES } from '../data/dynasties';
 import { createProject, deleteProject, getProjects } from '../services/storage';
 import { Project, RootStackParamList } from '../types';
@@ -109,11 +109,20 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* Elegant Header - 古籍装帧风格 */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>史书墨</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.headerContent}>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>史书墨</Text>
+            <Text style={styles.headerSubtitle}>历史小说创作</Text>
+          </View>
+          <View style={styles.headerDecoration}>
+            <Text style={styles.headerDecorationText}>📜</Text>
+          </View>
+        </View>
       </View>
 
+      {/* Project List */}
       <FlatList
         data={sortedProjects}
         renderItem={({ item }) => (
@@ -135,23 +144,27 @@ export const HomeScreen: React.FC = () => {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>暂无作品</Text>
-            <Text style={styles.emptySubtitle}>点击右下角新建作品开始创作</Text>
+            <View style={styles.emptyDecoration}>
+              <Text style={styles.emptyIcon}>📖</Text>
+            </View>
+            <Text style={styles.emptyTitle}>墨未落，纸尚新</Text>
+            <Text style={styles.emptySubtitle}>点击右下角按钮，开始您的创作</Text>
           </View>
         }
       />
 
-      {/* FAB - 右下角悬浮新建按钮 */}
+      {/* FAB - 悬浮新建按钮 with elegant design */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setModalVisible(true)}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         accessibilityLabel="新建作品"
         accessibilityRole="button"
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
 
+      {/* 新建作品弹窗 */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <KeyboardAvoidingView
           style={styles.modalOverlay}
@@ -170,8 +183,11 @@ export const HomeScreen: React.FC = () => {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>新建作品</Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text style={styles.closeButton}>✕</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>✕</Text>
                 </TouchableOpacity>
               </View>
 
@@ -252,36 +268,95 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  // Header - 古籍装帧风格
   header: {
+    backgroundColor: Colors.backgroundCard,
+    borderBottomWidth: 1,
+    borderBottomColor: ColorsAlpha.goldBorder,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+  },
+  headerTitleContainer: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: FontSize.xxxl,
     fontWeight: 'bold',
+    color: Colors.vermillion,
+    letterSpacing: 4,
+  },
+  headerSubtitle: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    marginTop: Spacing.xs,
+    letterSpacing: 2,
+  },
+  headerDecoration: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerDecorationText: {
+    fontSize: 24,
+  },
+  // List
+  list: {
+    padding: Spacing.md,
+    paddingBottom: 100,
+  },
+  // Empty State - 美学设计
+  empty: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xxl * 2,
+  },
+  emptyDecoration: {
+    width: 80,
+    height: 80,
+    borderRadius: BorderRadius.xxl,
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  emptyIcon: {
+    fontSize: 36,
+  },
+  emptyTitle: {
+    fontSize: FontSize.xl,
     color: Colors.textPrimary,
+    fontWeight: '600',
+    marginBottom: Spacing.sm,
+    letterSpacing: 2,
   },
-  headerRight: {
-    width: 60,
+  emptySubtitle: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    textAlign: 'center',
   },
+  // FAB
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 24,
+    right: Spacing.lg,
+    bottom: Spacing.lg,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.vermillion,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.ink,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
     elevation: 8,
     zIndex: 100,
   },
@@ -291,22 +366,7 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     lineHeight: 30,
   },
-  list: {
-    padding: 16,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    color: Colors.textSecondary,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: Colors.textLight,
-  },
+  // Modal
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -315,50 +375,54 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalScroll: {
-    // backgroundColor, borderTopLeftRadius, borderTopRightRadius inherited from child modalContent
-  },
+  modalScroll: {},
   modalScrollContent: {
     paddingBottom: 40,
   },
   modalContent: {
     backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
+    padding: Spacing.lg,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: FontSize.xl,
     fontWeight: 'bold',
     color: Colors.textPrimary,
   },
   closeButton: {
+    padding: Spacing.xs,
+  },
+  closeButtonText: {
     fontSize: 20,
     color: Colors.textSecondary,
   },
   formGroup: {
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   label: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+    fontWeight: '500',
   },
   input: {
     backgroundColor: Colors.backgroundCard,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginRight: 8,
-    marginBottom: 8,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    marginBottom: Spacing.xs,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.textPrimary,
   },
   textArea: {
@@ -366,49 +430,51 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   charCount: {
-    fontSize: 12,
+    fontSize: FontSize.xs,
     color: Colors.textLight,
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
   dynastySelector: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   dynastyButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.round,
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginRight: 8,
-    marginBottom: 8,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   dynastyButtonActive: {
     backgroundColor: Colors.vermillion,
     borderColor: Colors.vermillion,
   },
   dynastyButtonText: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   dynastyButtonTextActive: {
     color: Colors.textOnVermillion,
+    fontWeight: '600',
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Spacing.sm,
   },
   submitButtonDisabled: {
     opacity: 0.7,
   },
   submitButtonText: {
     color: Colors.textOnVermillion,
-    fontSize: 16,
+    fontSize: FontSize.md,
     fontWeight: 'bold',
+    letterSpacing: 2,
   },
 });
