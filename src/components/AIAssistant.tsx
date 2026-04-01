@@ -255,6 +255,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </TouchableOpacity>
             </View>
 
+            {/* 收起键盘按钮 */}
+            <TouchableOpacity
+              style={styles.keyboardDismiss}
+              onPress={Keyboard.dismiss}
+              accessibilityLabel="收起键盘"
+              accessibilityRole="button"
+            >
+              <Text style={styles.keyboardDismissText}>⌨️ 收起键盘</Text>
+            </TouchableOpacity>
+
             {aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist' ? (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>场景描述</Text>
@@ -359,6 +369,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.textSecondary,
     padding: 4,
+  },
+  keyboardDismiss: {
+    alignSelf: 'flex-end',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginBottom: 8,
+  },
+  keyboardDismissText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
   },
   body: {
     padding: 16,

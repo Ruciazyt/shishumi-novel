@@ -18,6 +18,7 @@ import { Colors } from '../constants/colors';
 import { DYNASTIES, getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS } from '../data/dynasties';
 import { updateChapter } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
+import { countChars } from '../utils/text';
 
 import { RootStackParamList, AIAssistantType } from '../types';
 
@@ -249,7 +250,7 @@ export const EditorScreen: React.FC = () => {
   const canRedo = historyIndex < history.length - 1;
 
   // 统计字数
-  const charCount = content.replace(/\s/g, '').length;
+  const charCount = countChars(content);
   const trimmed = content.trim();
   const wordCount = trimmed
     ? trimmed.split(/\s+/).length
