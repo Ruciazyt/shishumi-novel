@@ -10,6 +10,8 @@ import {
   Keyboard,
   Platform,
   Modal,
+  AppState,
+  type AppStateStatus,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -150,6 +152,24 @@ export const EditorScreen: React.FC = () => {
     pendingContentRef.current = text;
     recordHistory(text);
   }, [recordHistory]);
+
+  // AppState listener: 立即在后台保存，避免 OS 杀死进程时丢失数据
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        // 仅保存到 storage，不 dispatch，避免组件卸载后更新 state
+        const latestContent = pendingContentRef.current;
+        const currentChapter = chapterRef.current;
+        const currentProject = projectRef.current;
+        if (!currentProject || !currentChapter) return;
+        if (latestContent === lastSavedContentRef.current) return;
+        updateChapter(currentProject.id, currentChapter.id, { content: latestContent }).then(updated => {
+          if (updated) lastSavedContentRef.current = latestContent;
+        });
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   // 10秒防抖自动保存：timer 只在 mount 时创建，不依赖 content
   // content 变化只更新 ref，不重启 timer
@@ -684,7 +704,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   statsBarDynastyText: {
-    fontSize: FontSize.xs - 1,
+    fontSize: FontSize.xs,
     color: Colors.vermillion,
     fontWeight: '600',
   },
