@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
-import { Colors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import {
   getApiKey, setApiKey, getApiType, setApiType,
   getApiBaseUrl, setApiBaseUrl,
@@ -161,7 +161,15 @@ export const SettingsScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>设置</Text>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>设置</Text>
+            <Text style={styles.headerSubtitle}>配置与偏好</Text>
+          </View>
+          <View style={styles.headerDecoration}>
+            <Text style={styles.headerDecorationText}>⚙️</Text>
+          </View>
+        </View>
       </View>
 
       {/* 版本与更新 */}
@@ -381,14 +389,43 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 16,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: ColorsAlpha.goldBorder,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitleContainer: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: FontSize.xxxl,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
+    color: Colors.vermillion,
+    letterSpacing: 4,
+  },
+  headerSubtitle: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    marginTop: Spacing.xs,
+    letterSpacing: 2,
+  },
+  headerDecoration: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerDecorationText: {
+    fontSize: 24,
   },
   section: {
     padding: 16,

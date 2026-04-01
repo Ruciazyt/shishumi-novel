@@ -31,6 +31,17 @@ export const HomeScreen: React.FC = () => {
     () => [...state.projects].sort((a, b) => b.updatedAt - a.updatedAt),
     [state.projects]
   );
+
+  // 全局统计数据
+  const stats = useMemo(() => {
+    const totalProjects = state.projects.length;
+    const totalChapters = state.projects.reduce((sum, p) => sum + p.chapters.length, 0);
+    const totalChars = state.projects.reduce(
+      (sum, p) => sum + p.chapters.reduce((cs, c) => cs + c.content.replace(/\s/g, '').length, 0),
+      0
+    );
+    return { totalProjects, totalChapters, totalChars };
+  }, [state.projects]);
   const navigation = useNavigation<NavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -120,6 +131,13 @@ export const HomeScreen: React.FC = () => {
             <Text style={styles.headerDecorationText}>📜</Text>
           </View>
         </View>
+        {stats.totalProjects > 0 && (
+          <View style={styles.headerStats}>
+            <Text style={styles.headerStatsText}>
+              {stats.totalProjects}部作品 · {stats.totalChapters}章节 · {stats.totalChars.toLocaleString()}字
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Project List */}
@@ -307,6 +325,17 @@ const styles = StyleSheet.create({
   },
   headerDecorationText: {
     fontSize: 24,
+  },
+  headerStats: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: ColorsAlpha.goldBorder,
+  },
+  headerStatsText: {
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
+    letterSpacing: 1,
   },
   // List
   list: {
