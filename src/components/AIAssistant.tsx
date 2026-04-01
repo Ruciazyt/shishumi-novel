@@ -114,6 +114,14 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     requestActiveRef.current = false;
   }, [aiType]);
 
+  // 切换 AI 类型时自动清除旧结果，避免用户误读
+  useEffect(() => {
+    if (!loading) {
+      setResult('');
+      setError('');
+    }
+  }, [aiType, loading]);
+
   const { state } = useApp();
   const dynastyDisplayName = useMemo(
     () => DYNASTIES.find(d => d.id === state.dynasty || d.name === state.dynasty)?.name || state.dynasty,
@@ -291,6 +299,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 </View>
                 <Text style={styles.resultText}>{result}</Text>
                 <View style={styles.resultActions}>
+                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                    <Text style={styles.resetButtonText}>重新输入</Text>
+                  </TouchableOpacity>
                   <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
                     <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
                       {copyButtonText}
@@ -459,6 +470,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
+  },
+  resetButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.paperDark,
+  },
+  resetButtonText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
   },
   copyButton: {
     paddingHorizontal: 16,
