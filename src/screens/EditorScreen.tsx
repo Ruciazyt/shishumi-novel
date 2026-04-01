@@ -269,6 +269,8 @@ export const EditorScreen: React.FC = () => {
     ? trimmed.split(/\s+/).length
     : 0;
 
+  const chapterIndex = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
+  const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章 · ` : '';
   // 简短占位符（用于 TextInput placeholder）
   const dynastyPlaceholder = React.useMemo(() => {
     const dynastyData = project?.dynasty
@@ -325,7 +327,7 @@ export const EditorScreen: React.FC = () => {
       {/* 字数统计栏 */}
       <View style={styles.statsBar}>
         <Text style={styles.statsText}>
-          {charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
+          {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
           {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
         </Text>
         {isSaving ? (

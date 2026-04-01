@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,7 +20,7 @@ import { useApp } from '../context/AppContext';
 import { ProjectCard } from '../components/ProjectCard';
 import { Colors } from '../constants/colors';
 import { DYNASTIES } from '../data/dynasties';
-import { createProject, deleteProject } from '../services/storage';
+import { createProject, deleteProject, getProjects } from '../services/storage';
 import { Project, RootStackParamList } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -36,6 +37,19 @@ export const HomeScreen: React.FC = () => {
   const [newDynasty, setNewDynasty] = useState('tang');
   const [newDescription, setNewDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const projects = await getProjects();
+      dispatch({ type: 'SET_PROJECTS', payload: projects });
+    } catch (err) {
+      console.error('[HomeScreen] refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -111,6 +125,14 @@ export const HomeScreen: React.FC = () => {
         )}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.vermillion}
+            colors={[Colors.vermillion]}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>暂无作品</Text>
