@@ -1,36 +1,17 @@
 import { Linking, Alert } from 'react-native';
-import * as fs from 'fs';
 
 const REPO_OWNER = 'Ruciazyt';
 const REPO_NAME = 'shishumi-novel';
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
 
-export interface ReleaseInfo {
-  tagName: string;
-  version: string;
-  downloadUrl: string | null;
-  htmlUrl: string;
-  publishedAt: string;
-  body: string;
-}
+/** Hardcoded version extracted from app.json — avoids fs/path dependency (Node.js only). */
+export const APP_VERSION = '0.1.0';
 
 /**
- * 动态读取 app.json 中的版本号，与构建版本保持同步
+ * Kept for backwards API compatibility with SettingsScreen.
+ * Returns the hardcoded version string from app.json.
  */
-export const getAppVersion = (): string => {
-  try {
-    // 直接读取 app.json（Expo 项目根目录）
-    const appJsonPath = `${__dirname}/../../../app.json`;
-    if (fs.existsSync(appJsonPath)) {
-      const raw = fs.readFileSync(appJsonPath, 'utf-8');
-      const parsed = JSON.parse(raw);
-      return parsed.expo?.version || '0.1.0';
-    }
-  } catch {
-    // ignore
-  }
-  return '0.1.0';
-};
+export const getAppVersion = (): string => APP_VERSION;
 
 /**
  * 将版本字符串解析为数字数组，用于精确比较。
@@ -59,6 +40,15 @@ export const compareVersions = (v1: string, v2: string): number => {
   }
   return 0;
 };
+
+export interface ReleaseInfo {
+  tagName: string;
+  version: string;
+  downloadUrl: string | null;
+  htmlUrl: string;
+  publishedAt: string;
+  body: string;
+}
 
 export const checkForUpdate = async (): Promise<ReleaseInfo | null> => {
   try {
