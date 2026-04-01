@@ -31,6 +31,7 @@ export const ProjectScreen: React.FC = () => {
   const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState('');
   const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
+  const [isSavingChapter, setIsSavingChapter] = useState(false);
 
   if (!project) {
     return (
@@ -96,37 +97,50 @@ export const ProjectScreen: React.FC = () => {
       return;
     }
 
-    if (editingChapter) {
-      const updated = await updateChapter(project.id, editingChapter.id, {
-        title: chapterTitle.trim(),
-        content: editingChapter?.content ?? '',
-      });
-      if (updated) {
-        const updatedProject = {
-          ...project,
-          chapters: project.chapters.map(c =>
-            c.id === editingChapter.id ? updated : c
-          ),
-        };
-        dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+    setIsSavingChapter(true);
+    try {
+      if (editingChapter) {
+        const updated = await updateChapter(project.id, editingChapter.id, {
+          title: chapterTitle.trim(),
+          content: editingChapter?.content ?? '',
+        });
+        if (updated) {
+          const updatedProject = {
+            ...project,
+            chapters: project.chapters.map(c =>
+              c.id === editingChapter.id ? updated : c
+            ),
+          };
+          dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+        } else {
+          Alert.alert('错误', '保存章节失败，请重试');
+          setIsSavingChapter(false);
+          return;
+        }
+      } else {
+        const newChapter = await addChapter(project.id, {
+          title: chapterTitle.trim(),
+          content: '',
+        });
+        if (newChapter) {
+          const updatedProject = {
+            ...project,
+            chapters: [...project.chapters, newChapter],
+          };
+          dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+        } else {
+          Alert.alert('错误', '创建章节失败，请重试');
+          setIsSavingChapter(false);
+          return;
+        }
       }
-    } else {
-      const newChapter = await addChapter(project.id, {
-        title: chapterTitle.trim(),
-        content: '',
-      });
-      if (newChapter) {
-        const updatedProject = {
-          ...project,
-          chapters: [...project.chapters, newChapter],
-        };
-        dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-      }
-    }
 
-    setChapterModalVisible(false);
-    setChapterTitle('');
-    setEditingChapter(null);
+      setChapterModalVisible(false);
+      setChapterTitle('');
+      setEditingChapter(null);
+    } finally {
+      setIsSavingChapter(false);
+    }
   }, [chapterTitle, editingChapter, dispatch, project]);
 
   return (
@@ -240,9 +254,13 @@ export const ProjectScreen: React.FC = () => {
               <Text style={styles.charCount}>{chapterTitle.length}/50</Text>
             </View>
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleSaveChapter}>
-              <Text style={styles.submitButtonText}>
-                {editingChapter ? '保存' : '创建'}
+            <TouchableOpacity
+              style={[styles.submitButton, isSavingChapter && styles.submitButtonDisabled]}
+              onPress={handleSaveChapter}
+              disabled={isSavingChapter}
+            >
+              <Text style={[styles.submitButtonText, isSavingChapter && styles.submitButtonTextDisabled]}>
+                {isSavingChapter ? '保存中...' : editingChapter ? '保存' : '创建'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -432,9 +450,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
   submitButtonText: {
     color: Colors.textOnVermillion,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  submitButtonTextDisabled: {
+    color: Colors.backgroundCard,
   },
 });

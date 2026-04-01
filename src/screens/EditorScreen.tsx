@@ -288,11 +288,11 @@ export const EditorScreen: React.FC = () => {
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={undo} disabled={!canUndo} style={[styles.undoRedoBtn, !canUndo && styles.undoRedoBtnDisabled]}
             accessibilityLabel="撤销" accessibilityRole="button">
-            <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoDisabled]}>↩</Text>
+            <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoTextDisabled]}>↩</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={redo} disabled={!canRedo} style={[styles.undoRedoBtn, !canRedo && styles.undoRedoBtnDisabled]}
             accessibilityLabel="重做" accessibilityRole="button">
-            <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoDisabled]}>↪</Text>
+            <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoTextDisabled]}>↪</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setWritingTipVisible(true)}
             style={styles.tipBtn}
@@ -442,8 +442,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.vermillion,
   },
-  undoRedoDisabled: {
-    color: Colors.textLight,
+  undoRedoTextDisabled: {
+    opacity: 0.35,
   },
   tipBtn: {
     padding: 4,
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   saveButtonDisabled: {
-    color: Colors.textLight,
+    opacity: 0.35,
   },
   statsBar: {
     flexDirection: 'row',
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   },
   statsText: {
     fontSize: 12,
-    color: Colors.textLight,
+    opacity: 0.35,
   },
   savingIndicator: {
     fontSize: 12,
