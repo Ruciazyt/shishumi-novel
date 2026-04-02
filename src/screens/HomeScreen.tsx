@@ -19,7 +19,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { ProjectCard } from '../components/ProjectCard';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { DYNASTIES } from '../data/dynasties';
+import { DYNASTIES, DYNASTY_SUMMARIES } from '../data/dynasties';
 import { createProject, deleteProject, getProjects } from '../services/storage';
 import { Project, RootStackParamList, DynastyId } from '../types';
 
@@ -46,6 +46,7 @@ export const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDynasty, setNewDynasty] = useState<DynastyId>('tang');
+  const [newDynastySummary, setNewDynastySummary] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -61,6 +62,12 @@ export const HomeScreen: React.FC = () => {
       setRefreshing(false);
     }
   }, [dispatch]);
+
+  // Keep dynasty summary in sync with the selected dynasty
+  React.useEffect(() => {
+    const dynastyName = DYNASTIES.find(d => d.id === newDynasty)?.name || newDynasty;
+    setNewDynastySummary(DYNASTY_SUMMARIES[dynastyName] || '');
+  }, [newDynasty]);
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -81,6 +88,7 @@ export const HomeScreen: React.FC = () => {
       setModalVisible(false);
       setNewTitle('');
       setNewDynasty('tang');
+      setNewDynastySummary('');
       setNewDescription('');
     } catch (err) {
       console.error('[HomeScreen] createProject failed:', err);
@@ -251,6 +259,11 @@ export const HomeScreen: React.FC = () => {
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
+                  {newDynastySummary ? (
+                    <Text style={styles.dynastySummary} numberOfLines={2}>
+                      {newDynastySummary}
+                    </Text>
+                  ) : null}
               </View>
 
               <View style={styles.formGroup}>
@@ -496,6 +509,14 @@ const styles = StyleSheet.create({
   dynastyButtonTextActive: {
     color: Colors.textOnVermillion,
     fontWeight: '600',
+  },
+  dynastySummary: {
+    marginTop: Spacing.sm,
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+    fontStyle: 'italic',
+    paddingHorizontal: Spacing.xs,
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
