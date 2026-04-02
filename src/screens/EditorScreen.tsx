@@ -319,22 +319,23 @@ export const EditorScreen: React.FC = () => {
   }, [content]);
 
   const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : '';
-  // 简短占位符（用于 TextInput placeholder）
-  const handlePrevChapter = async () => {
+
+  /** 章节导航：稳定引用，避免 toolbar 每帧重渲染 */
+  const handlePrevChapter = useCallback(async () => {
     if (canGoPrev && prevChapterId) {
       if (hasUnsavedChanges) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: prevChapterId });
     }
-  };
+  }, [canGoPrev, prevChapterId, hasUnsavedChanges, project, dispatch, navigation]);
 
-  const handleNextChapter = async () => {
+  const handleNextChapter = useCallback(async () => {
     if (canGoNext && nextChapterId) {
       if (hasUnsavedChanges) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: nextChapterId });
     }
-  };
+  }, [canGoNext, nextChapterId, hasUnsavedChanges, project, dispatch, navigation]);
 
   // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
   const dynastyMeta = React.useMemo(() => {
