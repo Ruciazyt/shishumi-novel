@@ -539,14 +539,17 @@ export const EditorScreen: React.FC = () => {
                   ]}
                   onPress={() => handleDynastyChange(d.id as DynastyId)}
                 >
-                  <Text
-                    style={[
-                      styles.dynastySwitchText,
-                      (project?.dynasty || state.dynasty) === d.id && styles.dynastySwitchTextActive,
-                    ]}
-                  >
-                    {d.name}
-                  </Text>
+                  <View style={styles.dynastySwitchItemContent}>
+                    <Text
+                      style={[
+                        styles.dynastySwitchText,
+                        (project?.dynasty || state.dynasty) === d.id && styles.dynastySwitchTextActive,
+                      ]}
+                    >
+                      {d.name}
+                    </Text>
+                    <Text style={styles.dynastySwitchDesc}>{d.languageFeatures}</Text>
+                  </View>
                   {(project?.dynasty || state.dynasty) === d.id && (
                     <Text style={styles.dynastySwitchCheck}>✓</Text>
                   )}
@@ -839,13 +842,23 @@ const styles = StyleSheet.create({
     backgroundColor: ColorsAlpha.vermillionBadgeBg,
     borderColor: Colors.vermillion,
   },
+  dynastySwitchItemContent: {
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
   dynastySwitchText: {
     fontSize: FontSize.md,
     color: Colors.textSecondary,
     fontWeight: '600',
+    marginBottom: 2,
   },
   dynastySwitchTextActive: {
     color: Colors.vermillion,
+  },
+  dynastySwitchDesc: {
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
+    lineHeight: 16,
   },
   dynastySwitchCheck: {
     fontSize: FontSize.md,
