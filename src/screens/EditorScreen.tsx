@@ -463,7 +463,6 @@ export const EditorScreen: React.FC = () => {
           value={content}
           onChangeText={handleContentChange}
           multiline
-          textAlignVertical="top"
         />
       </ScrollView>
 
@@ -754,6 +753,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: 30,
     minHeight: 400,
+    textAlignVertical: 'top',
   },
   // Toolbar
   toolbar: {
