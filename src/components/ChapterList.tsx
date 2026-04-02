@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { countChars } from '../utils/text';
@@ -11,12 +11,15 @@ interface ChapterListProps {
   onChapterLongPress?: (chapter: Chapter) => void;
 }
 
-export const ChapterList: React.FC<ChapterListProps> = ({
+export const ChapterList: React.FC<ChapterListProps> = React.memo(({
   chapters,
   onChapterPress,
   onChapterLongPress,
 }) => {
-  const totalChars = chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
+  const totalChars = useMemo(
+    () => chapters.reduce((sum, ch) => sum + countChars(ch.content), 0),
+    [chapters]
+  );
 
   // Store latest callbacks in refs — avoids stale closures without needing to
   // re-create renderChapter on every parent re-render (which would waste all
@@ -91,7 +94,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
