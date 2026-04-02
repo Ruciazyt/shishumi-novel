@@ -45,6 +45,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   // 追踪当前请求是否已被用户取消
   const cancelledRef = useRef(false);
 
+  // 始终读取最新的 inputText/sceneText，避免 handleSubmit 中的 stale closure
+  const inputTextRef = useRef('');
+  const sceneTextRef = useRef('');
+  inputTextRef.current = inputText;
+  sceneTextRef.current = sceneText;
+
   // 当 initialType 变化时同步 aiType（modal 关闭/重新打开时也生效）
   useEffect(() => {
     if (initialType) {
@@ -119,33 +125,33 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     requestActiveRef.current = false;
   }, [aiType]);
 
-  // 切换 AI 类型时自动清除旧结果，避免用户误读
-  useEffect(() => {
-    if (!loading) {
-      setResult('');
-      setError('');
-    }
-  }, [aiType, loading]);
-
   const { state } = useApp();
   const dynastyDisplayName = useMemo(
     () => DYNASTIES.find(d => d.id === state.dynasty || d.name === state.dynasty)?.name || state.dynasty,
     [state.dynasty]
   );
 
-  const isSceneType = aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist';
   const canSubmit = !loading && (
-    isSceneType ? sceneText.trim().length > 0 : inputText.trim().length > 0
+    (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist')
+      ? sceneText.trim().length > 0
+      : inputText.trim().length > 0
   );
 
   const handleSubmit = useCallback(async () => {
+    // 始终读取最新值，避开 stale closure 问题
+    const currentInputText = inputTextRef.current;
+    const currentSceneText = sceneTextRef.current;
+    const currentAiType = aiType;
+
+    const isSceneType = currentAiType === 'poetry' || currentAiType === 'buddhist' || currentAiType === 'taoist';
+
     if (isSceneType) {
-      if (!sceneText.trim()) {
+      if (!currentSceneText.trim()) {
         setError('请输入场景描述');
         return;
       }
     } else {
-      if (!inputText.trim()) {
+      if (!currentInputText.trim()) {
         setError('请输入文本内容');
         return;
       }
@@ -161,10 +167,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     requestActiveRef.current = true;
 
     const response = await callAI({
-      type: aiType,
-      text: inputText,
+      type: currentAiType,
+      text: currentInputText,
       dynasty: state.dynasty,
-      scene: (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') ? sceneText : undefined,
+      scene: isSceneType ? currentSceneText : undefined,
     });
 
     // 只有在组件仍挂载且当前请求未被 modal 关闭阻断时才更新状态
@@ -176,7 +182,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     } else {
       setError(response.error || '调用失败');
     }
-  }, [aiType, inputText, sceneText, state.dynasty, isSceneType]);
+  }, [aiType, state.dynasty]);
 
   // 取消当前请求：标记为已取消，loading 立即重置，阻断响应处理
   const handleCancel = useCallback(() => {
