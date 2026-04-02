@@ -413,8 +413,7 @@ export const EditorScreen: React.FC = () => {
             <DynastyBadge name={dynastyDisplay} subtext={dynastySummary} size="xs" />
           </TouchableOpacity>
           <Text style={styles.statsText}>
-            {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
-            {lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
+            {chapterDisplay}{charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}{lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
           </Text>
         </View>
         <View style={styles.statsBarRight}>
