@@ -88,7 +88,9 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.empty} accessible accessibilityLabel="暂无章节列表，点击右下角按钮新建章节">
-            <Text style={styles.emptyText}>暂无章节，点击 + 新建</Text>
+            <Text style={styles.emptyIcon}>🖋</Text>
+            <Text style={styles.emptyText}>暂无章节</Text>
+            <Text style={styles.emptyHint}>点击右下角 + 按钮新建第一章</Text>
           </View>
         }
       />
@@ -191,8 +193,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.xxl,
   },
+  emptyIcon: {
+    fontSize: 36,
+    marginBottom: Spacing.md,
+  },
   emptyText: {
-    fontSize: FontSize.sm,
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+    marginBottom: Spacing.xs,
+  },
+  emptyHint: {
+    fontSize: FontSize.xs,
     color: Colors.textLight,
   },
 });

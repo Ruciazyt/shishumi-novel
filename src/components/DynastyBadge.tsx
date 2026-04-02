@@ -17,7 +17,7 @@ export const DynastyBadge: React.FC<{
   return (
     <View style={styles.badge}>
       <Text style={textStyle}>{name}</Text>
-      {subtext ? <Text style={styles.subtext}>{subtext}</Text> : null}
+      {subtext ? <Text style={styles.subtext} numberOfLines={1}>{subtext}</Text> : null}
     </View>
   );
 };

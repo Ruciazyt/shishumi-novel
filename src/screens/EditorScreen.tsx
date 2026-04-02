@@ -430,7 +430,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="收起键盘"
             accessibilityRole="button"
           >
-            <Text style={styles.keyboardDismissBtnText}>⌨</Text>
+            <Text style={styles.keyboardDismissBtnText}>⌨ 收起键盘</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -707,15 +707,15 @@ const styles = StyleSheet.create({
   },
   // Keyboard Dismiss Button
   keyboardDismissBtn: {
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.sm,
-    backgroundColor: Colors.backgroundCard,
+    paddingVertical: Spacing.xs + 2,
+    paddingHorizontal: Spacing.sm + 2,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   keyboardDismissBtnText: {
-    fontSize: FontSize.xs,
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   // Editor
