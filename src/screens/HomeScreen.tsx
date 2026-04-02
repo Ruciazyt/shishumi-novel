@@ -49,9 +49,6 @@ export const HomeScreen: React.FC = () => {
   const [newDescription, setNewDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  // 是否显示朝代选择器的滚动提示（滚动后隐藏）
-  const [showDynastyScrollHint, setShowDynastyScrollHint] = useState(true);
-  const dynastyScrollRef = useRef<ScrollView>(null);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -177,7 +174,7 @@ export const HomeScreen: React.FC = () => {
       {/* FAB - 悬浮新建按钮 with elegant design */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => { setShowDynastyScrollHint(true); setModalVisible(true); }}
+        onPress={() => setModalVisible(true)}
         activeOpacity={0.85}
         accessibilityLabel="新建作品"
         accessibilityRole="button"
@@ -228,19 +225,10 @@ export const HomeScreen: React.FC = () => {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>时代背景</Text>
-                {/* 容器用于 ScrollView + 右侧渐变提示 */}
-                <View style={styles.dynastySelectorWrapper}>
                   <ScrollView
-                    ref={dynastyScrollRef}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.dynastySelectorContent}
-                    onScroll={event => {
-                      if (event.nativeEvent.contentOffset.x > 8) {
-                        setShowDynastyScrollHint(false);
-                      }
-                    }}
-                    scrollEventThrottle={16}
                   >
                     {DYNASTIES.map(d => (
                       <TouchableOpacity
@@ -262,11 +250,6 @@ export const HomeScreen: React.FC = () => {
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
-                  {/* 右侧滚动提示渐变 — 用户向左滚动后淡出 */}
-                  {showDynastyScrollHint && (
-                    <View style={styles.dynastyScrollHint} pointerEvents="none" />
-                  )}
-                </View>
               </View>
 
               <View style={styles.formGroup}>
@@ -490,21 +473,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     paddingRight: Spacing.lg, // avoid last button hidden behind FAB
   },
-  // Wrapper: positions ScrollView and the gradient hint overlay
-  dynastySelectorWrapper: {
-    position: 'relative',
-  },
-  // Right-side fade gradient hint for horizontal scroll affordance
-  dynastyScrollHint: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    width: 48,
-    backgroundColor: Colors.background,
-    borderRightWidth: 1,
-    borderRightColor: Colors.border,
-  },
+
   dynastyButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
