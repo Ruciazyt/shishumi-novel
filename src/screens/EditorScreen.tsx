@@ -470,6 +470,13 @@ export const EditorScreen: React.FC = () => {
 
       {/* Toolbar */}
       <View style={styles.toolbar}>
+        {chapterIndex >= 0 && (
+          <View style={styles.chapterProgressChip} accessibilityLabel={`${chapterDisplay}章节进度`}>
+            <Text style={styles.chapterProgressChipText} numberOfLines={1}>
+              {chapterDisplay}{chapter.title}
+            </Text>
+          </View>
+        )}
         <TouchableOpacity
           style={[styles.toolButton, aiVisible && aiType === 'polish' && styles.toolButtonActive]}
           onPress={() => handleAIPress('polish')}
@@ -815,6 +822,24 @@ const styles = StyleSheet.create({
   },
   navChapterBtnTextDisabled: {
     color: Colors.textLight,
+  },
+  // Toolbar - Chapter Progress Chip
+  chapterProgressChip: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    marginBottom: Spacing.xs,
+    backgroundColor: ColorsAlpha.goldBorder,
+    borderRadius: BorderRadius.md,
+  },
+  chapterProgressChipText: {
+    fontSize: FontSize.xs,
+    color: Colors.gold,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
   // Error
   errorText: {

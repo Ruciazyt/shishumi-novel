@@ -38,6 +38,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const [error, setError] = useState('');
   const [loadingHint, setLoadingHint] = useState('');
   const [copied, setCopied] = useState(false);
+  // 插入确认状态：点击"插入文本"后短暂显示"已插入"提示，再关闭 modal
+  const [inserted, setInserted] = useState(false);
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -218,10 +220,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   }, []);
 
   const handleInsert = () => {
-    if (result && onInsertText) {
-      onInsertText(result);
-      onClose();
-    }
+    if (!result || !onInsertText) return;
+    setInserted(true);
+    onInsertText(result);
+    // 延迟关闭 modal，让用户看到"已插入"提示
+    setTimeout(() => {
+      if (isMountedRef.current) onClose();
+    }, 1200);
   };
 
   const handleCopy = async () => {
@@ -380,21 +385,29 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   <Text style={styles.resultText}>{result}</Text>
                 </ScrollView>
                 <View style={styles.resultActions}>
-                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
-                    <Text style={styles.resetButtonText}>重新输入</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
-                    <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
-                      {copyButtonText}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.insertButton, !result && styles.insertButtonDisabled]}
-                    onPress={handleInsert}
-                    disabled={!result}
-                  >
-                    <Text style={[styles.insertButtonText, !result && styles.insertButtonTextDisabled]}>插入文本</Text>
-                  </TouchableOpacity>
+                  {inserted ? (
+                    <View style={styles.insertedConfirm}>
+                      <Text style={styles.insertedConfirmText}>✓ 已插入 {result.length} 字</Text>
+                    </View>
+                  ) : (
+                    <>
+                      <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                        <Text style={styles.resetButtonText}>重新输入</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+                        <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
+                          {copyButtonText}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.insertButton, !result && styles.insertButtonDisabled]}
+                        onPress={handleInsert}
+                        disabled={!result}
+                      >
+                        <Text style={[styles.insertButtonText, !result && styles.insertButtonTextDisabled]}>插入文本</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
                 </View>
               </View>
             ) : (
@@ -673,5 +686,18 @@ const styles = StyleSheet.create({
   },
   submitButtonTextDisabled: {
     color: Colors.textLight,
+  },
+  // 插入确认提示
+  insertedConfirm: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  insertedConfirmText: {
+    fontSize: FontSize.md,
+    color: Colors.success,
+    fontWeight: '600',
   },
 });
