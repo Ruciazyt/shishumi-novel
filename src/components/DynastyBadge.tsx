@@ -12,7 +12,7 @@ export const DynastyBadge: React.FC<{
   subtext?: string;
   /** Font size: 'sm' (14px, for project info) or 'xs' (12px, for stats bar). Defaults to 'sm'. */
   size?: 'sm' | 'xs';
-}> = ({ name, subtext, size = 'sm' }) => {
+}> = React.memo(({ name, subtext, size = 'sm' }) => {
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   return (
     <View style={styles.badge}>
@@ -20,7 +20,7 @@ export const DynastyBadge: React.FC<{
       {subtext ? <Text style={[styles.subtext, size === 'xs' && styles.subtextXs]} numberOfLines={1}>{subtext}</Text> : null}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   badge: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   subtextXs: {
-    fontSize: 10,
+    fontSize: FontSize.xs, // consistent with design system (was hardcoded 10px)
     letterSpacing: 0.5,
   },
 });
