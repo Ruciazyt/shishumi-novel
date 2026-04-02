@@ -746,7 +746,11 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   toolButton: {
-    flex: 1,
+    // flex: 1 causes overflow on narrow screens; use minWidth so buttons
+    // size to content and wrap gracefully on small devices
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 56,
     alignItems: 'center',
     paddingVertical: Spacing.sm + 2,
     paddingHorizontal: Spacing.xs,
