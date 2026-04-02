@@ -19,7 +19,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTY_SUMMARIES, DYNASTIES } from '../data/dynasties';
+import { getDynastyById, getDynastyByName, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTY_SUMMARIES, DYNASTIES } from '../data/dynasties';
 import { updateChapter, saveDynasty } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
@@ -343,7 +343,7 @@ export const EditorScreen: React.FC = () => {
     const dynastyId = project?.dynasty ?? state.dynasty;
     const dynastyData = getDynastyById(dynastyId);
     return {
-      display: dynastyData?.name || dynastyId,
+      display: dynastyData?.name || getDynastyByName(dynastyId)?.name || dynastyId,
       summary: dynastyData ? (DYNASTY_SUMMARIES[dynastyData.name] || '') : '',
       writingTip: dynastyData ? (DYNASTY_WRITING_TIPS[dynastyData.name] || '') : '',
       placeholder: dynastyData ? (DYNASTY_PLACEHOLDERS[dynastyData.name] || '开始写作...') : '开始写作...',

@@ -1,8 +1,8 @@
 import { Linking, Alert } from 'react-native';
 
-// 动态读取 app.json 中的版本号（Expo 项目标准做法，无需额外依赖）
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version: APP_VERSION } = require('../../app.json').expo;
+// Expo 项目可直接导入 app.json（tsconfig.json 的 resolveJsonModule: true 已启用）
+import pkg from '../../app.json';
+const APP_VERSION: string = pkg.expo.version;
 
 const REPO_OWNER = 'Ruciazyt';
 const REPO_NAME = 'shishumi-novel';
