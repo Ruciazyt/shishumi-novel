@@ -121,7 +121,7 @@ const buildPrompt = (request: AIRequest): string => {
 };
 
 /** 从 axios error 对象中安全提取错误消息 */
-const extractErrorMessage = (error: unknown): string => {
+const extractErrorMessage = (error: unknown, attempt = 1, maxRetries = MAX_RETRIES): string => {
   if (!error || typeof error !== 'object') {
     return '调用失败';
   }
@@ -178,8 +178,7 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       return { success: false, error: '请先在设置中配置API密钥' };
     }
 
-    const [apiType, baseUrl, model] = await Promise.all([
-      getApiType(),
+    const [baseUrl, model] = await Promise.all([
       getApiBaseUrl(),
       getModel(),
     ]);
@@ -220,8 +219,9 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     const err = error as Record<string, unknown>;
     const code = err.code as string | undefined;
     const httpStatus = (err.response as Record<string, unknown> | undefined)?.status as number | undefined;
+
     // 判断是否值得重试：网络层错误（无 response）或服务端错误/限流
-    const isNetworkError = !httpStatus; // 无 HTTP 状态码 = 网络错误
+    const isNetworkError = !httpStatus;
     const isRetryable =
       code === 'ECONNABORTED' ||
       code === 'ERR_NETWORK' ||
@@ -232,11 +232,17 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       (httpStatus !== undefined && httpStatus >= 500);
 
     if (isRetryable && attempt < MAX_RETRIES) {
-      const delay = attempt * 2000;
+      // 指数退避：2s → 4s → 8s
+      const delay = Math.pow(2, attempt) * 1000;
       await sleep(delay);
       return callAI(request, attempt + 1);
     }
 
-    return { success: false, error: extractErrorMessage(error) };
+    // 重试耗尽或不可重试的错误，返回带上下文的错误信息
+    const baseError = extractErrorMessage(error, attempt, MAX_RETRIES);
+    if (attempt > 1) {
+      return { success: false, error: `${baseError}（已重试${attempt - 1}次）` };
+    }
+    return { success: false, error: baseError };
   }
 };
