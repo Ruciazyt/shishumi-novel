@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -105,6 +105,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   useEffect(() => {
     if (initialType) aiTypeRef.current = initialType;
   }, [initialType]);
+
+  // 同步 aiTypeRef 到当前选中的 aiType（用户切换类型标签页后也能正确提交）
+  useLayoutEffect(() => {
+    aiTypeRef.current = aiType;
+  }, [aiType]);
 
   // 开始加载时启动超时提示
   useEffect(() => {
