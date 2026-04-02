@@ -310,7 +310,19 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </View>
             )}
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+                <View style={styles.errorActions}>
+                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                    <Text style={styles.resetButtonText}>重新输入</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.retryButton} onPress={handleSubmit}>
+                    <Text style={styles.retryButtonText}>重试</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
 
             {loading ? (
               <View style={styles.loadingContainer}>
@@ -472,6 +484,31 @@ const styles = StyleSheet.create({
     color: Colors.error,
     fontSize: FontSize.sm,
     marginBottom: Spacing.md,
+  },
+  errorContainer: {
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.error,
+    marginBottom: Spacing.md,
+  },
+  errorActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  retryButton: {
+    backgroundColor: Colors.vermillion,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  retryButtonText: {
+    color: Colors.textOnVermillion,
+    fontSize: FontSize.sm,
+    fontWeight: '600',
   },
   loadingContainer: {
     alignItems: 'center',
