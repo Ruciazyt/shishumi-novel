@@ -96,7 +96,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       cancelledRef.current = false;
       resetState();
     }
-  }, [visible]);
+  }, [visible, resetState]);
 
   // 组件卸载时标记
   useEffect(() => {
