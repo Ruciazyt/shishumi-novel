@@ -129,9 +129,9 @@ const extractErrorMessage = (error: unknown): string => {
   const err = error as Record<string, unknown>;
 
   // axios 错误：err.response 存在
-  const response = err.response;
-  if (response && typeof response === 'object') {
-    const resp = response as Record<string, unknown>;
+  const errResponse = err.response;
+  if (errResponse && typeof errResponse === 'object') {
+    const resp = errResponse as Record<string, unknown>;
     const data = resp.data;
 
     // data 为对象时，尝试提取 error.message 或直接的 message 字段
