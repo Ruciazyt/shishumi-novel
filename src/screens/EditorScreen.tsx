@@ -317,38 +317,22 @@ export const EditorScreen: React.FC = () => {
     }
   };
 
-  const dynastyPlaceholder = React.useMemo(() => {
-    const dynastyData = project?.dynasty
-      ? getDynastyById(project.dynasty)
-      : getDynastyById(state.dynasty);
-    if (!dynastyData) return '开始写作...';
-    return DYNASTY_PLACEHOLDERS[dynastyData.name] || '开始写作...';
-  }, [project?.dynasty, state.dynasty]);
-
-  // 完整写作提示（用于弹窗）
-  const dynastyWritingTip = React.useMemo(() => {
-    const dynastyData = project?.dynasty
-      ? getDynastyById(project.dynasty)
-      : getDynastyById(state.dynasty);
-    if (!dynastyData) return '';
-    return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
-  }, [project?.dynasty, state.dynasty]);
-
-  // 朝代一句话概述（显示在弹窗标题下方和徽章副标题）
-  const dynastySummary = React.useMemo(() => {
-    const dynastyData = project?.dynasty
-      ? getDynastyById(project.dynasty)
-      : getDynastyById(state.dynasty);
-    if (!dynastyData) return '';
-    return DYNASTY_SUMMARIES[dynastyData.name] || '';
-  }, [project?.dynasty, state.dynasty]);
-
-  // 优先使用项目级朝代；其次全局朝代；找不到对应数据时回退到原始 ID
-  const dynastyDisplay = React.useMemo(() => {
+  // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
+  const dynastyMeta = React.useMemo(() => {
     const dynastyId = project?.dynasty ?? state.dynasty;
     const dynastyData = getDynastyById(dynastyId);
-    return dynastyData?.name || dynastyId;
+    return {
+      display: dynastyData?.name || dynastyId,
+      summary: dynastyData ? (DYNASTY_SUMMARIES[dynastyData.name] || '') : '',
+      writingTip: dynastyData ? (DYNASTY_WRITING_TIPS[dynastyData.name] || '') : '',
+      placeholder: dynastyData ? (DYNASTY_PLACEHOLDERS[dynastyData.name] || '开始写作...') : '开始写作...',
+    };
   }, [project?.dynasty, state.dynasty]);
+
+  const dynastyDisplay = dynastyMeta.display;
+  const dynastySummary = dynastyMeta.summary;
+  const dynastyWritingTip = dynastyMeta.writingTip;
+  const dynastyPlaceholder = dynastyMeta.placeholder;
 
   const handleDynastyChange = async (dynastyId: DynastyId) => {
     // 更新全局 dynasty 设置
@@ -678,15 +662,6 @@ const styles = StyleSheet.create({
   },
   undoRedoTextDisabled: {
     opacity: 0.35,
-  },
-  navBtn: {
-    padding: Spacing.xs,
-  },
-  navBtnText: {
-    fontSize: 24,
-    color: Colors.gold,
-    fontWeight: 'bold',
-    lineHeight: 24,
   },
   tipBtn: {
     padding: Spacing.xs,
