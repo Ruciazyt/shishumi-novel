@@ -81,6 +81,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
 
 const styles = StyleSheet.create({
   container: {
+    position: 'relative',
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.md,
