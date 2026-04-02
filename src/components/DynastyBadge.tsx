@@ -17,7 +17,7 @@ export const DynastyBadge: React.FC<{
   return (
     <View style={styles.badge}>
       <Text style={textStyle}>{name}</Text>
-      {subtext ? <Text style={styles.subtext} numberOfLines={1}>{subtext}</Text> : null}
+      {subtext ? <Text style={[styles.subtext, size === 'xs' && styles.subtextXs]} numberOfLines={1}>{subtext}</Text> : null}
     </View>
   );
 };
@@ -44,8 +44,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   subtext: {
-    fontSize: 10,
+    fontSize: FontSize.xs,
     color: Colors.textLight,
-    marginTop: 1,
+    marginTop: 2,
+  },
+  subtextXs: {
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
 });

@@ -9,6 +9,8 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,10 +18,9 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { addChapter, updateChapter, deleteChapter } from '../services/storage';
-import { getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
-import { Chapter } from '../types';
-import { RootStackParamList } from '../types';
+import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
+import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTIES } from '../data/dynasties';
+import { Chapter, DynastyId, RootStackParamList } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ProjectScreenRouteProp = RouteProp<RootStackParamList, 'Project'>;
@@ -35,6 +36,13 @@ export const ProjectScreen: React.FC = () => {
   const [chapterTitle, setChapterTitle] = useState('');
   const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
   const [isSavingChapter, setIsSavingChapter] = useState(false);
+
+  // Project edit modal state
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDynasty, setEditDynasty] = useState<DynastyId>('tang');
+  const [editDescription, setEditDescription] = useState('');
+  const [isSavingProject, setIsSavingProject] = useState(false);
 
   if (!project) {
     return (
@@ -162,6 +170,38 @@ export const ProjectScreen: React.FC = () => {
     }
   }, [chapterTitle, editingChapter, dispatch, project]);
 
+  /** 打开项目编辑弹窗，初始化表单数据 */
+  const handleEditProject = useCallback(() => {
+    setEditTitle(project.title);
+    setEditDynasty(project.dynasty);
+    setEditDescription(project.description);
+    setEditModalVisible(true);
+  }, [project]);
+
+  /** 保存项目编辑 */
+  const handleSaveProject = useCallback(async () => {
+    if (!editTitle.trim()) {
+      Alert.alert('错误', '请输入书名');
+      return;
+    }
+    setIsSavingProject(true);
+    try {
+      const updated = await updateProject(project.id, {
+        title: editTitle.trim(),
+        dynasty: editDynasty,
+        description: editDescription.trim(),
+      });
+      if (updated) {
+        dispatch({ type: 'UPDATE_PROJECT', payload: updated });
+        setEditModalVisible(false);
+      } else {
+        Alert.alert('错误', '保存失败，请重试');
+      }
+    } finally {
+      setIsSavingProject(false);
+    }
+  }, [editTitle, editDynasty, editDescription, dispatch, project.id]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -172,7 +212,14 @@ export const ProjectScreen: React.FC = () => {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {project.title}
         </Text>
-        <View style={styles.headerRight} />
+        <TouchableOpacity
+          onPress={handleEditProject}
+          style={styles.editButton}
+          accessibilityLabel="编辑项目"
+          accessibilityRole="button"
+        >
+          <Text style={styles.editButtonText}>编辑</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Project Info - 时代背景信息 */}
@@ -296,6 +343,106 @@ export const ProjectScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* 项目编辑弹窗 */}
+      <Modal visible={editModalVisible} animationType="slide" transparent>
+        <KeyboardAvoidingView
+          style={styles.modalContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setEditModalVisible(false)}
+          />
+          <ScrollView
+            style={styles.modalScroll}
+            contentContainerStyle={styles.modalScrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>编辑作品</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setEditModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>书名</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="请输入书名"
+                  placeholderTextColor={Colors.textLight}
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                  autoFocus
+                  maxLength={50}
+                />
+                <Text style={styles.charCount}>{editTitle.length}/50</Text>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>时代背景</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.dynastySelectorContent}
+                >
+                  {DYNASTIES.map(d => (
+                    <TouchableOpacity
+                      key={d.id}
+                      style={[
+                        styles.dynastyButton,
+                        editDynasty === d.id && styles.dynastyButtonActive,
+                      ]}
+                      onPress={() => setEditDynasty(d.id as DynastyId)}
+                    >
+                      <Text
+                        style={[
+                          styles.dynastyButtonText,
+                          editDynasty === d.id && styles.dynastyButtonTextActive,
+                        ]}
+                      >
+                        {d.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>简介</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="请输入简介（可选）"
+                  placeholderTextColor={Colors.textLight}
+                  value={editDescription}
+                  onChangeText={setEditDescription}
+                  multiline
+                  maxLength={200}
+                />
+                <Text style={styles.charCount}>{editDescription.length}/200</Text>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, isSavingProject && styles.submitButtonDisabled]}
+                onPress={handleSaveProject}
+                disabled={isSavingProject}
+              >
+                {isSavingProject ? (
+                  <ActivityIndicator color={Colors.textOnVermillion} size="small" />
+                ) : (
+                  <Text style={styles.submitButtonText}>保存修改</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 };
@@ -332,8 +479,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginHorizontal: Spacing.md,
   },
-  headerRight: {
-    width: 60,
+  editButton: {
+    padding: Spacing.xs,
+  },
+  editButtonText: {
+    fontSize: FontSize.md,
+    color: Colors.vermillion,
+    fontWeight: '500',
   },
   // Project Info - 古籍装帧风格
   projectInfo: {
@@ -418,6 +570,10 @@ const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
   },
+  modalScroll: {},
+  modalScrollContent: {
+    paddingBottom: 40,
+  },
   dynastyModalContent: {
     backgroundColor: Colors.background,
     borderTopLeftRadius: BorderRadius.xxl,
@@ -490,6 +646,37 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     fontSize: FontSize.md,
     color: Colors.textPrimary,
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  dynastySelectorContent: {
+    flexDirection: 'row',
+    paddingVertical: Spacing.xs,
+    paddingRight: Spacing.lg,
+  },
+  dynastyButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.round,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  dynastyButtonActive: {
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
+  },
+  dynastyButtonText: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+  },
+  dynastyButtonTextActive: {
+    color: Colors.textOnVermillion,
+    fontWeight: '600',
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
