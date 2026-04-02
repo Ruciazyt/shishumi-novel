@@ -63,7 +63,6 @@ export const EditorScreen: React.FC = () => {
   projectRef.current = project;
   chapterRef.current = chapter;
   chapterIdRef.current = chapterId;
-  pendingContentRef.current = content;
 
   // 用于撤销/重做的稳定引用，避免 stale closure
   const historyRef = useRef<string[]>([]);
@@ -289,6 +288,8 @@ export const EditorScreen: React.FC = () => {
     const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
     pendingContentRef.current = newContent;
+    // AI插入内容视为已保存，避免auto-save误判（pending===lastSaved时跳过保存）
+    lastSavedContentRef.current = newContent;
     recordHistory(newContent);
   };
 
