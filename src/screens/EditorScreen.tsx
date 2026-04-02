@@ -681,6 +681,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
+  statsBarLeft: {
+    flex: 1,
+  },
+  statsBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   statsText: {
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
@@ -697,16 +705,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.success,
   },
-  // Stats Bar - 收起键盘按钮
-  statsBarLeft: {
-    flex: 1,
-  },
-  statsBarRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-
+  // Keyboard Dismiss Button
   keyboardDismissBtn: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
