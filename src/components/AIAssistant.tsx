@@ -66,16 +66,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }
   }, [initialType]);
 
-  // 清除 hint 定时器
-  const clearHintTimer = () => {
+  // 清除 hint 定时器（稳定引用，供 useCallback 依赖使用）
+  const clearHintTimer = useCallback(() => {
     if (hintTimerRef.current) {
       clearTimeout(hintTimerRef.current);
       hintTimerRef.current = null;
     }
-  };
+  }, []);
 
-  // 重置状态
-  const resetState = () => {
+  // 重置状态（useCallback 避免 useEffect 中不必要的依赖触发）
+  const resetState = useCallback(() => {
     clearHintTimer();
     setInputText('');
     setSceneText('');
@@ -84,7 +84,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setLoadingHint('');
     setCopied(false);
     cancelledRef.current = false;
-  };
+  }, [clearHintTimer]);
 
   // visible 关闭时重置（但保持 isMountedRef = true，因为组件未卸载）
   // 只有组件真正卸载时 isMountedRef 才变为 false
@@ -205,11 +205,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   }, []); // 无外部依赖：inputText/sceneText/aiType 从 ref 读取（由各 setXxx 同步），dynasty 直接读 state
 
   // 取消当前请求：标记为已取消，loading 立即重置，阻断响应处理
+  // 直接操作 hintTimerRef 而非调用 clearHintTimer，避免 handleCancel 每次渲染重建
   const handleCancel = useCallback(() => {
     cancelledRef.current = true;
     requestActiveRef.current = false;
     setLoading(false);
-    clearHintTimer();
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = null;
+    }
     setLoadingHint('');
   }, []);
 
