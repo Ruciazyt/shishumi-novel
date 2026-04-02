@@ -18,7 +18,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { AIAssistant } from '../components/AIAssistant';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTIES } from '../data/dynasties';
+import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTY_SUMMARIES, DYNASTIES } from '../data/dynasties';
 import { updateChapter, saveDynasty } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
@@ -334,6 +334,15 @@ export const EditorScreen: React.FC = () => {
     return DYNASTY_WRITING_TIPS[dynastyData.name] || '';
   }, [project?.dynasty, state.dynasty]);
 
+  // 朝代一句话概述（显示在弹窗标题下方和徽章副标题）
+  const dynastySummary = React.useMemo(() => {
+    const dynastyData = project?.dynasty
+      ? getDynastyById(project.dynasty)
+      : getDynastyById(state.dynasty);
+    if (!dynastyData) return '';
+    return DYNASTY_SUMMARIES[dynastyData.name] || '';
+  }, [project?.dynasty, state.dynasty]);
+
   // 优先使用项目级朝代；其次全局朝代；找不到对应数据时回退到原始 ID
   const dynastyDisplay = React.useMemo(() => {
     const dynastyId = project?.dynasty ?? state.dynasty;
@@ -419,9 +428,14 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
             accessibilityRole="button"
           >
-            <Text style={styles.statsBarDynastyText}>
+            <Text style={styles.statsBarDynastyText} numberOfLines={1}>
               {dynastyDisplay}
             </Text>
+            {dynastySummary ? (
+              <Text style={styles.statsBarDynastySubtext} numberOfLines={1}>
+                {dynastySummary}
+              </Text>
+            ) : null}
           </TouchableOpacity>
           <Text style={styles.statsText}>
             {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
@@ -570,7 +584,14 @@ export const EditorScreen: React.FC = () => {
           />
           <View style={styles.tipModalContent}>
             <View style={styles.tipModalHeader}>
-              <Text style={styles.tipModalTitle}>📜 写作提示</Text>
+              <View style={styles.tipModalTitleRow}>
+                <Text style={styles.tipModalTitle}>📜 写作提示</Text>
+                {dynastySummary ? (
+                  <Text style={styles.tipModalSubtitle} numberOfLines={1}>
+                    {dynastySummary}
+                  </Text>
+                ) : null}
+              </View>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setWritingTipVisible(false)}
@@ -714,6 +735,11 @@ const styles = StyleSheet.create({
     color: Colors.vermillion,
     fontWeight: '600',
   },
+  statsBarDynastySubtext: {
+    fontSize: 10,
+    color: Colors.textLight,
+    marginTop: 1,
+  },
   keyboardDismissBtn: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
@@ -806,6 +832,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize.lg,
     fontWeight: 'bold',
     color: Colors.textPrimary,
+  },
+  tipModalTitleRow: {
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  tipModalSubtitle: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   closeButton: {
     padding: Spacing.xs,
