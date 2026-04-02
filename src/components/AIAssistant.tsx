@@ -43,9 +43,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 防止组件卸载后仍更新 state（仅在组件真正卸载时设为 false）
   const isMountedRef = useRef(true);
-  // 始终读取最新的 aiType/dynasty，避免 handleSubmit 因频繁变化的值而不必要地 re-create
+  // 始终读取最新的 aiType，避免 handleSubmit 因频繁变化的值而不必要地 re-create
   const aiTypeRef = useRef<AIAssistantType>(initialType || 'polish');
-  const dynastyRef = useRef('');
   // 追踪当前是否处于有效请求周期：modal 关闭时应拒绝响应
   const requestActiveRef = useRef(false);
   // 追踪当前请求是否已被用户取消
@@ -102,14 +101,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     };
   }, []);
 
-  // 同步 aiTypeRef / dynastyRef，确保 handleSubmit 总能读到最新值
+  // 同步 aiTypeRef，确保 handleSubmit 总能读到最新值
   useEffect(() => {
     if (initialType) aiTypeRef.current = initialType;
   }, [initialType]);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    dynastyRef.current = state.dynasty;
-  }, [state.dynasty]);
 
   // 开始加载时启动超时提示
   useEffect(() => {
@@ -152,12 +147,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   );
 
   const handleSubmit = useCallback(async () => {
-    // 始终读取最新值，避开 stale closure 问题
+    // inputText/sceneText 从 ref 读取（避免频繁 re-create）
+    // aiType 从 ref 读取（initialType 同步后不常变化）
+    // dynasty 直接从 state 读取（modal 生命周期内稳定）
     const currentInputText = inputTextRef.current;
     const currentSceneText = sceneTextRef.current;
-    // 从 ref 读取，避免 handleSubmit 依赖 aiType/dynasty 导致频繁 re-create
     const currentAiType = aiTypeRef.current;
-    const currentDynasty = dynastyRef.current;
+    const currentDynasty = state.dynasty;
 
     const isSceneType = currentAiType === 'poetry' || currentAiType === 'buddhist' || currentAiType === 'taoist';
 
@@ -198,7 +194,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     } else {
       setError(response.error || '调用失败');
     }
-  }, []); // 依赖为空 — aiType/dynasty 通过 aiTypeRef/dynastyRef 读取，避免不必要 re-create
+  }, []); // 无外部依赖：inputText/sceneText/aiType 从 ref 读取（由各 setXxx 同步），dynasty 直接读 state
 
   // 取消当前请求：标记为已取消，loading 立即重置，阻断响应处理
   const handleCancel = useCallback(() => {

@@ -351,7 +351,13 @@ export const EditorScreen: React.FC = () => {
   }, [project?.dynasty, state.dynasty]);
 
   const handleDynastyChange = async (dynastyId: DynastyId) => {
+    // 更新全局 dynasty 设置
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
+    // 同时更新当前项目的朝代（项目级优先于全局）
+    if (project) {
+      const updatedProject = { ...project, dynasty: dynastyId };
+      dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+    }
     await saveDynasty(dynastyId);
     setDynastyModalVisible(false);
   };
