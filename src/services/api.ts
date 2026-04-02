@@ -226,6 +226,7 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       code === 'ENOTFOUND' ||
       code === 'ECONNREFUSED' ||
       !err.response ||
+      httpStatus === 400 ||
       httpStatus === 429 ||
       (httpStatus !== undefined && httpStatus >= 500);
 
