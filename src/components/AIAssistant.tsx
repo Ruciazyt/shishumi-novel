@@ -88,6 +88,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     cancelledRef.current = false;
   }, [clearHintTimer]);
 
+  /** 清空输入框（保留结果区域） */
+  const handleClearInput = useCallback(() => {
+    if (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist') {
+      setSceneText('');
+    } else {
+      setInputText('');
+    }
+  }, [aiType]);
+
   // visible 关闭时重置（但保持 isMountedRef = true，因为组件未卸载）
   // 只有组件真正卸载时 isMountedRef 才变为 false
   useEffect(() => {
@@ -329,7 +338,14 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   multiline
                   autoFocus
                 />
-                <Text style={styles.charCount}>{sceneText.length} 字</Text>
+                <View style={styles.charCountRow}>
+                  <Text style={styles.charCount}>{sceneText.length} 字</Text>
+                  {sceneText.length > 0 && (
+                    <TouchableOpacity onPress={handleClearInput} style={styles.clearInputBtn} accessibilityLabel="清空场景描述">
+                      <Text style={styles.clearInputBtnText}>清空</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             ) : (
               <View style={styles.inputContainer}>
@@ -345,7 +361,14 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   multiline
                   autoFocus
                 />
-                <Text style={styles.charCount}>{inputText.length} 字</Text>
+                <View style={styles.charCountRow}>
+                  <Text style={styles.charCount}>{inputText.length} 字</Text>
+                  {inputText.length > 0 && (
+                    <TouchableOpacity onPress={handleClearInput} style={styles.clearInputBtn} accessibilityLabel="清空输入文本">
+                      <Text style={styles.clearInputBtnText}>清空</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             )}
 
@@ -536,6 +559,25 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     textAlign: 'right',
     marginTop: Spacing.xs,
+  },
+  charCountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Spacing.xs,
+  },
+  clearInputBtn: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  clearInputBtnText: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    fontWeight: '500',
   },
   errorText: {
     color: Colors.error,
