@@ -21,7 +21,11 @@ export const formatRelativeTime = (timestamp: number): string => {
   const date = new Date(timestamp);
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  return `${month}月${day}日`;
+  const year = date.getFullYear();
+  const currentYear = new Date().getFullYear();
+  return year === currentYear
+    ? `${month}月${day}日`
+    : `${year}年${month}月${day}日`;
 };
 
 /**
