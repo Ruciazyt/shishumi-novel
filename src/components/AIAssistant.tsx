@@ -388,8 +388,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                       {copyButtonText}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.insertButton} onPress={handleInsert}>
-                    <Text style={styles.insertButtonText}>插入文本</Text>
+                  <TouchableOpacity
+                    style={[styles.insertButton, !result && styles.insertButtonDisabled]}
+                    onPress={handleInsert}
+                    disabled={!result}
+                  >
+                    <Text style={[styles.insertButtonText, !result && styles.insertButtonTextDisabled]}>插入文本</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -641,10 +645,16 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
   },
+  insertButtonDisabled: {
+    opacity: 0.4,
+  },
   insertButtonText: {
     color: Colors.textOnVermillion,
     fontSize: FontSize.md,
     fontWeight: '600',
+  },
+  insertButtonTextDisabled: {
+    color: Colors.textLight,
   },
   submitButton: {
     backgroundColor: Colors.vermillion,

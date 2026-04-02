@@ -10,6 +10,7 @@ import {
   Keyboard,
   Platform,
   Modal,
+  Alert,
   AppState,
   type AppStateStatus,
 } from 'react-native';
@@ -256,9 +257,28 @@ export const EditorScreen: React.FC = () => {
     setIsSaving(false);
   };
 
-  const handleBack = async () => {
+  const handleBack = () => {
     if (hasUnsavedChanges) {
-      await handleSave();
+      Alert.alert(
+        '有未保存的更改',
+        '您可以保存后离开，或放弃更改',
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '放弃更改',
+            style: 'destructive',
+            onPress: () => navigation.goBack(),
+          },
+          {
+            text: '保存并离开',
+            onPress: async () => {
+              await handleSave();
+              navigation.goBack();
+            },
+          },
+        ]
+      );
+      return;
     }
     navigation.goBack();
   };
