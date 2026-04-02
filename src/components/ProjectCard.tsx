@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Project } from '../types';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
@@ -13,58 +13,71 @@ interface ProjectCardProps {
   onLongPress?: () => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress, onLongPress }) => {
-  const relativeTime = formatRelativeTime(project.updatedAt);
-  const totalChars = project.chapters.reduce((sum, ch) => sum + countChars(ch.content), 0);
+/** 避免父组件重渲染导致所有卡片无谓重绘 */
+export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
+  ({ project, onPress, onLongPress }) => {
+    const relativeTime = useMemo(
+      () => formatRelativeTime(project.updatedAt),
+      [project.updatedAt]
+    );
+    const totalChars = useMemo(
+      () => project.chapters.reduce((sum, ch) => sum + countChars(ch.content), 0),
+      [project.chapters]
+    );
+    const dynastyName = useMemo(
+      () => getDynastyById(project.dynasty)?.name || project.dynasty,
+      [project.dynasty]
+    );
 
-  return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      activeOpacity={0.75}
-    >
-      {/* 装饰边框 - 古籍装帧风格 */}
-      <View style={styles.decorationBorder} />
+    return (
+      <TouchableOpacity
+        style={styles.container}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        activeOpacity={0.75}
+      >
+        {/* 装饰边框 - 古籍装帧风格 */}
+        <View style={styles.decorationBorder} />
 
-      <View style={styles.content}>
-        <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={1}>
-            {project.title}
-          </Text>
-          <View style={styles.dynastyBadge}>
-            <Text style={styles.dynastyBadgeText}>{getDynastyById(project.dynasty)?.name || project.dynasty}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.description} numberOfLines={2}>
-          {project.description || '暂无简介'}
-        </Text>
-
-        <View style={styles.meta}>
-          <View style={styles.metaItem}>
-            <Text style={styles.metaIcon}>📄</Text>
-            <Text style={styles.metaText}>
-              {project.chapters.length}章节
+        <View style={styles.content}>
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1}>
+              {project.title}
             </Text>
+            <View style={styles.dynastyBadge}>
+              <Text style={styles.dynastyBadgeText}>{dynastyName}</Text>
+            </View>
           </View>
-          {totalChars > 0 && (
+
+          <Text style={styles.description} numberOfLines={2}>
+            {project.description || '暂无简介'}
+          </Text>
+
+          <View style={styles.meta}>
             <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>✍️</Text>
-              <Text style={styles.metaText}>{totalChars.toLocaleString()}字</Text>
+              <Text style={styles.metaIcon}>📄</Text>
+              <Text style={styles.metaText}>
+                {project.chapters.length}章节
+              </Text>
             </View>
-          )}
-          {relativeTime && (
-            <View style={styles.metaItem}>
-              <Text style={styles.metaIcon}>🕐</Text>
-              <Text style={styles.metaText}>{relativeTime}</Text>
-            </View>
-          )}
+            {totalChars > 0 && (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaIcon}>✍️</Text>
+                <Text style={styles.metaText}>{totalChars.toLocaleString()}字</Text>
+              </View>
+            )}
+            {relativeTime && (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaIcon}>🕐</Text>
+                <Text style={styles.metaText}>{relativeTime}</Text>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+      </TouchableOpacity>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
