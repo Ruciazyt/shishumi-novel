@@ -17,14 +17,14 @@ export const API_PROVIDERS = [
   { id: 'openai', name: 'OpenAI 兼容接口', baseUrl: '' }, // 用户自定义
 ];
 
-export const QWEN_MODELS = [
+export const QWEN_MODELS: { id: string; name: string }[] = [
   { id: 'qwen-turbo', name: 'qwen-turbo（快速·经济）' },
   { id: 'qwen-plus', name: 'qwen-plus（增强·平衡）' },
   { id: 'qwen-max', name: 'qwen-max（最强·高精度）' },
   { id: 'qwen-long', name: 'qwen-long（长文本·200万上下文）' },
 ];
 
-export const OPENAI_MODELS = [
+export const OPENAI_MODELS: { id: string; name: string }[] = [
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini（快速·经济）' },
   { id: 'gpt-4o', name: 'GPT-4o（增强·平衡）' },
   { id: 'gpt-4-turbo', name: 'GPT-4 Turbo（最强）' },
@@ -226,7 +226,6 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       code === 'ENOTFOUND' ||
       code === 'ECONNREFUSED' ||
       !err.response ||
-      httpStatus === 400 ||
       httpStatus === 429 ||
       (httpStatus !== undefined && httpStatus >= 500);
 
