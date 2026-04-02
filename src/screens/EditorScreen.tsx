@@ -438,8 +438,13 @@ export const EditorScreen: React.FC = () => {
           >
             <DynastyBadge name={dynastyDisplay} subtext={dynastySummary} size="xs" />
           </TouchableOpacity>
+          {chapterIndex >= 0 && (
+            <View style={styles.statsChapterChip}>
+              <Text style={styles.statsChapterChipText}>{chapterDisplay}</Text>
+            </View>
+          )}
           <Text style={styles.statsText}>
-            {chapterDisplay}{charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}{lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
+            {charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}{lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
           </Text>
         </View>
         <View style={styles.statsBarRight}>
@@ -720,6 +725,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+  },
+  statsChapterChip: {
+    backgroundColor: ColorsAlpha.goldBorder,
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    marginRight: Spacing.sm,
+    alignSelf: 'center',
+  },
+  statsChapterChipText: {
+    fontSize: FontSize.xs,
+    color: Colors.gold,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   statsText: {
     fontSize: FontSize.xs,
