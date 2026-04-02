@@ -177,7 +177,7 @@ export const HomeScreen: React.FC = () => {
       {/* FAB - 悬浮新建按钮 with elegant design */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setModalVisible(true)}
+        onPress={() => { setShowDynastyScrollHint(true); setModalVisible(true); }}
         activeOpacity={0.85}
         accessibilityLabel="新建作品"
         accessibilityRole="button"
