@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -50,7 +50,7 @@ export const HomeScreen: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       const projects = await getProjects();
@@ -60,7 +60,7 @@ export const HomeScreen: React.FC = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [dispatch]);
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -90,15 +90,15 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
-  const handleProjectPress = (project: Project) => {
+  const handleProjectPress = useCallback((project: Project) => {
     dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
     navigation.navigate('Project', { projectId: project.id });
-  };
+  }, [dispatch, navigation]);
 
-  const handleProjectLongPress = (project: Project) => {
+  const handleProjectLongPress = useCallback((project: Project) => {
     Alert.alert(
       '删除项目',
-      `确定要删除《${project.title}》吗？`,
+      `确定删除《${project.title}》吗？该操作不可恢复。`,
       [
         { text: '取消', style: 'cancel' },
         {
@@ -106,7 +106,8 @@ export const HomeScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteProject(project.id);
+              const ok = await deleteProject(project.id);
+              if (!ok) throw new Error('deleteProject returned false');
               dispatch({ type: 'DELETE_PROJECT', payload: project.id });
             } catch (err) {
               console.error('[HomeScreen] deleteProject failed:', err);
@@ -116,7 +117,7 @@ export const HomeScreen: React.FC = () => {
         },
       ]
     );
-  };
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
