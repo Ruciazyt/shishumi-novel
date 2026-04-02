@@ -220,12 +220,14 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     const err = error as Record<string, unknown>;
     const code = err.code as string | undefined;
     const httpStatus = (err.response as Record<string, unknown> | undefined)?.status as number | undefined;
+    // 判断是否值得重试：网络层错误（无 response）或服务端错误/限流
+    const isNetworkError = !httpStatus; // 无 HTTP 状态码 = 网络错误
     const isRetryable =
       code === 'ECONNABORTED' ||
       code === 'ERR_NETWORK' ||
       code === 'ENOTFOUND' ||
       code === 'ECONNREFUSED' ||
-      !err.response ||
+      isNetworkError ||
       httpStatus === 429 ||
       (httpStatus !== undefined && httpStatus >= 500);
 

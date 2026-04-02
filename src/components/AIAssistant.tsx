@@ -327,6 +327,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   value={sceneText}
                   onChangeText={setSceneText}
                   multiline
+                  autoFocus
                 />
               </View>
             ) : (
@@ -341,6 +342,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   value={inputText}
                   onChangeText={setInputText}
                   multiline
+                  autoFocus
                 />
               </View>
             )}
