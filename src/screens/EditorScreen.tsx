@@ -23,6 +23,7 @@ import { updateChapter, saveDynasty } from '../services/storage';
 import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
 
+import { DynastyBadge } from '../components/DynastyBadge';
 import { RootStackParamList, AIAssistantType, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -404,19 +405,12 @@ export const EditorScreen: React.FC = () => {
       <View style={styles.statsBar}>
         <View style={styles.statsBarLeft}>
           <TouchableOpacity
-            style={styles.statsBarDynastyBadge}
+            style={{ marginRight: Spacing.sm }}
             onPress={() => setDynastyModalVisible(true)}
             accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
             accessibilityRole="button"
           >
-            <Text style={styles.statsBarDynastyText} numberOfLines={1}>
-              {dynastyDisplay}
-            </Text>
-            {dynastySummary ? (
-              <Text style={styles.statsBarDynastySubtext} numberOfLines={1}>
-                {dynastySummary}
-              </Text>
-            ) : null}
+            <DynastyBadge name={dynastyDisplay} subtext={dynastySummary} size="xs" />
           </TouchableOpacity>
           <Text style={styles.statsText}>
             {chapterDisplay}{charCount} 字{wordCount > 0 ? ` / ${wordCount} 词` : ''}
@@ -713,26 +707,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  statsBarDynastyBadge: {
-    backgroundColor: ColorsAlpha.vermillionBadgeBg,
-    borderWidth: 1,
-    borderColor: ColorsAlpha.vermillionBadgeBorder,
-    borderRadius: BorderRadius.round,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    marginRight: Spacing.sm,
-    alignSelf: 'center',
-  },
-  statsBarDynastyText: {
-    fontSize: FontSize.xs,
-    color: Colors.vermillion,
-    fontWeight: '600',
-  },
-  statsBarDynastySubtext: {
-    fontSize: 10,
-    color: Colors.textLight,
-    marginTop: 1,
-  },
+
   keyboardDismissBtn: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,

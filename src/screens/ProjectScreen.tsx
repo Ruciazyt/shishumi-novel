@@ -14,6 +14,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
+import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter } from '../services/storage';
 import { getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
@@ -177,9 +178,7 @@ export const ProjectScreen: React.FC = () => {
       {/* Project Info - 时代背景信息 */}
       <View style={styles.projectInfo}>
         <View style={styles.projectInfoContent}>
-          <View style={styles.dynastyBadge}>
-            <Text style={styles.dynastyBadgeText}>{dynastyData?.name || project.dynasty}</Text>
-          </View>
+          <DynastyBadge name={dynastyData?.name || project.dynasty} />
           <Text style={styles.description} numberOfLines={2}>
             {project.description || '暂无简介'}
           </Text>
@@ -349,21 +348,6 @@ const styles = StyleSheet.create({
   projectInfoContent: {
     flex: 1,
     marginRight: Spacing.md,
-  },
-  dynastyBadge: {
-    backgroundColor: ColorsAlpha.vermillionBadgeBg,
-    borderWidth: 1,
-    borderColor: ColorsAlpha.vermillionBadgeBorder,
-    borderRadius: BorderRadius.round,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.sm,
-  },
-  dynastyBadgeText: {
-    fontSize: FontSize.sm,
-    color: Colors.vermillion,
-    fontWeight: '600',
   },
   description: {
     fontSize: FontSize.sm,
