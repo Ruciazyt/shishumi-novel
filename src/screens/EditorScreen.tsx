@@ -376,11 +376,7 @@ export const EditorScreen: React.FC = () => {
           {chapterDisplay}{chapter.title}
         </Text>
         <View style={styles.headerRight}>
-          {canGoPrev && (
-            <TouchableOpacity onPress={handlePrevChapter} style={styles.navBtn} accessibilityLabel="上一章">
-              <Text style={styles.navBtnText}>‹</Text>
-            </TouchableOpacity>
-          )}
+
           <TouchableOpacity
             onPress={undo}
             disabled={!canUndo}
@@ -399,11 +395,6 @@ export const EditorScreen: React.FC = () => {
           >
             <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoTextDisabled]}>↪</Text>
           </TouchableOpacity>
-          {canGoNext && (
-            <TouchableOpacity onPress={handleNextChapter} style={styles.navBtn} accessibilityLabel="下一章">
-              <Text style={styles.navBtnText}>›</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity
             onPress={() => setWritingTipVisible(true)}
             style={styles.tipBtn}
@@ -522,6 +513,27 @@ export const EditorScreen: React.FC = () => {
         >
           <Text style={[styles.toolButtonText, aiVisible && aiType === 'taoist' && styles.toolButtonTextActive]}>道家</Text>
         </TouchableOpacity>
+        {/* 章节导航 */}
+        <View style={styles.navRow}>
+          <TouchableOpacity
+            style={[styles.navChapterBtn, !canGoPrev && styles.navChapterBtnDisabled]}
+            onPress={handlePrevChapter}
+            disabled={!canGoPrev}
+            accessibilityLabel="上一章"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.navChapterBtnText, !canGoPrev && styles.navChapterBtnTextDisabled]}>‹ 上一章</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.navChapterBtn, !canGoNext && styles.navChapterBtnDisabled]}
+            onPress={handleNextChapter}
+            disabled={!canGoNext}
+            accessibilityLabel="下一章"
+            accessibilityRole="button"
+          >
+            <Text style={[styles.navChapterBtnText, !canGoNext && styles.navChapterBtnTextDisabled]}>下一章 ›</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <AIAssistant
@@ -803,6 +815,38 @@ const styles = StyleSheet.create({
   },
   toolButtonTextActive: {
     color: Colors.textOnVermillion,
+  },
+  // Toolbar - Chapter Navigation
+  navRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    marginTop: Spacing.xs,
+    gap: Spacing.sm,
+  },
+  navChapterBtn: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+    alignItems: 'center',
+  },
+  navChapterBtnDisabled: {
+    opacity: 0.4,
+    borderColor: Colors.border,
+  },
+  navChapterBtnText: {
+    fontSize: FontSize.sm,
+    color: Colors.gold,
+    fontWeight: '600',
+  },
+  navChapterBtnTextDisabled: {
+    color: Colors.textLight,
   },
   // Error
   errorText: {
