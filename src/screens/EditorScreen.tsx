@@ -416,11 +416,11 @@ export const EditorScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.statsBarDynastyBadge}
             onPress={() => setDynastyModalVisible(true)}
-            accessibilityLabel={`当前朝代：${project?.dynasty ? (getDynastyById(project.dynasty)?.name || project.dynasty) : dynastyDisplay}，点击切换`}
+            accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
             accessibilityRole="button"
           >
             <Text style={styles.statsBarDynastyText}>
-              {project?.dynasty ? getDynastyById(project.dynasty)?.name || project.dynasty : dynastyDisplay}
+              {dynastyDisplay}
             </Text>
           </TouchableOpacity>
           <Text style={styles.statsText}>
