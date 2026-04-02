@@ -50,6 +50,15 @@ export const ProjectScreen: React.FC = () => {
     [project.dynasty]
   );
 
+  // Derived project stats — memoized to avoid recalc on every render
+  const projectStats = useMemo(() => {
+    const chapterCount = project.chapters.length;
+    const wordCount = project.chapters.reduce(
+      (sum, ch) => sum + ch.content.replace(/\s/g, '').length, 0
+    );
+    return { chapterCount, wordCount };
+  }, [project.chapters]);
+
   const handleChapterPress = useCallback(
     (chapter: Chapter) => {
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
@@ -174,10 +183,22 @@ export const ProjectScreen: React.FC = () => {
           <Text style={styles.description} numberOfLines={2}>
             {project.description || '暂无简介'}
           </Text>
+          {projectStats.chapterCount > 0 && (
+            <View style={styles.projectStatsRow}>
+              <Text style={styles.projectStatsText}>
+                📄 {projectStats.chapterCount}章节
+              </Text>
+              <Text style={styles.projectStatsText}>
+                ✍️ {projectStats.wordCount.toLocaleString()}字
+              </Text>
+            </View>
+          )}
         </View>
         <TouchableOpacity
           style={styles.dynastyInfoBtn}
           onPress={() => setDynastyModalVisible(true)}
+          accessibilityLabel="查看时代背景详情"
+          accessibilityRole="button"
         >
           <Text style={styles.dynastyInfoBtnText}>时代背景</Text>
         </TouchableOpacity>
@@ -348,6 +369,17 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
     lineHeight: 22,
+    marginBottom: Spacing.sm,
+  },
+  projectStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginTop: Spacing.xs,
+  },
+  projectStatsText: {
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
   },
   dynastyInfoBtn: {
     paddingHorizontal: Spacing.md,
