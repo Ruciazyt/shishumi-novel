@@ -329,6 +329,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   multiline
                   autoFocus
                 />
+                <Text style={styles.charCount}>{sceneText.length} 字</Text>
               </View>
             ) : (
               <View style={styles.inputContainer}>
@@ -344,6 +345,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   multiline
                   autoFocus
                 />
+                <Text style={styles.charCount}>{inputText.length} 字</Text>
               </View>
             )}
 
@@ -528,6 +530,12 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  charCount: {
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
+    textAlign: 'right',
+    marginTop: Spacing.xs,
   },
   errorText: {
     color: Colors.error,
