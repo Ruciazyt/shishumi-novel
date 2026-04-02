@@ -1,15 +1,15 @@
 import { Linking, Alert } from 'react-native';
 
+// 动态读取 app.json 中的版本号（Expo 项目标准做法，无需额外依赖）
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version: APP_VERSION } = require('../../app.json').expo;
+
 const REPO_OWNER = 'Ruciazyt';
 const REPO_NAME = 'shishumi-novel';
 const LATEST_RELEASE_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
 
-/** Hardcoded version extracted from app.json — avoids fs/path dependency (Node.js only). */
-export const APP_VERSION = '0.1.0';
-
 /**
- * Kept for backwards API compatibility with SettingsScreen.
- * Returns the hardcoded version string from app.json.
+ * 返回当前 App 版本字符串，供 SettingsScreen 等模块使用
  */
 export const getAppVersion = (): string => APP_VERSION;
 

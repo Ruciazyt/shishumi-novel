@@ -122,13 +122,19 @@ const buildPrompt = (request: AIRequest): string => {
 
 /** 从 axios error 对象中安全提取错误消息 */
 const extractErrorMessage = (error: unknown): string => {
-  if (!error || typeof error !== 'object') return '调用失败';
+  if (!error || typeof error !== 'object') {
+    return '调用失败';
+  }
 
   const err = error as Record<string, unknown>;
 
-  if (err.response && typeof err.response === 'object') {
-    const resp = err.response as Record<string, unknown>;
+  // axios 错误：err.response 存在
+  const response = err.response;
+  if (response && typeof response === 'object') {
+    const resp = response as Record<string, unknown>;
     const data = resp.data;
+
+    // data 为对象时，尝试提取 error.message 或直接的 message 字段
     if (data && typeof data === 'object') {
       const d = data as Record<string, unknown>;
       // 通义千问标准错误格式: { error: { message: "..." } }
@@ -139,21 +145,29 @@ const extractErrorMessage = (error: unknown): string => {
         : d['message'];
       if (typeof msg === 'string') return msg;
     }
+
+    // data 为字符串时直接返回（如 "Rate limit exceeded"）
     if (typeof data === 'string' && data.length > 0) return data;
+
+    // HTTP 状态码映射
     if (typeof resp.status === 'number') {
       if (resp.status === 401) return 'API密钥无效，请检查设置';
       if (resp.status === 403) return 'API密钥权限不足';
       if (resp.status === 429) return '请求过于频繁，请稍后再试';
       if (resp.status >= 500) return 'AI服务暂不可用，请稍后再试';
+      // 其他 HTTP 错误（400/404/422 等）返回状态码描述
+      return `请求失败（HTTP ${resp.status}）`;
     }
   }
 
+  // 网络层错误（未收到服务器响应）
   const code = err.code as string | undefined;
   if (code === 'ECONNABORTED') return '请求超时，请重试';
   if (code === 'ERR_NETWORK' || code === 'ENOTFOUND' || code === 'ECONNREFUSED') {
     return '网络连接失败，请检查网络';
   }
 
+  // 兜底：返回 err.message 或默认文本
   return (err.message as string | undefined) || '调用失败';
 };
 
