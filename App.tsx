@@ -10,6 +10,7 @@ import { ProjectScreen } from './src/screens/ProjectScreen';
 import { EditorScreen } from './src/screens/EditorScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { LoadingScreen } from './src/screens/LoadingScreen';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { Colors } from './src/constants/colors';
 import { RootStackParamList } from './src/types';
 
@@ -93,7 +94,9 @@ const AppContent: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
+      <ErrorBoundary>
       <AppContent />
+      </ErrorBoundary>
     </AppProvider>
   );
 }
