@@ -241,7 +241,7 @@ export const ProjectScreen: React.FC = () => {
             </View>
             {dynastyData ? (
               <ScrollView style={styles.dynastyTipsScroll} showsVerticalScrollIndicator={false}>
-                <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name]}</Text>
+                <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name] || ''}</Text>
               </ScrollView>
             ) : (
               <Text style={styles.noDynastyText}>暂无时代背景数据</Text>

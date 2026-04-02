@@ -372,7 +372,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.detailLabel}>礼仪制度：</Text>
                 <Text style={styles.detailValue}>{selectedDynastyDetail.etiquetteFeatures}</Text>
               </View>
-              {selectedDynastyDetail && DYNASTY_WRITING_TIPS[selectedDynastyDetail.name] && (
+              {DYNASTY_WRITING_TIPS[selectedDynastyDetail.name] && (
                 <View style={styles.writingTipsContainer}>
                   <Text style={styles.writingTipsLabel}>写作引导</Text>
                   <Text style={styles.writingTipsText}>{DYNASTY_WRITING_TIPS[selectedDynastyDetail.name]}</Text>
