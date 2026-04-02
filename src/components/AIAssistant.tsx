@@ -55,6 +55,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const sceneTextRef = useRef('');
   inputTextRef.current = inputText;
   sceneTextRef.current = sceneText;
+  // dynastyRef: 保证 handleSubmit（[]依赖）始终读取最新朝代
+  const dynastyRef = useRef(state.dynasty);
+  dynastyRef.current = state.dynasty;
 
   // 当 initialType 变化时同步 aiType（modal 关闭/重新打开时也生效）
   useEffect(() => {
@@ -158,7 +161,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     const currentInputText = inputTextRef.current;
     const currentSceneText = sceneTextRef.current;
     const currentAiType = aiTypeRef.current;
-    const currentDynasty = state.dynasty;
+    const currentDynasty = dynastyRef.current;
 
     const isSceneType = currentAiType === 'poetry' || currentAiType === 'buddhist' || currentAiType === 'taoist';
 
