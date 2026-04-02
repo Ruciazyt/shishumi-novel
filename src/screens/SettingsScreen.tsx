@@ -24,7 +24,7 @@ import {
   openReleasePage, getAppVersion, compareVersions,
   type ReleaseInfo
 } from '../services/update';
-import { DYNASTIES } from '../data/dynasties';
+import { DYNASTIES, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { type DynastyId } from '../types';
 import { saveDynasty } from '../services/storage';
 
@@ -372,6 +372,12 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.detailLabel}>礼仪制度：</Text>
                 <Text style={styles.detailValue}>{selectedDynastyDetail.etiquetteFeatures}</Text>
               </View>
+              {selectedDynastyDetail && DYNASTY_WRITING_TIPS[selectedDynastyDetail.name] && (
+                <View style={styles.writingTipsContainer}>
+                  <Text style={styles.writingTipsLabel}>写作引导</Text>
+                  <Text style={styles.writingTipsText}>{DYNASTY_WRITING_TIPS[selectedDynastyDetail.name]}</Text>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -633,6 +639,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 20,
+  },
+  writingTipsContainer: {
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    backgroundColor: Colors.paperDark,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: ColorsAlpha.goldBorder,
+  },
+  writingTipsLabel: {
+    fontSize: FontSize.xs,
+    color: Colors.gold,
+    fontWeight: '600',
+    marginBottom: Spacing.sm,
+    letterSpacing: 1,
+  },
+  writingTipsText: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 22,
   },
   aboutText: {
     fontSize: FontSize.md,
