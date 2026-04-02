@@ -301,11 +301,20 @@ export const EditorScreen: React.FC = () => {
     );
   }
 
-  const chapterIndex = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
-  const canGoPrev = chapterIndex > 0;
-  const canGoNext = chapterIndex < (project?.chapters.length ?? 0) - 1;
-  const prevChapterId = canGoPrev ? project?.chapters[chapterIndex - 1].id : null;
-  const nextChapterId = canGoNext ? project?.chapters[chapterIndex + 1].id : null;
+  // 章节导航状态 — 使用 useMemo 避免每次渲染重复计算 findIndex
+  const { chapterIndex, canGoPrev, canGoNext, prevChapterId, nextChapterId, chapterDisplay } = React.useMemo(() => {
+    const idx = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
+    const len = project?.chapters.length ?? 0;
+    return {
+      chapterIndex: idx,
+      canGoPrev: idx > 0,
+      canGoNext: idx < len - 1,
+      prevChapterId: idx > 0 ? project?.chapters[idx - 1].id : null,
+      nextChapterId: idx < len - 1 ? project?.chapters[idx + 1].id : null,
+      chapterDisplay: idx >= 0 ? `第${idx + 1}章/共${len}章 · ` : '',
+    };
+  }, [project?.chapters, chapterId]);
+
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
@@ -317,8 +326,6 @@ export const EditorScreen: React.FC = () => {
       wordCount: trimmed ? trimmed.split(/\s+/).length : 0,
     };
   }, [content]);
-
-  const chapterDisplay = chapterIndex >= 0 ? `第${chapterIndex + 1}章/共${project?.chapters.length ?? 0}章 · ` : '';
 
   /** 章节导航：稳定引用，避免 toolbar 每帧重渲染 */
   const handlePrevChapter = useCallback(async () => {
