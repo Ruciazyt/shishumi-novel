@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F5EFE0',
+    backgroundColor: ColorsAlpha.goldCardBg,
     marginHorizontal: 14,
     marginTop: 10,
     marginBottom: 4,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#D4C4A8',
+    borderColor: Colors.paperDark,
   },
   inspirationBannerLeft: {
     flexDirection: 'row',
@@ -317,16 +317,16 @@ const styles = StyleSheet.create({
   inspirationBannerTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#5C3D2E',
+    color: Colors.inkDark,
   },
   inspirationBannerSubtitle: {
     fontSize: 12,
-    color: '#8B7355',
+    color: Colors.textSecondary,
     marginTop: 1,
   },
   inspirationBannerArrow: {
     fontSize: 18,
-    color: '#B0A090',
+    color: Colors.textLight,
   },
 
   // Header - 古籍装帧风格

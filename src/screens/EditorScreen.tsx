@@ -386,27 +386,21 @@ export const EditorScreen: React.FC = () => {
     setDynastyModalVisible(false);
   };
 
-  /** 统计栏右侧内容：仅在相关状态变化时重新计算，避免每帧重算 */
-  const statsBarRightContent = React.useMemo(() => {
-    if (isSaving) {
-      return <Text style={styles.savingIndicator}>● 保存中</Text>;
-    }
-    if (justSaved) {
-      return <Text style={styles.savedIndicator}>✓ 已保存</Text>;
-    }
-    if (lastSavedAt) {
-      const label = formatLastSaved(lastSavedAt);
-      return (
-        <Text style={styles.savedIndicator}>
-          {label === '刚刚' ? '刚刚自动保存' : `${label}自动保存`}
-        </Text>
-      );
-    }
-    if (hasUnsavedChangesRef.current) {
-      return <Text style={styles.unsavedIndicator}>● 未保存</Text>;
-    }
+  /** 统计栏右侧内容状态：返回纯数据而非 JSX，符合 React 数据驱动渲染原则 */
+  const saveStatus = React.useMemo<'saving' | 'saved' | 'unsaved' | 'autoSaved' | null>(() => {
+    if (isSaving) return 'saving';
+    if (justSaved) return 'saved';
+    if (lastSavedAt) return 'autoSaved';
+    if (hasUnsavedChangesRef.current) return 'unsaved';
     return null;
   }, [isSaving, justSaved, lastSavedAt, tick]);
+
+  /** 格式化自动保存时间文案 */
+  const autoSaveLabel = React.useMemo(() => {
+    if (saveStatus !== 'autoSaved' || !lastSavedAt) return '';
+    const label = formatLastSaved(lastSavedAt);
+    return label === '刚刚' ? '刚刚自动保存' : `${label}自动保存`;
+  }, [saveStatus, lastSavedAt, tick]);
 
   return (
     <KeyboardAvoidingView
@@ -482,7 +476,10 @@ export const EditorScreen: React.FC = () => {
           </Text>
         </View>
         <View style={styles.statsBarRight}>
-          {statsBarRightContent}
+          {saveStatus === 'saving' && <Text style={styles.savingIndicator}>● 保存中</Text>}
+          {saveStatus === 'saved' && <Text style={styles.savedIndicator}>✓ 已保存</Text>}
+          {saveStatus === 'autoSaved' && <Text style={styles.savedIndicator}>{autoSaveLabel}</Text>}
+          {saveStatus === 'unsaved' && <Text style={styles.unsavedIndicator}>● 未保存</Text>}
           <TouchableOpacity
             onPress={Keyboard.dismiss}
             style={styles.keyboardDismissBtn}
