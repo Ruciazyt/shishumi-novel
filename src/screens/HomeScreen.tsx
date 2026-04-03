@@ -18,8 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { ProjectCard } from '../components/ProjectCard';
+import { DynastySelector } from '../components/DynastySelector';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { DYNASTIES, DYNASTY_SUMMARIES } from '../data/dynasties';
 import { createProject, deleteProject, getProjects } from '../services/storage';
 import { countChars } from '../utils/text';
 import { Project, RootStackParamList, DynastyId } from '../types';
@@ -47,7 +47,6 @@ export const HomeScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDynasty, setNewDynasty] = useState<DynastyId>('tang');
-  const [newDynastySummary, setNewDynastySummary] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,16 +62,6 @@ export const HomeScreen: React.FC = () => {
       setRefreshing(false);
     }
   }, [dispatch]);
-
-  // Keep dynasty summary in sync with the selected dynasty
-  React.useEffect(() => {
-    if (newDynasty === 'custom') {
-      setNewDynastySummary('自定义创作，无历史背景限制');
-    } else {
-      const dynastyName = DYNASTIES.find(d => d.id === newDynasty)?.name || newDynasty;
-      setNewDynastySummary(DYNASTY_SUMMARIES[dynastyName] || '');
-    }
-  }, [newDynasty]);
 
   const handleCreateProject = async () => {
     if (!newTitle.trim()) {
@@ -93,7 +82,6 @@ export const HomeScreen: React.FC = () => {
       setModalVisible(false);
       setNewTitle('');
       setNewDynasty('tang');
-      setNewDynastySummary('');
       setNewDescription('');
     } catch (err) {
       console.error('[HomeScreen] createProject failed:', err);
@@ -240,53 +228,13 @@ export const HomeScreen: React.FC = () => {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>时代背景</Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.dynastySelectorContent}
-                  >
-                    {DYNASTIES.map(d => (
-                      <TouchableOpacity
-                        key={d.id}
-                        style={[
-                          styles.dynastyButton,
-                          newDynasty === d.id && styles.dynastyButtonActive,
-                        ]}
-                        onPress={() => setNewDynasty(d.id as DynastyId)}
-                      >
-                        <Text
-                          style={[
-                            styles.dynastyButtonText,
-                            newDynasty === d.id && styles.dynastyButtonTextActive,
-                          ]}
-                        >
-                          {d.name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                      {/* 自定义/架空 */}
-                      <TouchableOpacity
-                        style={[
-                          styles.dynastyButton,
-                          newDynasty === 'custom' && styles.dynastyButtonActive,
-                        ]}
-                        onPress={() => setNewDynasty('custom' as DynastyId)}
-                      >
-                        <Text
-                          style={[
-                            styles.dynastyButtonText,
-                            newDynasty === 'custom' && styles.dynastyButtonTextActive,
-                          ]}
-                        >
-                          自定义
-                        </Text>
-                      </TouchableOpacity>
-                  </ScrollView>
-                  {newDynastySummary ? (
-                    <Text style={styles.dynastySummary} numberOfLines={2}>
-                      {newDynastySummary}
-                    </Text>
-                  ) : null}
+                <DynastySelector
+                  selected={newDynasty}
+                  onSelect={setNewDynasty}
+                  layout="horizontal"
+                  showSummary
+                  customLabel="自定义"
+                />
               </View>
 
               <View style={styles.formGroup}>
@@ -504,42 +452,6 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     textAlign: 'right',
     marginTop: Spacing.xs,
-  },
-  dynastySelectorContent: {
-    flexDirection: 'row',
-    paddingVertical: Spacing.xs,
-    paddingRight: Spacing.lg, // avoid last button hidden behind FAB
-  },
-
-  dynastyButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.round,
-    backgroundColor: Colors.paperDark,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: Spacing.sm,
-    marginBottom: Spacing.sm,
-  },
-  dynastyButtonActive: {
-    backgroundColor: Colors.vermillion,
-    borderColor: Colors.vermillion,
-  },
-  dynastyButtonText: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-  },
-  dynastyButtonTextActive: {
-    color: Colors.textOnVermillion,
-    fontWeight: '600',
-  },
-  dynastySummary: {
-    marginTop: Spacing.sm,
-    fontSize: FontSize.sm,
-    color: Colors.gold,
-    lineHeight: 22,
-    paddingHorizontal: Spacing.xs,
-    letterSpacing: 0.5,
   },
   submitButton: {
     backgroundColor: Colors.vermillion,

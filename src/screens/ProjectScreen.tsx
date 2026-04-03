@@ -21,8 +21,9 @@ import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constan
 import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
 import { countChars } from '../utils/text';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTIES } from '../data/dynasties';
+import { getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { Chapter, DynastyId, RootStackParamList } from '../types';
+import { DynastySelector } from '../components/DynastySelector';
 
 const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
@@ -414,43 +415,10 @@ export const ProjectScreen: React.FC = () => {
 
               <View style={styles.formGroup}>
                 <Text style={styles.label}>时代背景</Text>
-                <View style={styles.dynastySelectorContent}>
-                  {DYNASTIES.map(d => (
-                    <TouchableOpacity
-                      key={d.id}
-                      style={[
-                        styles.dynastyButton,
-                        editDynasty === d.id && styles.dynastyButtonActive,
-                      ]}
-                      onPress={() => setEditDynasty(d.id as DynastyId)}
-                    >
-                      <Text
-                        style={[
-                          styles.dynastyButtonText,
-                          editDynasty === d.id && styles.dynastyButtonTextActive,
-                        ]}
-                      >
-                        {d.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity
-                    style={[
-                      styles.dynastyButton,
-                      editDynasty === 'custom' && styles.dynastyButtonActive,
-                    ]}
-                    onPress={() => setEditDynasty('custom')}
-                  >
-                    <Text
-                      style={[
-                        styles.dynastyButtonText,
-                        editDynasty === 'custom' && styles.dynastyButtonTextActive,
-                      ]}
-                    >
-                      自定义/架空
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <DynastySelector
+                  selected={editDynasty}
+                  onSelect={setEditDynasty}
+                />
                 {editDynasty === 'custom' && (
                   <TextInput
                     style={[styles.input, { marginTop: Spacing.sm }]}
@@ -699,32 +667,6 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
-  },
-  dynastySelectorContent: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.xs,
-  },
-  dynastyButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.round,
-    backgroundColor: Colors.paperDark,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dynastyButtonActive: {
-    backgroundColor: Colors.vermillion,
-    borderColor: Colors.vermillion,
-  },
-  dynastyButtonText: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-  },
-  dynastyButtonTextActive: {
-    color: Colors.textOnVermillion,
-    fontWeight: '600',
   },
   submitButton: {
     backgroundColor: Colors.vermillion,

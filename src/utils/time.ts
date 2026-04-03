@@ -31,7 +31,7 @@ export const formatRelativeTime = (timestamp: number): string => {
 /**
  * 格式化最后保存时间（EditorScreen 字数统计栏使用）
  * @param date Date 对象或 null
- * @returns 如 "刚刚"、"3分钟前"、"14:05"
+ * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"14:05"
  */
 export const formatLastSaved = (date: Date | null): string => {
   if (!date) return '';
@@ -39,5 +39,7 @@ export const formatLastSaved = (date: Date | null): string => {
   const diffMs = now.getTime() - date.getTime();
   if (diffMs < 60000) return '刚刚';
   if (diffMs < 3600000) return `${Math.floor(diffMs / 60000)}分钟前`;
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return `${hours}小时前`;
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };

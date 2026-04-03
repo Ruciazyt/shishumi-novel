@@ -26,6 +26,7 @@ import {
 } from '../services/update';
 import { DYNASTIES, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { type DynastyId } from '../types';
+import { DynastySelector } from '../components/DynastySelector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveDynasty } from '../services/storage';
 
@@ -407,43 +408,10 @@ export const SettingsScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>默认时代背景</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>选择默认时代后，AI将根据该时代特征进行调整</Text>
-          <View style={styles.dynastyList}>
-            {DYNASTIES.map(dynasty => (
-              <TouchableOpacity
-                key={dynasty.id}
-                style={[
-                  styles.dynastyItem,
-                  state.dynasty === dynasty.id && styles.dynastyItemActive,
-                ]}
-                onPress={() => handleDynastyChange(dynasty.id)}
-              >
-                <Text
-                  style={[
-                    styles.dynastyName,
-                    state.dynasty === dynasty.id && styles.dynastyNameActive,
-                  ]}
-                >
-                  {dynasty.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity
-              style={[
-                styles.dynastyItem,
-                state.dynasty === 'custom' && styles.dynastyItemActive,
-              ]}
-              onPress={() => handleDynastyChange('custom')}
-            >
-              <Text
-                style={[
-                  styles.dynastyName,
-                  state.dynasty === 'custom' && styles.dynastyNameActive,
-                ]}
-              >
-                自定义/架空
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <DynastySelector
+            selected={state.dynasty as DynastyId}
+            onSelect={handleDynastyChange}
+          />
           {state.dynasty === 'custom' && (
             <View style={{ marginTop: Spacing.md }}>
               <TextInput
@@ -712,31 +680,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textOnVermillion,
     fontWeight: 'bold',
-  },
-  dynastyList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  dynastyItem: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
-    borderRadius: BorderRadius.round,
-    backgroundColor: Colors.paperDark,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dynastyItemActive: {
-    backgroundColor: Colors.vermillion,
-    borderColor: Colors.vermillion,
-  },
-  dynastyName: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-  },
-  dynastyNameActive: {
-    color: Colors.textOnVermillion,
-    fontWeight: '600',
   },
   fetchModelsButton: {
     backgroundColor: Colors.paperDark,
