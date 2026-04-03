@@ -316,15 +316,15 @@ export const EditorScreen: React.FC = () => {
 
   // 章节导航状态 — 使用 useMemo 避免每次渲染重复计算 findIndex
   const { chapterIndex, canGoPrev, canGoNext, prevChapterId, nextChapterId, chapterDisplay } = React.useMemo(() => {
-    const idx = project?.chapters.findIndex(c => c.id === chapterId) ?? -1;
-    const len = project?.chapters.length ?? 0;
+    const chapters = project?.chapters ?? [];
+    const idx = chapters.findIndex(c => c.id === chapterId);
     return {
       chapterIndex: idx,
       canGoPrev: idx > 0,
-      canGoNext: idx < len - 1,
-      prevChapterId: idx > 0 ? project?.chapters[idx - 1].id : null,
-      nextChapterId: idx < len - 1 ? project?.chapters[idx + 1].id : null,
-      chapterDisplay: idx >= 0 ? `第${idx + 1}章/共${len}章 · ` : '',
+      canGoNext: idx < chapters.length - 1,
+      prevChapterId: idx > 0 ? chapters[idx - 1].id : null,
+      nextChapterId: idx < chapters.length - 1 ? chapters[idx + 1].id : null,
+      chapterDisplay: idx >= 0 ? `第${idx + 1}章/共${chapters.length}章 · ` : '',
     };
   }, [project?.chapters, chapterId]);
 
