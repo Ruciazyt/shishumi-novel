@@ -22,6 +22,7 @@ export const getProjects = async (): Promise<Project[]> => {
     return data ? JSON.parse(data) : [];
   } catch (err) {
     console.error('[storage] getProjects failed:', err);
+    _cachedRaw = null; // 缓存损坏则清除，避免后续操作读取损坏数据
     return [];
   }
 };
