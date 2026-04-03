@@ -332,7 +332,7 @@ export const SettingsScreen: React.FC = () => {
 
           {apiType !== 'qwen' && (
             <>
-              <View style={{ marginTop: Spacing.md }}>
+              <View style={styles.apiUrlSection}>
                 <Text style={styles.label}>接口地址 {apiType === 'openai' ? '（OpenAI 兼容）' : ''}</Text>
               </View>
               <TextInput
@@ -413,7 +413,7 @@ export const SettingsScreen: React.FC = () => {
             onSelect={handleDynastyChange}
           />
           {state.dynasty === 'custom' && (
-            <View style={{ marginTop: Spacing.md }}>
+            <View style={styles.customDynastySection}>
               <TextInput
                 style={styles.input}
                 placeholder="请输入自定义朝代名称，如：架空朝代"
@@ -744,5 +744,11 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
+  },
+  apiUrlSection: {
+    marginTop: Spacing.md,
+  },
+  customDynastySection: {
+    marginTop: Spacing.md,
   },
 });

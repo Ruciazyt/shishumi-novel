@@ -337,22 +337,28 @@ export const EditorScreen: React.FC = () => {
     };
   }, [content]);
 
-  /** 章节导航：稳定引用，避免 toolbar 每帧重渲染 */
+  /** 章节导航：使用 projectRef 避免 project 引用变化导致回调重建 */
   const handlePrevChapter = useCallback(async () => {
-    if (canGoPrev && prevChapterId) {
+    const p = projectRef.current;
+    if (!p) return;
+    const idx = p.chapters.findIndex(c => c.id === chapterId);
+    if (idx > 0) {
       if (hasUnsavedChangesRef.current) await handleSave();
-      dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
-      navigation.navigate('Editor', { chapterId: prevChapterId });
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: p });
+      navigation.navigate('Editor', { chapterId: p.chapters[idx - 1].id });
     }
-  }, [canGoPrev, prevChapterId, project, dispatch, navigation, handleSave]);
+  }, [chapterId, dispatch, navigation, handleSave]);
 
   const handleNextChapter = useCallback(async () => {
-    if (canGoNext && nextChapterId) {
+    const p = projectRef.current;
+    if (!p) return;
+    const idx = p.chapters.findIndex(c => c.id === chapterId);
+    if (idx < p.chapters.length - 1) {
       if (hasUnsavedChangesRef.current) await handleSave();
-      dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
-      navigation.navigate('Editor', { chapterId: nextChapterId });
+      dispatch({ type: 'SET_CURRENT_PROJECT', payload: p });
+      navigation.navigate('Editor', { chapterId: p.chapters[idx + 1].id });
     }
-  }, [canGoNext, nextChapterId, project, dispatch, navigation, handleSave]);
+  }, [chapterId, dispatch, navigation, handleSave]);
 
   // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
   const dynastyMeta = React.useMemo(() => {
