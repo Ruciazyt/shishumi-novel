@@ -1,7 +1,13 @@
 /**
+ * Precompiled regex patterns (avoids re-creation on every function call)
+ */
+const WHITESPACE_REGEX = /\s/g;
+const MULTI_NEWLINE_REGEX = /\n\s*\n/;
+
+/**
  * 统计中文字符数（去除所有空白字符）
  */
-export const countChars = (text: string): number => text.replace(/\s/g, '').length;
+export const countChars = (text: string): number => text.replace(WHITESPACE_REGEX, '').length;
 
 /**
  * 统计文本中的中文字符数量（CJK Unified Ideographs + CJK Compatibility Ideographs）
@@ -32,5 +38,5 @@ export const truncateText = (text: string, maxLen: number = 30, suffix: string =
  */
 export const countParagraphs = (text: string): number => {
   if (!text.trim()) return 0;
-  return text.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
+  return text.split(MULTI_NEWLINE_REGEX).filter(p => p.trim().length > 0).length;
 };

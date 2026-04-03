@@ -49,11 +49,12 @@ const ChapterItem = React.memo<ChapterItemProps>(
       </TouchableOpacity>
     );
   },
-  // 自定义比较：只有当 chapter 内容/标题 或 index 变化时才重绘
+  // 自定义比较：只有当 chapter 内容/标题、index 或回调变化时才重绘
   (prev, next) =>
     prev.chapter.content === next.chapter.content &&
     prev.chapter.title === next.chapter.title &&
     prev.index === next.index &&
+    prev.onPress === next.onPress &&
     prev.onLongPress === next.onLongPress
 );
 
