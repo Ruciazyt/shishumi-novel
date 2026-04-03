@@ -282,8 +282,11 @@ export const EditorScreen: React.FC = () => {
   const handleInsertContent = (text: string) => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
-    // 去除内容末尾的换行，避免与前缀的 \n\n 重复积累产生多余空行
-    const baseContent = pendingContentRef.current.replace(/\n+$/, '');
+    // Normalize runs of 3+ newlines to 2 (prevents excessive blank lines
+    // when inserting multiple times into content with existing paragraph breaks).
+    // Then strip trailing newlines so the \n\n prefix always works correctly.
+    const normalized = pendingContentRef.current.replace(/\n{3,}/g, '\n\n');
+    const baseContent = normalized.replace(/\n+$/, '');
     const prefix = baseContent ? '\n\n' : '';
     const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
