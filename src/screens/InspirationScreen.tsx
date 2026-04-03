@@ -78,6 +78,31 @@ function parseAIResult(text: string): Inspiration | null {
   }
 }
 
+/** Reusable bullet-list section — deduplicates 4 near-identical blocks in card rendering */
+function BulletSection({
+  title,
+  items,
+  titleColor,
+  itemColor,
+  isFirst,
+}: {
+  title: string;
+  items: string[];
+  titleColor?: string;
+  itemColor?: string;
+  isFirst?: boolean;
+}) {
+  if (!items || items.length === 0) return null;
+  return (
+    <View style={[styles.section, !isFirst && { marginTop: 12 }]}>
+      <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
+      {items.map((text, i) => (
+        <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]}>· {text}</Text>
+      ))}
+    </View>
+  );
+}
+
 export default function InspirationScreen({ navigation }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('全部');
   const [selectedDynasty, setSelectedDynasty] = useState<string>('全部');
@@ -171,35 +196,10 @@ export default function InspirationScreen({ navigation }: Props) {
 
         {isExpanded && (
           <View style={styles.cardBody}>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>📖 正史记载</Text>
-              {item.historicalFacts.map((fact, i) => (
-                <Text key={i} style={styles.bulletItem}>· {fact}</Text>
-              ))}
-            </View>
-
-            <View style={[styles.section, { marginTop: 12 }]}>
-              <Text style={[styles.sectionTitle, { color: '#8B4513' }]}>📜 野史说法</Text>
-              {item.folkVersions.map((fact, i) => (
-                <Text key={i} style={[styles.bulletItem, { color: '#5A3E28' }]}>· {fact}</Text>
-              ))}
-            </View>
-
-            <View style={[styles.section, { marginTop: 12 }]}>
-              <Text style={[styles.sectionTitle, { color: '#6B21A8' }]}>✍️ 创作角度</Text>
-              {item.creativeAngles.map((fact, i) => (
-                <Text key={i} style={[styles.bulletItem, { color: '#6B21A8' }]}>· {fact}</Text>
-              ))}
-            </View>
-
-            {item.characterIdeas && item.characterIdeas.length > 0 && (
-              <View style={[styles.section, { marginTop: 12 }]}>
-                <Text style={[styles.sectionTitle, { color: '#0369A1' }]}>👤 人物设定灵感</Text>
-                {item.characterIdeas.map((idea, i) => (
-                  <Text key={i} style={[styles.bulletItem, { color: '#0369A1' }]}>· {idea}</Text>
-                ))}
-              </View>
-            )}
+            <BulletSection title="📖 正史记载" items={item.historicalFacts} isFirst />
+            <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor="#8B4513" itemColor="#5A3E28" />
+            <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor="#6B21A8" itemColor="#6B21A8" />
+            <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor="#0369A1" itemColor="#0369A1" />
           </View>
         )}
 

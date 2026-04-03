@@ -729,9 +729,7 @@ const styles = StyleSheet.create({
     padding: Spacing.xs,
   },
   undoRedoBtnDisabled: {
-    padding: Spacing.xs,
-    backgroundColor: Colors.paperDark,
-    borderRadius: BorderRadius.sm,
+    opacity: 0.35,
   },
   undoRedoText: {
     fontSize: 20,
