@@ -31,6 +31,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     alignSelf: 'flex-start',
+    maxWidth: 200,
+    flexShrink: 1,
   },
   textSm: {
     fontSize: FontSize.sm,
