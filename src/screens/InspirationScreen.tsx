@@ -7,6 +7,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '../data/inspirations';
 import { callAI } from '../services/api';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -29,8 +31,10 @@ const DYNASTY_COLORS: Record<string, string> = {
   '其他': '#718096',
 };
 
+type InspirationScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Inspiration">;
+
 interface Props {
-  navigation: any;
+  navigation: InspirationScreenNavigationProp;
 }
 
 function parseAIResult(text: string): Inspiration | null {

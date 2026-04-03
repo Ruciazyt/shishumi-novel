@@ -83,6 +83,27 @@ export const EditorScreen: React.FC = () => {
     return () => { isMountedRef.current = false; };
   }, []);
 
+  /** 持久化内容到 storage + dispatch 更新 project state，返回是否成功 */
+  const persistContent = useCallback(async (
+    contentToSave: string,
+    proj: NonNullable<typeof projectRef.current>,
+    chap: NonNullable<typeof chapterRef.current>,
+  ) => {
+    const updated = await updateChapter(proj.id, chap.id, { content: contentToSave });
+    if (updated) {
+      lastSavedContentRef.current = contentToSave;
+      hasUnsavedChangesRef.current = false;
+      dispatch({
+        type: 'UPDATE_PROJECT',
+        payload: {
+          ...proj,
+          chapters: proj.chapters.map(c => c.id === chap.id ? updated : c),
+        },
+      });
+    }
+    return !!updated;
+  }, [dispatch]);
+
   // 清除历史记录防抖 timer
   const clearHistoryTimer = () => {
     if (historyTimerRef.current) {
@@ -191,18 +212,9 @@ export const EditorScreen: React.FC = () => {
       if (!currentProject || !currentChapter) return;
       if (latestContent === lastSavedContentRef.current) return; // 无变化则跳过
       setIsSaving(true);
-      const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
+      const ok = await persistContent(latestContent, currentProject, currentChapter);
       if (timerChapterId !== chapterIdRef.current) { setIsSaving(false); return; }
-      if (updated) {
-        lastSavedContentRef.current = latestContent;
-        hasUnsavedChangesRef.current = false;
-        const updatedProject = {
-          ...currentProject,
-          chapters: currentProject.chapters.map(c =>
-            c.id === currentChapter.id ? updated : c
-          ),
-        };
-        dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+      if (ok) {
         setLastSavedAt(new Date());
         setJustSaved(true);
       }
@@ -239,23 +251,14 @@ export const EditorScreen: React.FC = () => {
     const latestContent = pendingContentRef.current;
     setIsSaving(true);
     if (!isMountedRef.current) { setIsSaving(false); return; }
-    const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
+    const ok = await persistContent(latestContent, currentProject, currentChapter);
     if (!isMountedRef.current) return;
-    if (updated) {
-      lastSavedContentRef.current = latestContent;
-      hasUnsavedChangesRef.current = false;
-      const updatedProject = {
-        ...currentProject,
-        chapters: currentProject.chapters.map(c =>
-          c.id === currentChapter.id ? updated : c
-        ),
-      };
-      dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
+    if (ok) {
       setLastSavedAt(new Date());
       setJustSaved(true);
       setHistory(prev => {
         const newHistory = [...prev.slice(0, historyIndexRef.current + 1)];
-        newHistory[newHistory.length - 1] = updated.content;
+        newHistory[newHistory.length - 1] = latestContent;
         return newHistory;
       });
     }
