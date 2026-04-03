@@ -10,6 +10,9 @@ const API_BASE_URL_KEY = 'shishumi_api_base_url';
 const MODEL_STORAGE_KEY = 'shishumi_model';
 const MAX_RETRIES = 3;
 
+/** 系统提示词：始终作为第一条消息注入，确保 AI 输出符合历史小说风格 */
+const SYSTEM_PROMPT = '你是一位专业的中国古代历史小说作家。请始终使用典雅、简洁的书面中文进行回复。回复内容应契合历史小说的叙事风格——语言含蓄内敛，描写简洁有力，避免现代口语、网络用语和过于直白的表达。对话应符合古代说话习惯，适当使用文言词汇和古典意象。';
+
 export type ApiType = 'qwen' | 'openai' | 'minimax';
 
 export const API_PROVIDERS = [
@@ -224,10 +227,8 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     const body: Record<string, unknown> = {
       model,
       messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: prompt },
       ],
       max_tokens: request.type === 'poetry' || request.type === 'buddhist' || request.type === 'taoist' ? 2000 : 1500,
     };
