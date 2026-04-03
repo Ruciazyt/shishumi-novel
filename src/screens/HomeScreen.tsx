@@ -512,11 +512,11 @@ const styles = StyleSheet.create({
   },
   dynastySummary: {
     marginTop: Spacing.sm,
-    fontSize: FontSize.xs,
-    color: Colors.textSecondary,
-    lineHeight: 18,
-    fontStyle: 'italic',
+    fontSize: FontSize.sm,
+    color: Colors.gold,
+    lineHeight: 22,
     paddingHorizontal: Spacing.xs,
+    letterSpacing: 0.5,
   },
   submitButton: {
     backgroundColor: Colors.vermillion,
