@@ -3,9 +3,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { Project, Chapter } from '../types';
 
 const PROJECTS_KEY = 'shishumi_projects';
+const STORAGE_VERSION_KEY = 'shishumi_storage_version';
+const CURRENT_STORAGE_VERSION = 2;
 
 /** 内存缓存：避免每次操作都解析全量 JSON（Read-through cache） */
 let _cachedRaw: string | null = null;
+
+/** 强制清除所有项目数据（用于存储损坏后的恢复） */
+export const resetAllProjects = async (): Promise<void> => {
+  _cachedRaw = null;
+  await AsyncStorage.removeItem(PROJECTS_KEY);
+};
 
 export const getProjects = async (): Promise<Project[]> => {
   // 缓存命中：直接解析缓存字符串，避免重复 AsyncStorage I/O
@@ -13,7 +21,7 @@ export const getProjects = async (): Promise<Project[]> => {
     try {
       return JSON.parse(_cachedRaw) as Project[];
     } catch {
-      _cachedRaw = null; // 缓存损坏则降级到 I/O
+      _cachedRaw = null; // 缓存损坏则清除，避免后续操作读取损坏数据
     }
   }
   try {
@@ -21,20 +29,29 @@ export const getProjects = async (): Promise<Project[]> => {
     _cachedRaw = data;
     return data ? JSON.parse(data) : [];
   } catch (err) {
-    console.error('[storage] getProjects failed:', err);
-    _cachedRaw = null; // 缓存损坏则清除，避免后续操作读取损坏数据
+    console.error('[storage] getProjects failed, resetting storage:', err);
+    _cachedRaw = null;
+    await resetAllProjects(); // AsyncStorage 损坏，强制重置
     return [];
   }
 };
 
 export const saveProjects = async (projects: Project[]): Promise<void> => {
+  let raw: string;
   try {
-    const raw = JSON.stringify(projects);
-    _cachedRaw = raw; // 写入缓存，避免下次读取重新解析
+    raw = JSON.stringify(projects);
+  } catch (err) {
+    console.error('[storage] JSON.stringify failed:', err);
+    throw new Error('数据序列化失败');
+  }
+  _cachedRaw = raw; // 写入缓存，避免下次读取重新解析
+  try {
     await AsyncStorage.setItem(PROJECTS_KEY, raw);
   } catch (err) {
-    console.error('[storage] saveProjects failed:', err);
-    throw err; // re-throw so caller knows save failed
+    console.error('[storage] AsyncStorage.setItem failed:', err);
+    // AsyncStorage 写入失败，清空缓存，下次从空状态重新开始
+    _cachedRaw = null;
+    throw new Error('存储写入失败，请检查手机存储空间'); // 返回明确错误信息
   }
 };
 

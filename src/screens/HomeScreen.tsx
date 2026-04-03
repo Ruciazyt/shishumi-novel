@@ -97,7 +97,8 @@ export const HomeScreen: React.FC = () => {
       setNewDescription('');
     } catch (err) {
       console.error('[HomeScreen] createProject failed:', err);
-      Alert.alert('错误', '创建作品失败，请重试');
+      const msg = err instanceof Error ? err.message : '请重试';
+      Alert.alert('错误', `创建作品失败：${msg}`);
     } finally {
       setIsCreating(false);
     }
