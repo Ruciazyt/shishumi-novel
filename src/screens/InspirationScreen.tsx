@@ -29,31 +29,12 @@ const DYNASTY_COLORS: Record<string, string> = {
   '其他': '#718096',
 };
 
-const SYSTEM_PROMPT = `你是一个中国古代历史小说创作助手，专门提供野史、悬案、帝王秘闻等创作灵感。
-
-当用户提供一个历史话题或关键词时，你需要：
-1. 如果有匹配度高的历史悬案/野史，提供详细的：正史记载、野史说法（多个版本）、创作角度、人物设定灵感
-2. 如果没有直接匹配，创作一个与用户话题相关的历史悬案条目
-
-请以JSON格式返回，格式如下（不要返回其他内容，只返回JSON）：
-{
-  "title": "标题",
-  "dynasty": "所属朝代",
-  "category": "野史传说|历史悬案|帝王之谜|战争秘闻|人物逸事",
-  "summary": "一段话简介",
-  "historicalFacts": ["正史记载1", "正史记载2", "正史记载3"],
-  "folkVersions": ["野史说法1", "野史说法2", "野史说法3"],
-  "creativeAngles": ["创作角度1", "创作角度2", "创作角度3"],
-  "characterIdeas": ["人物设定1", "人物设定2"]
-}`;
-
 interface Props {
   navigation: any;
 }
 
 function parseAIResult(text: string): Inspiration | null {
   try {
-    // Try to extract JSON from the response
     let jsonStr = text.trim();
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
@@ -78,7 +59,7 @@ function parseAIResult(text: string): Inspiration | null {
   }
 }
 
-/** Reusable bullet-list section — deduplicates 4 near-identical blocks in card rendering */
+/** Reusable bullet-list section */
 function BulletSection({
   title,
   items,
@@ -100,6 +81,47 @@ function BulletSection({
         <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]}>· {text}</Text>
       ))}
     </View>
+  );
+}
+
+/** Horizontal filter chip row — deduplicates dynasty/category filter blocks */
+function FilterChipRow({
+  items,
+  selected,
+  onSelect,
+  style,
+}: {
+  items: string[];
+  selected: string;
+  onSelect: (value: string) => void;
+  style?: object;
+}) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={style}>
+      {items.map(item => {
+        const isAll = item === '全部';
+        const isActive = selected === item;
+        return (
+          <TouchableOpacity
+            key={item}
+            style={[
+              styles.filterChip,
+              isActive && (isAll ? styles.filterChipActiveAll : styles.filterChipActive),
+            ]}
+            onPress={() => onSelect(item)}
+          >
+            <Text
+              style={[
+                styles.filterChipText,
+                isActive && (isAll ? styles.filterChipTextActiveAll : styles.filterChipTextActive),
+              ]}
+            >
+              {item}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
   );
 }
 
@@ -212,6 +234,9 @@ export default function InspirationScreen({ navigation }: Props) {
     );
   };
 
+  const dynastyItems = ['全部', ...DYNASTIES_FILTER.filter(d => d !== '全部')];
+  const categoryItems = ['全部', ...CATEGORIES];
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -279,53 +304,21 @@ export default function InspirationScreen({ navigation }: Props) {
         </View>
       )}
 
-      {/* 朝代筛选 */}
+      {/* 筛选器 */}
       {!searched && (
         <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-            <TouchableOpacity
-              style={[styles.filterChip, selectedDynasty === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
-              onPress={() => setSelectedDynasty('全部')}
-            >
-              <Text style={[styles.filterChipText, selectedDynasty === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
-                全部
-              </Text>
-            </TouchableOpacity>
-            {DYNASTIES_FILTER.filter(d => d !== '全部').map(d => (
-              <TouchableOpacity
-                key={d}
-                style={[styles.filterChip, selectedDynasty === d ? styles.filterChipActive : styles.filterChip]}
-                onPress={() => setSelectedDynasty(d)}
-              >
-                <Text style={[styles.filterChipText, selectedDynasty === d ? styles.filterChipTextActive : styles.filterChipText]}>
-                  {d}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          {/* 分类筛选 */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow2}>
-            <TouchableOpacity
-              style={[styles.filterChip, selectedCategory === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
-              onPress={() => setSelectedCategory('全部')}
-            >
-              <Text style={[styles.filterChipText, selectedCategory === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
-                全部
-              </Text>
-            </TouchableOpacity>
-            {CATEGORIES.map(c => (
-              <TouchableOpacity
-                key={c}
-                style={[styles.filterChip, selectedCategory === c ? styles.filterChipActive : styles.filterChip]}
-                onPress={() => setSelectedCategory(c)}
-              >
-                <Text style={[styles.filterChipText, selectedCategory === c ? styles.filterChipTextActive : styles.filterChipText]}>
-                  {c}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <FilterChipRow
+            items={dynastyItems}
+            selected={selectedDynasty}
+            onSelect={setSelectedDynasty}
+            style={styles.filterRow}
+          />
+          <FilterChipRow
+            items={categoryItems}
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+            style={styles.filterRow}
+          />
         </>
       )}
 
@@ -439,11 +432,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   filterRow: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    maxHeight: 44,
-  },
-  filterRow2: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     maxHeight: 44,
