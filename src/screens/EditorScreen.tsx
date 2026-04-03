@@ -369,11 +369,6 @@ export const EditorScreen: React.FC = () => {
     };
   }, [project?.dynasty, state.dynasty]);
 
-  const dynastyDisplay = dynastyMeta.display;
-  const dynastySummary = dynastyMeta.summary;
-  const dynastyWritingTip = dynastyMeta.writingTip;
-  const dynastyPlaceholder = dynastyMeta.placeholder;
-
   const handleDynastyChange = async (dynastyId: DynastyId) => {
     // 更新全局 dynasty 设置
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
@@ -470,10 +465,10 @@ export const EditorScreen: React.FC = () => {
         <View style={styles.statsBarLeft}>
           <TouchableOpacity
             onPress={() => setDynastyModalVisible(true)}
-            accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
+            accessibilityLabel={`当前朝代：${dynastyMeta.display}，点击切换`}
             accessibilityRole="button"
           >
-            <DynastyBadge name={dynastyDisplay} subtext={dynastySummary} size="xs" />
+            <DynastyBadge name={dynastyMeta.display} subtext={dynastyMeta.summary} size="xs" />
           </TouchableOpacity>
           {chapterIndex >= 0 && (
             <View style={styles.statsChapterChip}>
@@ -501,7 +496,7 @@ export const EditorScreen: React.FC = () => {
       <ScrollView style={styles.editorContainer}>
         <TextInput
           style={styles.editor}
-          placeholder={dynastyPlaceholder}
+          placeholder={dynastyMeta.placeholder}
           placeholderTextColor={Colors.textLight}
           value={content}
           onChangeText={handleContentChange}
@@ -671,9 +666,9 @@ export const EditorScreen: React.FC = () => {
             <View style={styles.tipModalHeader}>
               <View style={styles.tipModalTitleRow}>
                 <Text style={styles.tipModalTitle}>📜 写作提示</Text>
-                {dynastySummary ? (
+                {dynastyMeta.summary ? (
                   <Text style={styles.tipModalSubtitle} numberOfLines={1}>
-                    {dynastySummary}
+                    {dynastyMeta.summary}
                   </Text>
                 ) : null}
               </View>
@@ -685,7 +680,7 @@ export const EditorScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.tipModalScroll}>
-              <Text style={styles.tipModalText}>{dynastyWritingTip}</Text>
+              <Text style={styles.tipModalText}>{dynastyMeta.writingTip}</Text>
             </ScrollView>
           </View>
         </View>

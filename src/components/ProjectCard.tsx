@@ -5,6 +5,7 @@ import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constan
 import { formatRelativeTime } from '../utils/time';
 import { countChars } from '../utils/text';
 import { getDynastyById } from '../data/dynasties';
+import { DynastyBadge } from './DynastyBadge';
 
 
 interface ProjectCardProps {
@@ -44,9 +45,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
             <Text style={styles.title} numberOfLines={1}>
               {project.title}
             </Text>
-            <View style={styles.dynastyBadge}>
-              <Text style={styles.dynastyBadgeText}>{dynastyName}</Text>
-            </View>
+            <DynastyBadge name={dynastyName} />
           </View>
 
           <Text style={styles.description} numberOfLines={2}>
@@ -118,21 +117,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     flex: 1,
     marginRight: Spacing.sm,
-    letterSpacing: 1,
-  },
-  dynastyBadge: {
-    backgroundColor: ColorsAlpha.vermillionBadgeBg,
-    borderWidth: 1,
-    borderColor: ColorsAlpha.vermillionBadgeBorder,
-    borderRadius: BorderRadius.round,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    flexShrink: 0,
-  },
-  dynastyBadgeText: {
-    fontSize: FontSize.xs,
-    color: Colors.vermillion,
-    fontWeight: '600',
     letterSpacing: 1,
   },
   description: {
