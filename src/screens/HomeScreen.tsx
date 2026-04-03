@@ -65,8 +65,12 @@ export const HomeScreen: React.FC = () => {
 
   // Keep dynasty summary in sync with the selected dynasty
   React.useEffect(() => {
-    const dynastyName = DYNASTIES.find(d => d.id === newDynasty)?.name || newDynasty;
-    setNewDynastySummary(DYNASTY_SUMMARIES[dynastyName] || '');
+    if (newDynasty === 'custom') {
+      setNewDynastySummary('自定义创作，无历史背景限制');
+    } else {
+      const dynastyName = DYNASTIES.find(d => d.id === newDynasty)?.name || newDynasty;
+      setNewDynastySummary(DYNASTY_SUMMARIES[dynastyName] || '');
+    }
   }, [newDynasty]);
 
   const handleCreateProject = async () => {
@@ -258,6 +262,23 @@ export const HomeScreen: React.FC = () => {
                         </Text>
                       </TouchableOpacity>
                     ))}
+                      {/* 自定义/架空 */}
+                      <TouchableOpacity
+                        style={[
+                          styles.dynastyButton,
+                          newDynasty === 'custom' && styles.dynastyButtonActive,
+                        ]}
+                        onPress={() => setNewDynasty('custom' as DynastyId)}
+                      >
+                        <Text
+                          style={[
+                            styles.dynastyButtonText,
+                            newDynasty === 'custom' && styles.dynastyButtonTextActive,
+                          ]}
+                        >
+                          自定义
+                        </Text>
+                      </TouchableOpacity>
                   </ScrollView>
                   {newDynastySummary ? (
                     <Text style={styles.dynastySummary} numberOfLines={2}>

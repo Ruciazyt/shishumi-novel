@@ -21,7 +21,6 @@ import { AIAssistant } from '../components/AIAssistant';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTY_SUMMARIES, DYNASTIES } from '../data/dynasties';
 import { updateChapter, saveDynasty } from '../services/storage';
-import { formatLastSaved } from '../utils/time';
 import { countChars } from '../utils/text';
 
 import { DynastyBadge } from '../components/DynastyBadge';
@@ -75,6 +74,11 @@ export const EditorScreen: React.FC = () => {
   // 记录上一次推入历史的文本，避免重复记录相同内容
   const lastRecordedRef = useRef<string>('');
   const isMountedRef = useRef(true);
+  // 组件卸载时标记，防止异步操作更新已卸载组件的 state
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   // 清除历史记录防抖 timer
   const clearHistoryTimer = () => {
