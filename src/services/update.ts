@@ -36,7 +36,7 @@ export const compareVersions = (v1: string, v2: string): number => {
   const p1 = parseVersion(v1);
   const p2 = parseVersion(v2);
   for (let i = 0; i < 3; i++) {
-    if (p2[i] !== p1[i]) return p2[i] - p1[i];
+    if (p2[i] !== p1[i]) return p2[i] > p1[i] ? 1 : -1;
   }
   return 0;
 };
