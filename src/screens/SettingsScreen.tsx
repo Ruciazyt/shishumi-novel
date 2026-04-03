@@ -144,6 +144,9 @@ export const SettingsScreen: React.FC = () => {
     if (newType === 'qwen') {
       const qwenUrl = API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
       await setApiBaseUrl(qwenUrl);
+    } else if (newType === 'minimax') {
+      const minimaxUrl = API_PROVIDERS.find(p => p.id === 'minimax')!.baseUrl;
+      await setApiBaseUrl(minimaxUrl);
     }
   };
 
@@ -358,7 +361,7 @@ export const SettingsScreen: React.FC = () => {
               ? '不同模型在速度、费用和生成质量上有差异'
               : '选择您的 API 提供商支持的模型'}
           </Text>
-          {apiType === 'openai' && (
+          {(apiType === 'openai' || apiType === 'minimax') && (
             <TouchableOpacity
               style={styles.fetchModelsButton}
               onPress={handleFetchModels}

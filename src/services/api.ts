@@ -10,10 +10,11 @@ const API_BASE_URL_KEY = 'shishumi_api_base_url';
 const MODEL_STORAGE_KEY = 'shishumi_model';
 const MAX_RETRIES = 3;
 
-export type ApiType = 'qwen' | 'openai';
+export type ApiType = 'qwen' | 'openai' | 'minimax';
 
 export const API_PROVIDERS = [
   { id: 'qwen', name: '通义千问 (DashScope)', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions' },
+  { id: 'minimax', name: 'MiniMax', baseUrl: 'https://api.minimaxi.com/anthropic/v1' },
   { id: 'openai', name: 'OpenAI 兼容接口', baseUrl: '' }, // 用户自定义
 ];
 
