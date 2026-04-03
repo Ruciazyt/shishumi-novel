@@ -21,6 +21,7 @@ import { ProjectCard } from '../components/ProjectCard';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { DYNASTIES, DYNASTY_SUMMARIES } from '../data/dynasties';
 import { createProject, deleteProject, getProjects } from '../services/storage';
+import { countChars } from '../utils/text';
 import { Project, RootStackParamList, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -37,7 +38,7 @@ export const HomeScreen: React.FC = () => {
     const totalProjects = state.projects.length;
     const totalChapters = state.projects.reduce((sum, p) => sum + p.chapters.length, 0);
     const totalChars = state.projects.reduce(
-      (sum, p) => sum + p.chapters.reduce((cs, c) => cs + c.content.replace(/\s/g, '').length, 0),
+      (sum, p) => sum + p.chapters.reduce((cs, c) => cs + countChars(c.content), 0),
       0
     );
     return { totalProjects, totalChapters, totalChars };

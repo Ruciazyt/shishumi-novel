@@ -230,7 +230,7 @@ export const SettingsScreen: React.FC = () => {
   );
 
   // 判断是否有可用更新
-  const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) < 0;
+  const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) > 0;
 
   return (
     <ScrollView style={styles.container}>

@@ -469,7 +469,6 @@ export const EditorScreen: React.FC = () => {
       <View style={styles.statsBar}>
         <View style={styles.statsBarLeft}>
           <TouchableOpacity
-            style={{ marginRight: Spacing.sm }}
             onPress={() => setDynastyModalVisible(true)}
             accessibilityLabel={`当前朝代：${dynastyDisplay}，点击切换`}
             accessibilityRole="button"
@@ -774,6 +773,10 @@ const styles = StyleSheet.create({
   },
   statsBarLeft: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
   },
   statsBarRight: {
     flexDirection: 'row',
@@ -785,7 +788,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
-    marginRight: Spacing.sm,
     alignSelf: 'center',
   },
   statsChapterChipText: {

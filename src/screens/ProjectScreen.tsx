@@ -19,6 +19,7 @@ import { ChapterList } from '../components/ChapterList';
 import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
+import { countChars } from '../utils/text';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTIES } from '../data/dynasties';
 import { Chapter, DynastyId, RootStackParamList } from '../types';
@@ -67,7 +68,7 @@ export const ProjectScreen: React.FC = () => {
   const projectStats = useMemo(() => {
     const chapterCount = project.chapters.length;
     const wordCount = project.chapters.reduce(
-      (sum, ch) => sum + ch.content.replace(/\s/g, '').length, 0
+      (sum, ch) => sum + countChars(ch.content), 0
     );
     return { chapterCount, wordCount };
   }, [project.chapters]);
