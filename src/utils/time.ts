@@ -38,8 +38,9 @@ export const formatLastSaved = (date: Date | null): string => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   if (diffMs < 60000) return '刚刚';
-  if (diffMs < 3600000) return `${Math.floor(diffMs / 60000)}分钟前`;
-  const hours = Math.floor(diffMs / 3600000);
-  if (hours < 24) return `${hours}小时前`;
+  const totalMinutes = Math.floor(diffMs / 60000);
+  if (totalMinutes < 60) return `${totalMinutes}分钟前`;
+  const totalHours = Math.floor(totalMinutes / 60);
+  if (totalHours < 24) return `${totalHours}小时前`;
   return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };

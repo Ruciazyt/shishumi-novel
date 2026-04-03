@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -36,16 +36,14 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
   customLabel = '自定义/架空',
   showSummary = false,
 }) => {
-  const [summary, setSummary] = useState('');
-
-  useEffect(() => {
-    if (!showSummary) return;
+  // useMemo 替代 useState+useEffect：同步计算，避免额外渲染周期
+  const summary = useMemo(() => {
+    if (!showSummary) return '';
     if (selected === 'custom') {
-      setSummary('自定义创作，无历史背景限制');
-    } else {
-      const name = DYNASTIES.find(d => d.id === selected)?.name || selected;
-      setSummary(DYNASTY_SUMMARIES[name] || '');
+      return '自定义创作，无历史背景限制';
     }
+    const name = DYNASTIES.find(d => d.id === selected)?.name || selected;
+    return DYNASTY_SUMMARIES[name] || '';
   }, [selected, showSummary]);
 
   const buttons = (
