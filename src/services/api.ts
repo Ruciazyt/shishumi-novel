@@ -17,7 +17,7 @@ export type ApiType = 'qwen' | 'openai' | 'minimax';
 
 export const API_PROVIDERS = [
   { id: 'qwen', name: '通义千问 (DashScope)', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions' },
-  { id: 'minimax', name: 'MiMo', baseUrl: 'https://api.xiaomimimo.com/v1' },
+  { id: 'minimax', name: 'MiniMax', baseUrl: 'https://api.minimaxi.com/v1' },
   { id: 'openai', name: 'OpenAI 兼容接口', baseUrl: '' }, // 用户自定义
 ];
 
