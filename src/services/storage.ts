@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Project, Chapter } from '../types';
 
 /** 可靠的 ID 生成（兼容 React Native，不依赖 uuid 库） */
-const generateId = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+let _idCounter = 0;
+const generateId = (): string => `${Date.now()}-${++_idCounter}-${Math.random().toString(36).slice(2, 9)}`;
 
 const PROJECTS_KEY = 'shishumi_projects';
 const STORAGE_VERSION_KEY = 'shishumi_storage_version';

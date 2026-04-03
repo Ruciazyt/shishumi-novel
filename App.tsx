@@ -95,7 +95,7 @@ export default function App() {
   return (
     <AppProvider>
       <ErrorBoundary>
-      <AppContent />
+        <AppContent />
       </ErrorBoundary>
     </AppProvider>
   );
