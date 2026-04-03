@@ -46,8 +46,7 @@ export const createProject = async (project: Omit<Project, 'id' | 'createdAt' | 
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  projects.push(newProject);
-  await saveProjects(projects);
+  await saveProjects([...projects, newProject]); // [...projects] 创建新数组，避免污染缓存
   return newProject;
 };
 
