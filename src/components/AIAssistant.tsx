@@ -283,7 +283,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
             <View style={styles.typeSelector}>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'polish' && styles.typeButtonActive]}
-                onPress={() => setAiType('polish')}
+                onPress={() => { Keyboard.dismiss(); setAiType('polish'); }}
               >
                 <Text style={[styles.typeButtonText, aiType === 'polish' && styles.typeButtonTextActive]}>
                   润色
@@ -291,7 +291,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'historical' && styles.typeButtonActive]}
-                onPress={() => setAiType('historical')}
+                onPress={() => { Keyboard.dismiss(); setAiType('historical'); }}
               >
                 <Text style={[styles.typeButtonText, aiType === 'historical' && styles.typeButtonTextActive]}>
                   历史细节
@@ -299,7 +299,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'poetry' && styles.typeButtonActive]}
-                onPress={() => setAiType('poetry')}
+                onPress={() => { Keyboard.dismiss(); setAiType('poetry'); }}
               >
                 <Text style={[styles.typeButtonText, aiType === 'poetry' && styles.typeButtonTextActive]}>
                   诗词
@@ -307,7 +307,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'buddhist' && styles.typeButtonActive]}
-                onPress={() => setAiType('buddhist')}
+                onPress={() => { Keyboard.dismiss(); setAiType('buddhist'); }}
               >
                 <Text style={[styles.typeButtonText, aiType === 'buddhist' && styles.typeButtonTextActive]}>
                   佛教
@@ -315,7 +315,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.typeButton, aiType === 'taoist' && styles.typeButtonActive]}
-                onPress={() => setAiType('taoist')}
+                onPress={() => { Keyboard.dismiss(); setAiType('taoist'); }}
               >
                 <Text style={[styles.typeButtonText, aiType === 'taoist' && styles.typeButtonTextActive]}>
                   道家
