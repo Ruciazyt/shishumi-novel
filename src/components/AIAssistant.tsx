@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
   },
   resultScroll: {
-    maxHeight: 280,
+    maxHeight: 400,
   },
   resultText: {
     fontSize: FontSize.md,
