@@ -39,6 +39,33 @@ export const DEFAULT_MODEL = (apiType: ApiType) => {
   return apiType === 'qwen' ? 'qwen-turbo' : 'gpt-4o-mini';
 };
 
+/**
+ * Fetch available models from an OpenAI-compatible API endpoint.
+ * Returns a list of { id, name } objects.
+ * Fails silently — returns empty array on error.
+ */
+export const fetchAvailableModels = async (
+  apiKey: string,
+  baseUrl: string
+): Promise<{ id: string; name: string }[]> => {
+  try {
+    // Strip trailing slash and /chat/completions suffix to get the models endpoint
+    const modelsUrl = baseUrl.replace(/\/chat\/completions\/?$/, '') + '/models';
+    const response = await axios.get(modelsUrl, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      timeout: 10000,
+    });
+    // OpenAI-compatible format: response.data.data is an array of model objects
+    const data = response.data;
+    if (Array.isArray(data?.data)) {
+      return data.data.map((m: { id: string }) => ({ id: m.id, name: m.id }));
+    }
+    return [];
+  } catch {
+    return [];
+  }
+};
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getApiType = async (): Promise<ApiType> => {

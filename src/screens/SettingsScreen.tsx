@@ -16,7 +16,7 @@ import {
   getApiKey, setApiKey, getApiType, setApiType,
   getApiBaseUrl, setApiBaseUrl,
   getModel, setModel,
-  getAvailableModels, DEFAULT_MODEL,
+  getAvailableModels, DEFAULT_MODEL, fetchAvailableModels,
   API_PROVIDERS, type ApiType
 } from '../services/api';
 import {
@@ -26,7 +26,10 @@ import {
 } from '../services/update';
 import { DYNASTIES, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { type DynastyId } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveDynasty } from '../services/storage';
+
+const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
 export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -37,7 +40,11 @@ export const SettingsScreen: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState('');
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [latestRelease, setLatestRelease] = useState<ReleaseInfo | null>(null);
-  const availableModels = getAvailableModels(apiType);
+  const [customDynastyName, setCustomDynastyName] = useState('');
+  const [customDynastyInput, setCustomDynastyInput] = useState('');
+  const [models, setModels] = useState<{ id: string; name: string }[]>([]);
+  const [fetchingModels, setFetchingModels] = useState(false);
+  const availableModels = models.length > 0 ? models : getAvailableModels(apiType);
   const currentVersion = getAppVersion();
 
   useEffect(() => {
@@ -54,6 +61,15 @@ export const SettingsScreen: React.FC = () => {
         setCustomBaseUrl(url);
       }
       setSelectedModel(model);
+      setModels(getAvailableModels(type));
+      // Load custom dynasty name if in custom mode
+      if (state.dynasty === 'custom') {
+        const customName = await AsyncStorage.getItem(CUSTOM_DYNASTY_KEY);
+        if (customName) {
+          setCustomDynastyName(customName);
+          setCustomDynastyInput(customName);
+        }
+      }
     };
     loadData();
   }, []);
@@ -124,6 +140,7 @@ export const SettingsScreen: React.FC = () => {
     const newDefault = DEFAULT_MODEL(newType);
     setSelectedModel(newDefault);
     await setModel(newDefault);
+    setModels(getAvailableModels(newType));
     if (newType === 'qwen') {
       const qwenUrl = API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
       await setApiBaseUrl(qwenUrl);
@@ -154,11 +171,60 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleDynastyChange = async (dynastyId: DynastyId) => {
+    if (dynastyId === 'custom') {
+      // Don't dispatch yet; custom name input handles final save
+      return;
+    }
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
     await saveDynasty(dynastyId);
   };
 
-  const selectedDynastyDetail = useMemo(() => DYNASTIES.find(d => d.id === state.dynasty), [state.dynasty]);
+  const handleSaveCustomDynasty = async () => {
+    const name = customDynastyInput.trim();
+    if (!name) {
+      Alert.alert('错误', '请输入自定义朝代名称');
+      return;
+    }
+    dispatch({ type: 'SET_DYNASTY', payload: 'custom' });
+    await saveDynasty('custom');
+    await AsyncStorage.setItem(CUSTOM_DYNASTY_KEY, name);
+    setCustomDynastyName(name);
+  };
+
+  const handleFetchModels = async () => {
+    if (!apiKey.trim()) {
+      Alert.alert('错误', '请先保存 API 密钥后再获取模型列表');
+      return;
+    }
+    if (!customBaseUrl.trim()) {
+      Alert.alert('错误', '请先保存接口地址后再获取模型列表');
+      return;
+    }
+    setFetchingModels(true);
+    try {
+      const fetched = await fetchAvailableModels(apiKey.trim(), customBaseUrl.trim());
+      if (fetched.length === 0) {
+        Alert.alert('获取失败', '未能获取到模型列表，请检查 API 地址和密钥是否正确');
+      } else {
+        setModels(fetched);
+        // Auto-select first model if current selection not in list
+        if (!fetched.find(m => m.id === selectedModel)) {
+          setSelectedModel(fetched[0].id);
+          await setModel(fetched[0].id);
+        }
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '未知错误';
+      Alert.alert('获取失败', msg);
+    } finally {
+      setFetchingModels(false);
+    }
+  };
+
+  const selectedDynastyDetail = useMemo(
+    () => (state.dynasty === 'custom' ? null : DYNASTIES.find(d => d.id === state.dynasty)),
+    [state.dynasty]
+  );
 
   // 判断是否有可用更新
   const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) < 0;
@@ -292,6 +358,19 @@ export const SettingsScreen: React.FC = () => {
               ? '不同模型在速度、费用和生成质量上有差异'
               : '选择您的 API 提供商支持的模型'}
           </Text>
+          {apiType === 'openai' && (
+            <TouchableOpacity
+              style={styles.fetchModelsButton}
+              onPress={handleFetchModels}
+              disabled={fetchingModels}
+            >
+              {fetchingModels ? (
+                <ActivityIndicator size="small" color={Colors.textOnVermillion} />
+              ) : (
+                <Text style={styles.fetchModelsButtonText}>🔄 获取可用模型</Text>
+              )}
+            </TouchableOpacity>
+          )}
           <View style={styles.modelList}>
             {availableModels.map(model => (
               <TouchableOpacity
@@ -345,7 +424,38 @@ export const SettingsScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             ))}
+            <TouchableOpacity
+              style={[
+                styles.dynastyItem,
+                state.dynasty === 'custom' && styles.dynastyItemActive,
+              ]}
+              onPress={() => handleDynastyChange('custom')}
+            >
+              <Text
+                style={[
+                  styles.dynastyName,
+                  state.dynasty === 'custom' && styles.dynastyNameActive,
+                ]}
+              >
+                自定义/架空
+              </Text>
+            </TouchableOpacity>
           </View>
+          {state.dynasty === 'custom' && (
+            <View style={{ marginTop: Spacing.md }}>
+              <TextInput
+                style={styles.input}
+                placeholder="请输入自定义朝代名称，如：架空朝代"
+                placeholderTextColor={Colors.textLight}
+                value={customDynastyInput}
+                onChangeText={setCustomDynastyInput}
+                maxLength={20}
+              />
+              <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomDynasty}>
+                <Text style={styles.saveButtonText}>保存自定义朝代</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 
@@ -353,7 +463,12 @@ export const SettingsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>时代背景详情</Text>
         <View style={styles.card}>
-          {selectedDynastyDetail && (
+          {state.dynasty === 'custom' ? (
+            <View>
+              <Text style={styles.detailTitle}>{customDynastyName || '自定义/架空'}</Text>
+              <Text style={styles.detailValue}>自定义朝代无预设背景资料，请根据您的创作需求自行设定语言、服饰、建筑和礼仪特征。</Text>
+            </View>
+          ) : selectedDynastyDetail && (
             <View>
               <Text style={styles.detailTitle}>{selectedDynastyDetail.name}</Text>
               <View style={styles.detailRow}>
@@ -618,6 +733,21 @@ const styles = StyleSheet.create({
   },
   dynastyNameActive: {
     color: Colors.textOnVermillion,
+    fontWeight: '600',
+  },
+  fetchModelsButton: {
+    backgroundColor: Colors.paperDark,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.gold,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  fetchModelsButtonText: {
+    fontSize: 14,
+    color: Colors.gold,
     fontWeight: '600',
   },
   detailTitle: {

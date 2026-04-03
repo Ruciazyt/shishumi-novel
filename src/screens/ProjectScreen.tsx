@@ -19,6 +19,9 @@ import { ChapterList } from '../components/ChapterList';
 import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTIES } from '../data/dynasties';
 import { Chapter, DynastyId, RootStackParamList } from '../types';
 
@@ -41,6 +44,7 @@ export const ProjectScreen: React.FC = () => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDynasty, setEditDynasty] = useState<DynastyId>('tang');
+  const [editCustomDynastyName, setEditCustomDynastyName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [isSavingProject, setIsSavingProject] = useState(false);
 
@@ -173,8 +177,15 @@ export const ProjectScreen: React.FC = () => {
   /** 打开项目编辑弹窗，初始化表单数据 */
   const handleEditProject = useCallback(() => {
     setEditTitle(project.title);
-    setEditDynasty(project.dynasty);
+    setEditDynasty(project.dynasty as DynastyId);
     setEditDescription(project.description);
+    if ((project.dynasty as string) === 'custom') {
+      AsyncStorage.getItem(CUSTOM_DYNASTY_KEY).then(name => {
+        setEditCustomDynastyName(name || '');
+      });
+    } else {
+      setEditCustomDynastyName('');
+    }
     setEditModalVisible(true);
   }, [project]);
 
@@ -184,14 +195,18 @@ export const ProjectScreen: React.FC = () => {
       Alert.alert('错误', '请输入书名');
       return;
     }
+    const dynastyToSave: DynastyId = editDynasty === 'custom' ? 'custom' : editDynasty;
     setIsSavingProject(true);
     try {
       const updated = await updateProject(project.id, {
         title: editTitle.trim(),
-        dynasty: editDynasty,
+        dynasty: dynastyToSave,
         description: editDescription.trim(),
       });
       if (updated) {
+        if (editDynasty === 'custom') {
+          await AsyncStorage.setItem(CUSTOM_DYNASTY_KEY, editCustomDynastyName.trim() || '自定义朝代');
+        }
         dispatch({ type: 'UPDATE_PROJECT', payload: updated });
         setEditModalVisible(false);
       } else {
@@ -200,7 +215,7 @@ export const ProjectScreen: React.FC = () => {
     } finally {
       setIsSavingProject(false);
     }
-  }, [editTitle, editDynasty, editDescription, dispatch, project.id]);
+  }, [editTitle, editDynasty, editCustomDynastyName, editDescription, dispatch, project.id]);
 
   return (
     <View style={styles.container}>
@@ -225,7 +240,9 @@ export const ProjectScreen: React.FC = () => {
       {/* Project Info - 时代背景信息 */}
       <View style={styles.projectInfo}>
         <View style={styles.projectInfoContent}>
-          <DynastyBadge name={dynastyData?.name || project.dynasty} />
+          <DynastyBadge
+            name={dynastyData?.name || (project.dynasty === 'custom' ? '自定义/架空' : project.dynasty)}
+          />
           <Text style={styles.description} numberOfLines={2}>
             {project.description || '暂无简介'}
           </Text>
@@ -277,7 +294,7 @@ export const ProjectScreen: React.FC = () => {
           <View style={styles.dynastyModalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {dynastyData ? `${dynastyData.name} 时代背景` : project.dynasty}
+                {dynastyData ? `${dynastyData.name} 时代背景` : (project.dynasty === 'custom' ? '自定义/架空 时代背景' : project.dynasty)}
               </Text>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -407,7 +424,33 @@ export const ProjectScreen: React.FC = () => {
                       </Text>
                     </TouchableOpacity>
                   ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.dynastyButton,
+                      editDynasty === 'custom' && styles.dynastyButtonActive,
+                    ]}
+                    onPress={() => setEditDynasty('custom')}
+                  >
+                    <Text
+                      style={[
+                        styles.dynastyButtonText,
+                        editDynasty === 'custom' && styles.dynastyButtonTextActive,
+                      ]}
+                    >
+                      自定义/架空
+                    </Text>
+                  </TouchableOpacity>
                 </View>
+                {editDynasty === 'custom' && (
+                  <TextInput
+                    style={[styles.input, { marginTop: Spacing.sm }]}
+                    placeholder="请输入自定义朝代名称"
+                    placeholderTextColor={Colors.textLight}
+                    value={editCustomDynastyName}
+                    onChangeText={setEditCustomDynastyName}
+                    maxLength={20}
+                  />
+                )}
               </View>
 
               <View style={styles.formGroup}>

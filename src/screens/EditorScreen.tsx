@@ -346,6 +346,14 @@ export const EditorScreen: React.FC = () => {
   const dynastyMeta = React.useMemo(() => {
     const dynastyId = project?.dynasty ?? state.dynasty;
     const dynastyData = getDynastyById(dynastyId);
+    if (dynastyId === 'custom') {
+      return {
+        display: '自定义/架空',
+        summary: '',
+        writingTip: '自定义朝代无预设写作引导，请根据您的创作设定自由发挥。',
+        placeholder: '开始写作...',
+      };
+    }
     return {
       display: dynastyData?.name || dynastyId,
       summary: dynastyData ? (DYNASTY_SUMMARIES[dynastyData.name] || '') : '',
@@ -442,7 +450,7 @@ export const EditorScreen: React.FC = () => {
             </View>
           )}
           <Text style={styles.statsText}>
-            {charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}{lastSavedAt ? ` · ${formatLastSaved(lastSavedAt)}` : ''}
+            {charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}
           </Text>
         </View>
         <View style={styles.statsBarRight}>
@@ -450,6 +458,18 @@ export const EditorScreen: React.FC = () => {
             <Text style={styles.savingIndicator}>● 保存中</Text>
           ) : justSaved ? (
             <Text style={styles.savedIndicator}>✓ 已保存</Text>
+          ) : lastSavedAt ? (
+            (() => {
+              const diffMs = Date.now() - lastSavedAt.getTime();
+              const diffMin = Math.floor(diffMs / 60000);
+              const hh = lastSavedAt.getHours().toString().padStart(2, '0');
+              const mm = lastSavedAt.getMinutes().toString().padStart(2, '0');
+              return (
+                <Text style={styles.savedIndicator}>
+                  {diffMin >= 5 ? `${diffMin}分钟前自动保存` : `自动保存于 ${hh}:${mm}`}
+                </Text>
+              );
+            })()
           ) : hasUnsavedChanges ? (
             <Text style={styles.unsavedIndicator}>● 未保存</Text>
           ) : null}
@@ -599,6 +619,28 @@ export const EditorScreen: React.FC = () => {
                   )}
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[
+                  styles.dynastySwitchItem,
+                  (project?.dynasty || state.dynasty) === 'custom' && styles.dynastySwitchItemActive,
+                ]}
+                onPress={() => handleDynastyChange('custom')}
+              >
+                <View style={styles.dynastySwitchItemContent}>
+                  <Text
+                    style={[
+                      styles.dynastySwitchText,
+                      (project?.dynasty || state.dynasty) === 'custom' && styles.dynastySwitchTextActive,
+                    ]}
+                  >
+                    自定义/架空
+                  </Text>
+                  <Text style={styles.dynastySwitchDesc}>自定义创作，无历史背景限制</Text>
+                </View>
+                {(project?.dynasty || state.dynasty) === 'custom' && (
+                  <Text style={styles.dynastySwitchCheck}>✓</Text>
+                )}
+              </TouchableOpacity>
             </View>
           </View>
         </View>
