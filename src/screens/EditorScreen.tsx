@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   saveButtonDisabled: {
-    opacity: 0.35,
+    opacity: 0.6,
   },
   // Stats Bar
   statsBar: {
