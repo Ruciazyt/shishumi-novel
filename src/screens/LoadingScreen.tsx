@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Colors, FontSize, Spacing } from '../constants/colors';
+import { Colors, FontSize, Spacing, ColorsAlpha, BorderRadius } from '../constants/colors';
 
 export const LoadingScreen: React.FC = () => {
   return (
@@ -8,6 +8,7 @@ export const LoadingScreen: React.FC = () => {
       <View style={styles.content}>
         <Text style={styles.title}>史书墨</Text>
         <Text style={styles.subtitle}>历史小说创作</Text>
+        <View style={styles.decorationLine} />
         <ActivityIndicator
           size="large"
           color={Colors.vermillion}
@@ -39,6 +40,13 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginTop: Spacing.xs,
     letterSpacing: 2,
+  },
+  decorationLine: {
+    width: 48,
+    height: 2,
+    backgroundColor: ColorsAlpha.vermillionBadgeBorder,
+    borderRadius: BorderRadius.round,
+    marginTop: Spacing.lg,
   },
   spinner: {
     marginTop: Spacing.xxl,

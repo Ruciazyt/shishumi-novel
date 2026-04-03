@@ -281,6 +281,8 @@ export const ProjectScreen: React.FC = () => {
         style={styles.fab}
         onPress={handleAddChapter}
         activeOpacity={0.85}
+        accessibilityLabel="新建章节"
+        accessibilityRole="button"
       >
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
