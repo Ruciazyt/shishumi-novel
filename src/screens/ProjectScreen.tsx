@@ -20,10 +20,10 @@ import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTIES } from '../data/dynasties';
 import { Chapter, DynastyId, RootStackParamList } from '../types';
+
+const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ProjectScreenRouteProp = RouteProp<RootStackParamList, 'Project'>;

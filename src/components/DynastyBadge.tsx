@@ -49,12 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1,
   },
-  subtext: {
-    fontSize: FontSize.xs,
-    color: Colors.textLight,
-    marginTop: 2,
-  },
-  // sm variant: inherits subtext base (xs font + light color + marginTop)
+  // sm variant: xs font + light color + marginTop + letterSpacing
   subtextSm: {
     fontSize: FontSize.xs,
     color: Colors.textLight,
