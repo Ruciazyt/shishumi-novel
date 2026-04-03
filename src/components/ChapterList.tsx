@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { countChars } from '../utils/text';
@@ -58,6 +58,8 @@ const ChapterItem = React.memo<ChapterItemProps>(
     prev.onLongPress === next.onLongPress
 );
 
+ChapterItem.displayName = 'ChapterItem';
+
 interface ChapterListProps {
   chapters: Chapter[];
   onChapterPress: (chapter: Chapter) => void;
@@ -80,6 +82,16 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
   onChapterPressRef.current = onChapterPress;
   onChapterLongPressRef.current = onChapterLongPress;
 
+
+  const renderItem = useCallback(({ item, index }: { item: Chapter; index: number }) => (
+    <ChapterItem
+      chapter={item}
+      index={index}
+      onPress={onChapterPressRef.current}
+      onLongPress={onChapterLongPressRef.current}
+    />
+  ), []);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -92,14 +104,7 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
       </View>
       <FlatList
         data={chapters}
-        renderItem={({ item, index }) => (
-          <ChapterItem
-            chapter={item}
-            index={index}
-            onPress={onChapterPressRef.current}
-            onLongPress={onChapterLongPressRef.current}
-          />
-        )}
+        renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
@@ -113,6 +118,8 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
     </View>
   );
 });
+
+ChapterList.displayName = 'ChapterList';
 
 const styles = StyleSheet.create({
   container: {

@@ -81,6 +81,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
   }
 );
 
+ProjectCard.displayName = 'ProjectCard';
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',

@@ -26,6 +26,21 @@ import { Project, RootStackParamList, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+/** 包装组件：稳定化 onPress/onLongPress 引用，让 React.memo 真正生效 */
+const MemoizedProjectCard = React.memo<{
+  project: Project;
+  onPress: (project: Project) => void;
+  onLongPress: (project: Project) => void;
+}>(({ project, onPress, onLongPress }) => (
+  <ProjectCard
+    project={project}
+    onPress={() => onPress(project)}
+    onLongPress={() => onLongPress(project)}
+  />
+));
+MemoizedProjectCard.displayName = 'MemoizedProjectCard';
+
+
 export const HomeScreen: React.FC = () => {
   const { state, dispatch } = useApp();
   const sortedProjects = useMemo(
@@ -165,10 +180,10 @@ export const HomeScreen: React.FC = () => {
       <FlatList
         data={sortedProjects}
         renderItem={({ item }) => (
-          <ProjectCard
+          <MemoizedProjectCard
             project={item}
-            onPress={() => handleProjectPress(item)}
-            onLongPress={() => handleProjectLongPress(item)}
+            onPress={handleProjectPress}
+            onLongPress={handleProjectLongPress}
           />
         )}
         keyExtractor={item => item.id}

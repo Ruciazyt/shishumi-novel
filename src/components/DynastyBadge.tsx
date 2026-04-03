@@ -26,6 +26,8 @@ export const DynastyBadge: React.FC<{
   );
 });
 
+DynastyBadge.displayName = 'DynastyBadge';
+
 const styles = StyleSheet.create({
   badge: {
     backgroundColor: ColorsAlpha.vermillionBadgeBg,
