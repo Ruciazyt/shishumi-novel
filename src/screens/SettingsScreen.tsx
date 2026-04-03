@@ -160,7 +160,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleSaveCustomUrl = async () => {
-    if (apiType === 'openai' && !customBaseUrl.trim()) {
+    if (apiType !== 'qwen' && !customBaseUrl.trim()) {
       Alert.alert('错误', '请输入API接口地址');
       return;
     }
@@ -329,14 +329,14 @@ export const SettingsScreen: React.FC = () => {
             <Text style={styles.saveButtonText}>保存密钥</Text>
           </TouchableOpacity>
 
-          {apiType === 'openai' && (
+          {apiType !== 'qwen' && (
             <>
               <View style={{ marginTop: Spacing.md }}>
-                <Text style={styles.label}>接口地址（OpenAI 兼容）</Text>
+                <Text style={styles.label}>接口地址 {apiType === 'openai' ? '（OpenAI 兼容）' : ''}</Text>
               </View>
               <TextInput
                 style={styles.input}
-                placeholder="https://api.openai.com/v1/chat/completions"
+                placeholder={apiType === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://api.minimaxi.com/anthropic/v1'}
                 placeholderTextColor={Colors.textLight}
                 value={customBaseUrl}
                 onChangeText={setCustomBaseUrl}
