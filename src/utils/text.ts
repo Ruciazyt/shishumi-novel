@@ -7,15 +7,17 @@ const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/g;
 
 /**
  * 统计中文字符数（去除所有空白字符）
+ * 安全处理：非字符串输入返回 0，避免上游 reducer 崩溃
  */
-export const countChars = (text: string): number => text.replace(WHITESPACE_REGEX, '').length;
+export const countChars = (text: string): number =>
+  typeof text === 'string' ? text.replace(WHITESPACE_REGEX, '').length : 0;
 
 /**
  * 统计文本中的中文字符数量（CJK Unified Ideographs + CJK Compatibility Ideographs）
  * 适用于精确统计中文写作字数（不含标点和英文）
  */
 export const countChineseChars = (text: string): number => {
-  const matches = text.match(CJK_REGEX);
+  const matches = (text || '').match(CJK_REGEX);
   return matches ? matches.length : 0;
 };
 

@@ -10,7 +10,7 @@ export const formatRelativeTime = (timestamp: number): string => {
 
   if (days < 30) {
     // 复用 describeTimeDiff，消除 DRY 重复
-    return describeTimeDiff(diff).label;
+    return describeTimeDiff(diff);
   }
 
   const date = new Date(timestamp);
@@ -26,25 +26,26 @@ export const formatRelativeTime = (timestamp: number): string => {
 /**
  * 计算时间差（毫秒）对应的相对时间描述
  * 内部辅助函数，避免 formatRelativeTime 和 formatLastSaved 之间的逻辑重复
+ * @returns 相对时间文案，超过 24h 返回空字符串（由调用方自行处理）
  */
-const describeTimeDiff = (diffMs: number): { label: string; isJustNow: boolean } => {
-  if (diffMs < 60000) return { label: '刚刚', isJustNow: true };
+const describeTimeDiff = (diffMs: number): string => {
+  if (diffMs < 60000) return '刚刚';
   const totalMinutes = Math.floor(diffMs / 60000);
-  if (totalMinutes < 60) return { label: `${totalMinutes}分钟前`, isJustNow: false };
+  if (totalMinutes < 60) return `${totalMinutes}分钟前`;
   const totalHours = Math.floor(totalMinutes / 60);
-  if (totalHours < 24) return { label: `${totalHours}小时前`, isJustNow: false };
-  return { label: '', isJustNow: false }; // 调用方需自行处理超过24h的情况
+  if (totalHours < 24) return `${totalHours}小时前`;
+  return ''; // 调用方需自行处理超过24h的情况
 };
 
 /**
  * 格式化最后保存时间（EditorScreen 字数统计栏使用）
  * @param date Date 对象或 null
- * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"3天前"、"3月15日"
+ * @returns 如 "刚刚"、"3分钟前"、"2小时前"
  */
 export const formatLastSaved = (date: Date | null): string => {
   if (!date) return '';
   const diffMs = Date.now() - date.getTime();
-  const { label } = describeTimeDiff(diffMs);
+  const label = describeTimeDiff(diffMs);
   if (label) return label;
   // 超过24小时，复用 formatRelativeTime 显示日期上下文
   return formatRelativeTime(date.getTime());
