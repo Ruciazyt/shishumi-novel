@@ -80,7 +80,7 @@ export const HomeScreen: React.FC = () => {
     }
   }, [dispatch]);
 
-  const handleCreateProject = async () => {
+  const handleCreateProject = useCallback(async () => {
     if (!newTitle.trim()) {
       Alert.alert('错误', '请输入书名');
       return;
@@ -107,7 +107,7 @@ export const HomeScreen: React.FC = () => {
     } finally {
       setIsCreating(false);
     }
-  };
+  }, [newTitle, newDynasty, newDescription, dispatch]);
 
   const handleProjectPress = useCallback((project: Project) => {
     dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
@@ -459,10 +459,10 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalScroll: {},
   modalScrollContent: {
