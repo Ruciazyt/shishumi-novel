@@ -1,9 +1,60 @@
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { Chapter } from '../types';
 import { countChars } from '../utils/text';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 
+
+/** 单个章节项 — memoized，避免列表变化时所有项都重绘 */
+interface ChapterItemProps {
+  chapter: Chapter;
+  index: number;
+  onPress: (chapter: Chapter) => void;
+  onLongPress?: (chapter: Chapter) => void;
+}
+
+const ChapterItem = React.memo<ChapterItemProps>(
+  ({ chapter, index, onPress, onLongPress }) => {
+    const chars = countChars(chapter.content);
+    return (
+      <TouchableOpacity
+        style={styles.chapterItem}
+        onPress={() => onPress(chapter)}
+        onLongPress={() => onLongPress?.(chapter)}
+        activeOpacity={0.75}
+      >
+        {/* 章节序号徽章 */}
+        <View
+          style={styles.chapterNumber}
+          accessible={true}
+          accessibilityLabel={`第${index + 1}章 ${chapter.title}`}
+          accessibilityRole="text"
+        >
+          <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
+        </View>
+
+        <View style={styles.chapterInfo}>
+          <View style={styles.chapterTitleRow}>
+            <Text style={styles.chapterTitle} numberOfLines={1}>
+              {chapter.title}
+            </Text>
+            {chars > 0 && (
+              <Text style={styles.chapterWordCount}>{chars}字</Text>
+            )}
+          </View>
+          <Text style={styles.chapterContent} numberOfLines={2}>
+            {chapter.content || '空白章节'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  },
+  // 自定义比较：只有当 chapter 内容/标题 或 index 变化时才重绘
+  (prev, next) =>
+    prev.chapter.content === next.chapter.content &&
+    prev.chapter.title === next.chapter.title &&
+    prev.index === next.index
+);
 
 interface ChapterListProps {
   chapters: Chapter[];
@@ -21,55 +72,11 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
     [chapters]
   );
 
-  // Store latest callbacks in refs — avoids stale closures without needing to
-  // re-create renderChapter on every parent re-render (which would waste all
-  // FlatList item render tree allocations).
+  // Stable callback refs — avoids stale closures
   const onChapterPressRef = useRef(onChapterPress);
   const onChapterLongPressRef = useRef(onChapterLongPress);
   onChapterPressRef.current = onChapterPress;
   onChapterLongPressRef.current = onChapterLongPress;
-
-  // Stable render: item/index come directly from FlatList. We read callbacks
-  // from refs so that any parent callback change takes effect on the NEXT
-  // press (not the next parent re-render of this component).
-  const renderChapter = useCallback(
-    ({ item, index }: { item: Chapter; index: number }) => {
-      const chars = countChars(item.content);
-      return (
-        <TouchableOpacity
-          style={styles.chapterItem}
-          onPress={() => onChapterPressRef.current(item)}
-          onLongPress={() => onChapterLongPressRef.current?.(item)}
-          activeOpacity={0.75}
-        >
-          {/* 章节序号徽章 */}
-          <View
-            style={styles.chapterNumber}
-            accessible={true}
-            accessibilityLabel={`第${index + 1}章 ${item.title}`}
-            accessibilityRole="text"
-          >
-            <Text style={styles.chapterNumberText} numberOfLines={1}>{index + 1}</Text>
-          </View>
-
-          <View style={styles.chapterInfo}>
-            <View style={styles.chapterTitleRow}>
-              <Text style={styles.chapterTitle} numberOfLines={1}>
-                {item.title}
-              </Text>
-              {chars > 0 && (
-                <Text style={styles.chapterWordCount}>{chars}字</Text>
-              )}
-            </View>
-            <Text style={styles.chapterContent} numberOfLines={2}>
-              {item.content || '空白章节'}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      );
-    },
-    [] // stable: reads callbacks from refs
-  );
 
   return (
     <View style={styles.container}>
@@ -83,7 +90,14 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
       </View>
       <FlatList
         data={chapters}
-        renderItem={renderChapter}
+        renderItem={({ item, index }) => (
+          <ChapterItem
+            chapter={item}
+            index={index}
+            onPress={onChapterPressRef.current}
+            onLongPress={onChapterLongPressRef.current}
+          />
+        )}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
