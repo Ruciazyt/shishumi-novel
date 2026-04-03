@@ -379,6 +379,31 @@ export const EditorScreen: React.FC = () => {
     setDynastyModalVisible(false);
   };
 
+  /** 统计栏右侧内容：仅在相关状态变化时重新计算，避免每帧重算 */
+  const statsBarRightContent = React.useMemo(() => {
+    if (isSaving) {
+      return <Text style={styles.savingIndicator}>● 保存中</Text>;
+    }
+    if (justSaved) {
+      return <Text style={styles.savedIndicator}>✓ 已保存</Text>;
+    }
+    if (lastSavedAt) {
+      const diffMs = Date.now() - lastSavedAt.getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      const hh = lastSavedAt.getHours().toString().padStart(2, '0');
+      const mm = lastSavedAt.getMinutes().toString().padStart(2, '0');
+      return (
+        <Text style={styles.savedIndicator}>
+          {diffMin >= 5 ? `${diffMin}分钟前自动保存` : `自动保存于 ${hh}:${mm}`}
+        </Text>
+      );
+    }
+    if (hasUnsavedChanges) {
+      return <Text style={styles.unsavedIndicator}>● 未保存</Text>;
+    }
+    return null;
+  }, [isSaving, justSaved, lastSavedAt, hasUnsavedChanges]);
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -454,25 +479,7 @@ export const EditorScreen: React.FC = () => {
           </Text>
         </View>
         <View style={styles.statsBarRight}>
-          {isSaving ? (
-            <Text style={styles.savingIndicator}>● 保存中</Text>
-          ) : justSaved ? (
-            <Text style={styles.savedIndicator}>✓ 已保存</Text>
-          ) : lastSavedAt ? (
-            (() => {
-              const diffMs = Date.now() - lastSavedAt.getTime();
-              const diffMin = Math.floor(diffMs / 60000);
-              const hh = lastSavedAt.getHours().toString().padStart(2, '0');
-              const mm = lastSavedAt.getMinutes().toString().padStart(2, '0');
-              return (
-                <Text style={styles.savedIndicator}>
-                  {diffMin >= 5 ? `${diffMin}分钟前自动保存` : `自动保存于 ${hh}:${mm}`}
-                </Text>
-              );
-            })()
-          ) : hasUnsavedChanges ? (
-            <Text style={styles.unsavedIndicator}>● 未保存</Text>
-          ) : null}
+          {statsBarRightContent}
           <TouchableOpacity
             onPress={Keyboard.dismiss}
             style={styles.keyboardDismissBtn}

@@ -17,7 +17,11 @@ export const DynastyBadge: React.FC<{
   return (
     <View style={styles.badge}>
       <Text style={textStyle}>{name}</Text>
-      {subtext ? <Text style={[styles.subtext, size === 'xs' && styles.subtextXs]} numberOfLines={1}>{subtext}</Text> : null}
+      {subtext ? (
+        <Text style={size === 'xs' ? styles.subtextXs : styles.subtextSm} numberOfLines={1}>
+          {subtext}
+        </Text>
+      ) : null}
     </View>
   );
 });
@@ -50,8 +54,18 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginTop: 2,
   },
+  // sm variant: inherits subtext base (xs font + light color + marginTop)
+  subtextSm: {
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
+    marginTop: 2,
+    letterSpacing: 1,
+  },
+  // xs variant: tighter letterSpacing for compact stats bar rendering
   subtextXs: {
-    fontSize: FontSize.xs, // consistent with design system (was hardcoded 10px)
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
+    marginTop: 2,
     letterSpacing: 0.5,
   },
 });
