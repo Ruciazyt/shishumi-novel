@@ -156,6 +156,8 @@ const buildPrompt = (request: AIRequest): string => {
       return PROMPTS.buddhist(request.scene || '');
     case 'taoist':
       return PROMPTS.taoist(request.scene || '');
+    case 'inspiration':
+      return PROMPTS.inspiration(request.text || '');
     default:
       return request.text || '';
   }

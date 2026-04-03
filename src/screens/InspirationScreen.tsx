@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  FlatList, LayoutAnimation, Platform, UIManager
+  FlatList, LayoutAnimation, Platform, UIManager,
+  TextInput, ActivityIndicator, Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '../data/inspirations';
+import { callAI } from '../services/api';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -27,14 +29,63 @@ const DYNASTY_COLORS: Record<string, string> = {
   '其他': '#718096',
 };
 
+const SYSTEM_PROMPT = `你是一个中国古代历史小说创作助手，专门提供野史、悬案、帝王秘闻等创作灵感。
+
+当用户提供一个历史话题或关键词时，你需要：
+1. 如果有匹配度高的历史悬案/野史，提供详细的：正史记载、野史说法（多个版本）、创作角度、人物设定灵感
+2. 如果没有直接匹配，创作一个与用户话题相关的历史悬案条目
+
+请以JSON格式返回，格式如下（不要返回其他内容，只返回JSON）：
+{
+  "title": "标题",
+  "dynasty": "所属朝代",
+  "category": "野史传说|历史悬案|帝王之谜|战争秘闻|人物逸事",
+  "summary": "一段话简介",
+  "historicalFacts": ["正史记载1", "正史记载2", "正史记载3"],
+  "folkVersions": ["野史说法1", "野史说法2", "野史说法3"],
+  "creativeAngles": ["创作角度1", "创作角度2", "创作角度3"],
+  "characterIdeas": ["人物设定1", "人物设定2"]
+}`;
+
 interface Props {
   navigation: any;
+}
+
+function parseAIResult(text: string): Inspiration | null {
+  try {
+    // Try to extract JSON from the response
+    let jsonStr = text.trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    jsonStr = jsonMatch[0];
+
+    const parsed = JSON.parse(jsonStr);
+    if (!parsed.title || !parsed.dynasty || !parsed.category) return null;
+
+    return {
+      id: `ai-${Date.now()}`,
+      title: parsed.title,
+      dynasty: parsed.dynasty,
+      category: parsed.category,
+      summary: parsed.summary || '',
+      historicalFacts: Array.isArray(parsed.historicalFacts) ? parsed.historicalFacts.slice(0, 5) : [],
+      folkVersions: Array.isArray(parsed.folkVersions) ? parsed.folkVersions.slice(0, 5) : [],
+      creativeAngles: Array.isArray(parsed.creativeAngles) ? parsed.creativeAngles.slice(0, 5) : [],
+      characterIdeas: Array.isArray(parsed.characterIdeas) ? parsed.characterIdeas.slice(0, 4) : [],
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default function InspirationScreen({ navigation }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('全部');
   const [selectedDynasty, setSelectedDynasty] = useState<string>('全部');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [aiSearching, setAiSearching] = useState(false);
+  const [aiResults, setAiResults] = useState<Inspiration[]>([]);
+  const [searched, setSearched] = useState(false);
 
   const filtered = useMemo(() => {
     return INSPIRATIONS.filter(item => {
@@ -49,17 +100,60 @@ export default function InspirationScreen({ navigation }: Props) {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const renderItem = ({ item }: { item: Inspiration }) => {
+  const handleAISearch = async () => {
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    setAiSearching(true);
+    setSearched(true);
+    setAiResults([]);
+    setExpandedId(null);
+
+    try {
+      const result = await callAI({
+        type: 'historical',
+        text: query,
+      });
+
+      if (result.success && result.data) {
+        const parsed = parseAIResult(result.data);
+        if (parsed) {
+          setAiResults([parsed]);
+        } else {
+          Alert.alert('提示', 'AI 返回格式无法解析，请换个关键词重试');
+        }
+      } else {
+        Alert.alert('AI 搜索失败', result.error || '请检查 API 配置');
+      }
+    } catch (e) {
+      Alert.alert('错误', '搜索过程中发生错误');
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
+  const clearAISearch = () => {
+    setAiResults([]);
+    setSearched(false);
+    setSearchQuery('');
+  };
+
+  const renderItem = (item: Inspiration, isAI = false) => {
     const isExpanded = expandedId === item.id;
     const catColor = CATEGORY_COLORS[item.category] || '#718096';
     const dynColor = DYNASTY_COLORS[item.dynasty] || '#718096';
 
     return (
       <TouchableOpacity
-        style={styles.card}
+        style={[styles.card, isAI && styles.cardAI]}
         activeOpacity={0.8}
         onPress={() => toggleExpand(item.id)}
       >
+        {isAI && (
+          <View style={styles.aiBadge}>
+            <Text style={styles.aiBadgeText}>🤖 AI 创作</Text>
+          </View>
+        )}
         <View style={styles.cardHeader}>
           <View style={styles.tagRow}>
             <View style={[styles.tag, { backgroundColor: catColor + '22' }]}>
@@ -98,7 +192,7 @@ export default function InspirationScreen({ navigation }: Props) {
               ))}
             </View>
 
-            {item.characterIdeas && (
+            {item.characterIdeas && item.characterIdeas.length > 0 && (
               <View style={[styles.section, { marginTop: 12 }]}>
                 <Text style={[styles.sectionTitle, { color: '#0369A1' }]}>👤 人物设定灵感</Text>
                 {item.characterIdeas.map((idea, i) => (
@@ -134,66 +228,122 @@ export default function InspirationScreen({ navigation }: Props) {
         </Text>
       </View>
 
-      {/* 朝代筛选 */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-        <TouchableOpacity
-          key="全部"
-          style={[styles.filterChip, selectedDynasty === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
-          onPress={() => setSelectedDynasty('全部')}
-        >
-          <Text style={[styles.filterChipText, selectedDynasty === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
-            全部
-          </Text>
-        </TouchableOpacity>
-        {DYNASTIES_FILTER.filter(d => d !== '全部').map(d => (
-          <TouchableOpacity
-            key={d}
-            style={[styles.filterChip, selectedDynasty === d ? styles.filterChipActive : styles.filterChip]}
-            onPress={() => setSelectedDynasty(d)}
-          >
-            <Text style={[styles.filterChipText, selectedDynasty === d ? styles.filterChipTextActive : styles.filterChipText]}>
-              {d}
-            </Text>
+      {/* AI 搜索栏 */}
+      <View style={styles.searchSection}>
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="输入历史话题，让 AI 为你探索..."
+            placeholderTextColor="#B0A090"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={handleAISearch}
+            returnKeyType="search"
+            maxLength={100}
+          />
+          {aiSearching ? (
+            <ActivityIndicator size="small" color="#7B5E3C" style={styles.searchBtn} />
+          ) : (
+            <TouchableOpacity
+              style={[styles.searchBtn, searchQuery.trim() ? styles.searchBtnActive : null]}
+              onPress={handleAISearch}
+              disabled={!searchQuery.trim()}
+            >
+              <Text style={[styles.searchBtnText, searchQuery.trim() ? styles.searchBtnTextActive : null]}>
+                搜索
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        {searched && !aiSearching && (
+          <TouchableOpacity onPress={clearAISearch} style={styles.clearBtn}>
+            <Text style={styles.clearBtnText}>✕ 清除 AI 结果，回到资料库</Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+      </View>
 
-      {/* 分类筛选 */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow2}>
-        <TouchableOpacity
-          style={[styles.filterChip, selectedCategory === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
-          onPress={() => setSelectedCategory('全部')}
-        >
-          <Text style={[styles.filterChipText, selectedCategory === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
-            全部
-          </Text>
-        </TouchableOpacity>
-        {CATEGORIES.map(c => (
-          <TouchableOpacity
-            key={c}
-            style={[styles.filterChip, selectedCategory === c ? styles.filterChipActive : styles.filterChip]}
-            onPress={() => setSelectedCategory(c)}
-          >
-            <Text style={[styles.filterChipText, selectedCategory === c ? styles.filterChipTextActive : styles.filterChipText]}>
-              {c}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* AI 搜索结果 */}
+      {searched && (
+        <View style={styles.aiSection}>
+          {aiSearching ? (
+            <View style={styles.aiLoading}>
+              <ActivityIndicator size="small" color="#7B5E3C" />
+              <Text style={styles.aiLoadingText}>AI 正在为你探索历史...</Text>
+            </View>
+          ) : aiResults.length > 0 ? (
+            <>
+              <Text style={styles.aiSectionTitle}>🔮 AI 为你找到的灵感</Text>
+              {aiResults.map(item => renderItem(item, true))}
+            </>
+          ) : null}
+        </View>
+      )}
+
+      {/* 朝代筛选 */}
+      {!searched && (
+        <>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+            <TouchableOpacity
+              style={[styles.filterChip, selectedDynasty === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
+              onPress={() => setSelectedDynasty('全部')}
+            >
+              <Text style={[styles.filterChipText, selectedDynasty === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
+                全部
+              </Text>
+            </TouchableOpacity>
+            {DYNASTIES_FILTER.filter(d => d !== '全部').map(d => (
+              <TouchableOpacity
+                key={d}
+                style={[styles.filterChip, selectedDynasty === d ? styles.filterChipActive : styles.filterChip]}
+                onPress={() => setSelectedDynasty(d)}
+              >
+                <Text style={[styles.filterChipText, selectedDynasty === d ? styles.filterChipTextActive : styles.filterChipText]}>
+                  {d}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* 分类筛选 */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow2}>
+            <TouchableOpacity
+              style={[styles.filterChip, selectedCategory === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
+              onPress={() => setSelectedCategory('全部')}
+            >
+              <Text style={[styles.filterChipText, selectedCategory === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
+                全部
+              </Text>
+            </TouchableOpacity>
+            {CATEGORIES.map(c => (
+              <TouchableOpacity
+                key={c}
+                style={[styles.filterChip, selectedCategory === c ? styles.filterChipActive : styles.filterChip]}
+                onPress={() => setSelectedCategory(c)}
+              >
+                <Text style={[styles.filterChipText, selectedCategory === c ? styles.filterChipTextActive : styles.filterChipText]}>
+                  {c}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </>
+      )}
 
       {/* 列表 */}
-      <FlatList
-        data={filtered}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>暂无符合条件的条目</Text>
-          </View>
-        }
-      />
+      {!searched && (
+        <FlatList
+          data={filtered}
+          renderItem={({ item }) => renderItem(item, false)}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>暂无符合条件的条目</Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -215,6 +365,78 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#5C3D2E' },
   subtitle: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
   subtitleText: { fontSize: 13, color: '#8B7355', fontStyle: 'italic' },
+  searchSection: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#F0E6D2',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0D4C0',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: '#3D2B1F',
+    borderWidth: 1,
+    borderColor: '#D4C4A8',
+  },
+  searchBtn: {
+    marginLeft: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#E8DCC8',
+    borderWidth: 1,
+    borderColor: '#D4C4A8',
+  },
+  searchBtnActive: {
+    backgroundColor: '#7B5E3C',
+    borderColor: '#7B5E3C',
+  },
+  searchBtnText: {
+    fontSize: 14,
+    color: '#8B7355',
+    fontWeight: 'bold',
+  },
+  searchBtnTextActive: {
+    color: '#FFF',
+  },
+  clearBtn: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
+  },
+  clearBtnText: {
+    fontSize: 12,
+    color: '#B0A090',
+  },
+  aiSection: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+  },
+  aiLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  aiLoadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#8B7355',
+    fontStyle: 'italic',
+  },
+  aiSectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#6B21A8',
+    marginBottom: 10,
+  },
   filterRow: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -267,6 +489,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
+  },
+  cardAI: {
+    borderColor: '#9B59B6',
+    borderWidth: 1.5,
+    backgroundColor: '#FAF5FF',
+  },
+  aiBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#6B21A8',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  aiBadgeText: {
+    fontSize: 11,
+    color: '#FFF',
+    fontWeight: 'bold',
   },
   cardHeader: {},
   tagRow: { flexDirection: 'row', marginBottom: 8 },
