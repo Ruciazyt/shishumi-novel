@@ -50,4 +50,5 @@ export type RootStackParamList = {
   Project: { projectId: string };
   Editor: { chapterId: string };
   Settings: undefined;
+  Inspiration: undefined;
 };

@@ -9,6 +9,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { ProjectScreen } from './src/screens/ProjectScreen';
 import { EditorScreen } from './src/screens/EditorScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import InspirationScreen from './src/screens/InspirationScreen';
 import { LoadingScreen } from './src/screens/LoadingScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { Colors } from './src/constants/colors';
@@ -82,6 +83,13 @@ const AppContent: React.FC = () => {
         <Stack.Screen
           name="Editor"
           component={EditorScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="Inspiration"
+          component={InspirationScreen}
           options={{
             animation: 'slide_from_right',
           }}

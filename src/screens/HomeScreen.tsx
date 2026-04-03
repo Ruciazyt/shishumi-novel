@@ -143,6 +143,22 @@ export const HomeScreen: React.FC = () => {
         )}
       </View>
 
+      {/* 历史探秘入口 */}
+      <TouchableOpacity
+        style={styles.inspirationBanner}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Inspiration')}
+      >
+        <View style={styles.inspirationBannerLeft}>
+          <Text style={styles.inspirationBannerEmoji}>🔍</Text>
+          <View>
+            <Text style={styles.inspirationBannerTitle}>历史探秘</Text>
+            <Text style={styles.inspirationBannerSubtitle}>野史传说 · 悬案之谜 · 创作灵感</Text>
+          </View>
+        </View>
+        <Text style={styles.inspirationBannerArrow}>→</Text>
+      </TouchableOpacity>
+
       {/* Project List */}
       <FlatList
         data={sortedProjects}
@@ -275,6 +291,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  // 历史探秘入口
+  inspirationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F5EFE0',
+    marginHorizontal: 14,
+    marginTop: 10,
+    marginBottom: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D4C4A8',
+  },
+  inspirationBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inspirationBannerEmoji: {
+    fontSize: 22,
+    marginRight: 10,
+  },
+  inspirationBannerTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#5C3D2E',
+  },
+  inspirationBannerSubtitle: {
+    fontSize: 12,
+    color: '#8B7355',
+    marginTop: 1,
+  },
+  inspirationBannerArrow: {
+    fontSize: 18,
+    color: '#B0A090',
+  },
+
   // Header - 古籍装帧风格
   header: {
     backgroundColor: Colors.backgroundCard,
