@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { v4 as uuidv4 } from 'uuid';
 import { Project, Chapter } from '../types';
+
+/** 可靠的 ID 生成（兼容 React Native，不依赖 uuid 库） */
+const generateId = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const PROJECTS_KEY = 'shishumi_projects';
 const STORAGE_VERSION_KEY = 'shishumi_storage_version';
@@ -59,11 +61,16 @@ export const createProject = async (project: Omit<Project, 'id' | 'createdAt' | 
   const projects = await getProjects();
   const newProject: Project = {
     ...project,
-    id: uuidv4(),
+    id: generateId(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  await saveProjects([...projects, newProject]); // [...projects] 创建新数组，避免污染缓存
+  // 先验证新项目数据完整
+  if (!newProject.id || !newProject.title) {
+    throw new Error('项目数据不完整，请重试');
+  }
+  // 只在保存成功后才返回；失败时不清除缓存以保留原有数据
+  await saveProjects([...projects, newProject]);
   return newProject;
 };
 
@@ -106,7 +113,7 @@ export const addChapter = async (projectId: string, chapter: Omit<Chapter, 'id' 
 
     const newChapter: Chapter = {
       ...chapter,
-      id: uuidv4(),
+      id: generateId(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
