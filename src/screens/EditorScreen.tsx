@@ -430,7 +430,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="撤销"
             accessibilityRole="button"
           >
-            <Text style={[styles.undoRedoText, !canUndo && styles.undoRedoTextDisabled]}>↩</Text>
+            <Text style={styles.undoRedoText}>↩</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={redo}
@@ -439,7 +439,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="重做"
             accessibilityRole="button"
           >
-            <Text style={[styles.undoRedoText, !canRedo && styles.undoRedoTextDisabled]}>↪</Text>
+            <Text style={styles.undoRedoText}>↪</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setWritingTipVisible(true)}
@@ -740,9 +740,6 @@ const styles = StyleSheet.create({
   undoRedoText: {
     fontSize: 20,
     color: Colors.vermillion,
-  },
-  undoRedoTextDisabled: {
-    opacity: 0.35,
   },
   tipBtn: {
     padding: Spacing.xs,

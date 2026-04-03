@@ -140,10 +140,10 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   metaIcon: {
-    fontSize: FontSize.xs,
+    fontSize: FontSize.sm,
   },
   metaText: {
-    fontSize: FontSize.xs,
+    fontSize: FontSize.sm,
     color: Colors.textLight,
   },
 });
