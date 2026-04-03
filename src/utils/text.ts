@@ -3,6 +3,7 @@
  */
 const WHITESPACE_REGEX = /\s/g;
 const MULTI_NEWLINE_REGEX = /\n\s*\n/;
+const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/g;
 
 /**
  * 统计中文字符数（去除所有空白字符）
@@ -14,7 +15,7 @@ export const countChars = (text: string): number => text.replace(WHITESPACE_REGE
  * 适用于精确统计中文写作字数（不含标点和英文）
  */
 export const countChineseChars = (text: string): number => {
-  const matches = text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g);
+  const matches = text.match(CJK_REGEX);
   return matches ? matches.length : 0;
 };
 

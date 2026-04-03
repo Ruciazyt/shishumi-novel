@@ -219,7 +219,7 @@ export default function InspirationScreen({ navigation }: Props) {
           <Text style={styles.backBtnText}>← 返回</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>历史探秘</Text>
-        <View style={{ width: 50 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.subtitle}>
@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 4 },
   backBtnText: { fontSize: 16, color: '#7B5E3C' },
+  headerSpacer: { width: 50 },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#5C3D2E' },
   subtitle: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
   subtitleText: { fontSize: 13, color: '#8B7355', fontStyle: 'italic' },
