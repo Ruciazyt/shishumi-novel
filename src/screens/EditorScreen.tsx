@@ -229,25 +229,28 @@ export const EditorScreen: React.FC = () => {
     }
   }, [content, chapter?.content]);
 
-  const handleSave = async () => {
-    if (!project || !chapter) return;
+  // 使用 useCallback + 空依赖实现稳定引用，通过 ref 读取最新值避免 stale closure
+  const handleSave = useCallback(async () => {
+    const currentProject = projectRef.current;
+    const currentChapter = chapterRef.current;
+    if (!currentProject || !currentChapter) return;
+    const latestContent = pendingContentRef.current;
     setIsSaving(true);
     if (!isMountedRef.current) { setIsSaving(false); return; }
-    const updated = await updateChapter(project.id, chapter.id, { content });
+    const updated = await updateChapter(currentProject.id, currentChapter.id, { content: latestContent });
     if (!isMountedRef.current) return;
     if (updated) {
-      lastSavedContentRef.current = content;
+      lastSavedContentRef.current = latestContent;
       const updatedProject = {
-        ...project,
-        chapters: project.chapters.map(c =>
-          c.id === chapter.id ? updated : c
+        ...currentProject,
+        chapters: currentProject.chapters.map(c =>
+          c.id === currentChapter.id ? updated : c
         ),
       };
       dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
       setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
       setJustSaved(true);
-      // 更新历史记录为已保存状态
       setHistory(prev => {
         const newHistory = [...prev.slice(0, historyIndexRef.current + 1)];
         newHistory[newHistory.length - 1] = updated.content;
@@ -255,7 +258,7 @@ export const EditorScreen: React.FC = () => {
       });
     }
     setIsSaving(false);
-  };
+  }, []); // 空依赖 — 所有值通过 ref 读取，保持引用稳定
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
@@ -339,7 +342,7 @@ export const EditorScreen: React.FC = () => {
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: prevChapterId });
     }
-  }, [canGoPrev, prevChapterId, hasUnsavedChanges, project, dispatch, navigation]);
+  }, [canGoPrev, prevChapterId, hasUnsavedChanges, project, dispatch, navigation, handleSave]);
 
   const handleNextChapter = useCallback(async () => {
     if (canGoNext && nextChapterId) {
@@ -347,7 +350,7 @@ export const EditorScreen: React.FC = () => {
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: nextChapterId });
     }
-  }, [canGoNext, nextChapterId, hasUnsavedChanges, project, dispatch, navigation]);
+  }, [canGoNext, nextChapterId, hasUnsavedChanges, project, dispatch, navigation, handleSave]);
 
   // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
   const dynastyMeta = React.useMemo(() => {

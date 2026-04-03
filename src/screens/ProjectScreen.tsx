@@ -318,6 +318,15 @@ export const ProjectScreen: React.FC = () => {
       {/* 章节创建/编辑弹窗 */}
       <Modal visible={chapterModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => {
+              setChapterModalVisible(false);
+              setEditingChapter(null);
+              setChapterTitle('');
+            }}
+          />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
