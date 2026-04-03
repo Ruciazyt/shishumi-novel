@@ -42,7 +42,7 @@ export const EditorScreen: React.FC = () => {
   const [content, setContent] = useState(chapter?.content || '');
   const [aiVisible, setAiVisible] = useState(false);
   const [aiType, setAiType] = useState<AIAssistantType>('polish');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const hasUnsavedChangesRef = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [justSaved, setJustSaved] = useState(false);
@@ -103,7 +103,7 @@ export const EditorScreen: React.FC = () => {
       setHistoryIndex(0);
       historyRef.current = [initial];
       historyIndexRef.current = 0;
-      setHasUnsavedChanges(false);
+      hasUnsavedChangesRef.current = false;
       // 从章节的 updatedAt 初始化最后保存时间
       if (chapter.updatedAt) {
         setLastSavedAt(new Date(chapter.updatedAt));
@@ -155,6 +155,7 @@ export const EditorScreen: React.FC = () => {
   const handleContentChange = useCallback((text: string) => {
     setContent(text);
     pendingContentRef.current = text;
+    hasUnsavedChangesRef.current = text !== lastSavedContentRef.current;
     recordHistory(text);
   }, [recordHistory]);
 
@@ -194,6 +195,7 @@ export const EditorScreen: React.FC = () => {
       if (timerChapterId !== chapterIdRef.current) { setIsSaving(false); return; }
       if (updated) {
         lastSavedContentRef.current = latestContent;
+        hasUnsavedChangesRef.current = false;
         const updatedProject = {
           ...currentProject,
           chapters: currentProject.chapters.map(c =>
@@ -201,7 +203,6 @@ export const EditorScreen: React.FC = () => {
           ),
         };
         dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-        setHasUnsavedChanges(false);
         setLastSavedAt(new Date());
         setJustSaved(true);
       }
@@ -228,15 +229,7 @@ export const EditorScreen: React.FC = () => {
     setAiVisible(true);
   };
 
-  useEffect(() => {
-    if (chapter) {
-      if (content !== chapter.content) {
-        setHasUnsavedChanges(true);
-      } else {
-        setHasUnsavedChanges(false);
-      }
-    }
-  }, [content, chapter?.content]);
+
 
   // 使用 useCallback + 空依赖实现稳定引用，通过 ref 读取最新值避免 stale closure
   const handleSave = useCallback(async () => {
@@ -250,6 +243,7 @@ export const EditorScreen: React.FC = () => {
     if (!isMountedRef.current) return;
     if (updated) {
       lastSavedContentRef.current = latestContent;
+      hasUnsavedChangesRef.current = false;
       const updatedProject = {
         ...currentProject,
         chapters: currentProject.chapters.map(c =>
@@ -257,7 +251,6 @@ export const EditorScreen: React.FC = () => {
         ),
       };
       dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-      setHasUnsavedChanges(false);
       setLastSavedAt(new Date());
       setJustSaved(true);
       setHistory(prev => {
@@ -270,7 +263,7 @@ export const EditorScreen: React.FC = () => {
   }, []); // 空依赖 — 所有值通过 ref 读取，保持引用稳定
 
   const handleBack = () => {
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChangesRef.current) {
       Alert.alert(
         '有未保存的更改',
         '您可以保存后离开，或放弃更改',
@@ -347,19 +340,19 @@ export const EditorScreen: React.FC = () => {
   /** 章节导航：稳定引用，避免 toolbar 每帧重渲染 */
   const handlePrevChapter = useCallback(async () => {
     if (canGoPrev && prevChapterId) {
-      if (hasUnsavedChanges) await handleSave();
+      if (hasUnsavedChangesRef.current) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: prevChapterId });
     }
-  }, [canGoPrev, prevChapterId, hasUnsavedChanges, project, dispatch, navigation, handleSave]);
+  }, [canGoPrev, prevChapterId, project, dispatch, navigation, handleSave]);
 
   const handleNextChapter = useCallback(async () => {
     if (canGoNext && nextChapterId) {
-      if (hasUnsavedChanges) await handleSave();
+      if (hasUnsavedChangesRef.current) await handleSave();
       dispatch({ type: 'SET_CURRENT_PROJECT', payload: project });
       navigation.navigate('Editor', { chapterId: nextChapterId });
     }
-  }, [canGoNext, nextChapterId, hasUnsavedChanges, project, dispatch, navigation, handleSave]);
+  }, [canGoNext, nextChapterId, project, dispatch, navigation, handleSave]);
 
   // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
   const dynastyMeta = React.useMemo(() => {
@@ -409,11 +402,11 @@ export const EditorScreen: React.FC = () => {
         </Text>
       );
     }
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChangesRef.current) {
       return <Text style={styles.unsavedIndicator}>● 未保存</Text>;
     }
     return null;
-  }, [isSaving, justSaved, lastSavedAt, hasUnsavedChanges, tick]);
+  }, [isSaving, justSaved, lastSavedAt, tick]);
 
   return (
     <KeyboardAvoidingView
@@ -462,7 +455,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityLabel="保存"
             accessibilityRole="button"
           >
-            <Text style={[styles.saveButton, (!hasUnsavedChanges || isSaving) && styles.saveButtonDisabled]}>
+            <Text style={[styles.saveButton, (!hasUnsavedChangesRef.current || isSaving) && styles.saveButtonDisabled]}>
               {isSaving ? '保存中' : '保存'}
             </Text>
           </TouchableOpacity>

@@ -53,7 +53,8 @@ const ChapterItem = React.memo<ChapterItemProps>(
   (prev, next) =>
     prev.chapter.content === next.chapter.content &&
     prev.chapter.title === next.chapter.title &&
-    prev.index === next.index
+    prev.index === next.index &&
+    prev.onLongPress === next.onLongPress
 );
 
 interface ChapterListProps {
