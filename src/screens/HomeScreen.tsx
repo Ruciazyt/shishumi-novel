@@ -33,15 +33,17 @@ export const HomeScreen: React.FC = () => {
     [state.projects]
   );
 
-  // 全局统计数据
+  // 全局统计数据 — 合并为单次 reduce，避免两次遍历 projects 数组
   const stats = useMemo(() => {
-    const totalProjects = state.projects.length;
-    const totalChapters = state.projects.reduce((sum, p) => sum + p.chapters.length, 0);
-    const totalChars = state.projects.reduce(
-      (sum, p) => sum + p.chapters.reduce((cs, c) => cs + countChars(c.content), 0),
-      0
-    );
-    return { totalProjects, totalChapters, totalChars };
+    let totalChapters = 0;
+    let totalChars = 0;
+    for (const p of state.projects) {
+      totalChapters += p.chapters.length;
+      for (const c of p.chapters) {
+        totalChars += countChars(c.content);
+      }
+    }
+    return { totalProjects: state.projects.length, totalChapters, totalChars };
   }, [state.projects]);
   const navigation = useNavigation<NavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);

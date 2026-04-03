@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef, ReactNode } from 'react';
 import { Project, DynastyId } from '../types';
 import { getProjects, saveProjects } from '../services/storage';
 
@@ -80,15 +80,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     loadData();
   }, []);
 
-  // 监听 projects 变化，保存所有变更（仅在非 loading 状态）
-  // 注意：SET_PROJECTS 同时改变 projects 和 loading，
-  // 因此无需额外的 loading-complete effect — 本 effect 在 projects 变化时已覆盖保存。
+  // 跳过首次加载后的无意义保存：数据刚从 storage 读出就立即写回是浪费
+  const hasLoadedOnce = useRef(false);
+
+  // 监听 projects 变化，保存所有变更（仅在非 loading 状态且非首次加载）
   useEffect(() => {
-    if (!state.loading) {
-      saveProjects(state.projects).catch(err => {
-        console.error('[AppContext] saveProjects failed:', err);
-      });
+    if (state.loading) return;
+    if (!hasLoadedOnce.current) {
+      hasLoadedOnce.current = true;
+      return; // 首次加载完成，跳过保存
     }
+    saveProjects(state.projects).catch(err => {
+      console.error('[AppContext] saveProjects failed:', err);
+    });
   }, [state.projects, state.loading]);
 
   return (
