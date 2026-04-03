@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, ReactNode } from 'react';
 import { Project, DynastyId } from '../types';
-import { getProjects, saveProjects } from '../services/storage';
+import { getProjects, saveProjects, getDynasty } from '../services/storage';
 
 interface AppState {
   projects: Project[];
@@ -72,7 +72,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const loadData = async () => {
       const [projects, dynasty] = await Promise.all([
         getProjects(),
-        import('../services/storage').then(m => m.getDynasty()),
+        getDynasty(),
       ]);
       dispatch({ type: 'SET_PROJECTS', payload: projects });
       dispatch({ type: 'SET_DYNASTY', payload: dynasty as DynastyId });
