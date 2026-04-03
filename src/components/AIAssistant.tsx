@@ -143,13 +143,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     return () => clearHintTimer();
   }, [loading]);
 
-  // Hint timer unmount guard: always clear timer when component unmounts,
-  // regardless of current loading state. Prevents stale timer firing into
-  // an unmounted component if the modal closes while loading is still true.
-  useEffect(() => {
-    return () => clearHintTimer();
-  }, [clearHintTimer]);
-
   // 切换类型时清除无关输入，防止旧内容残留
   // 同时重置请求状态，防止旧请求结果在切换后仍显示
   useEffect(() => {

@@ -660,8 +660,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginRight: Spacing.sm,
-    marginBottom: Spacing.sm,
   },
   dynastyButtonActive: {
     backgroundColor: Colors.vermillion,
