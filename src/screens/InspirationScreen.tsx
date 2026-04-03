@@ -136,13 +136,22 @@ export default function InspirationScreen({ navigation }: Props) {
 
       {/* 朝代筛选 */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-        {DYNASTIES_FILTER.map(d => (
+        <TouchableOpacity
+          key="全部"
+          style={[styles.filterChip, selectedDynasty === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
+          onPress={() => setSelectedDynasty('全部')}
+        >
+          <Text style={[styles.filterChipText, selectedDynasty === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
+            全部
+          </Text>
+        </TouchableOpacity>
+        {DYNASTIES_FILTER.filter(d => d !== '全部').map(d => (
           <TouchableOpacity
             key={d}
-            style={[styles.filterChip, selectedDynasty === d && styles.filterChipActive]}
+            style={[styles.filterChip, selectedDynasty === d ? styles.filterChipActive : styles.filterChip]}
             onPress={() => setSelectedDynasty(d)}
           >
-            <Text style={[styles.filterChipText, selectedDynasty === d && styles.filterChipTextActive]}>
+            <Text style={[styles.filterChipText, selectedDynasty === d ? styles.filterChipTextActive : styles.filterChipText]}>
               {d}
             </Text>
           </TouchableOpacity>
@@ -152,20 +161,20 @@ export default function InspirationScreen({ navigation }: Props) {
       {/* 分类筛选 */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow2}>
         <TouchableOpacity
-          style={[styles.filterChip, selectedCategory === '全部' && styles.filterChipActive]}
+          style={[styles.filterChip, selectedCategory === '全部' ? styles.filterChipActiveAll : styles.filterChip]}
           onPress={() => setSelectedCategory('全部')}
         >
-          <Text style={[styles.filterChipText, selectedCategory === '全部' && styles.filterChipTextActive]}>
+          <Text style={[styles.filterChipText, selectedCategory === '全部' ? styles.filterChipTextActiveAll : styles.filterChipText]}>
             全部
           </Text>
         </TouchableOpacity>
         {CATEGORIES.map(c => (
           <TouchableOpacity
             key={c}
-            style={[styles.filterChip, selectedCategory === c && styles.filterChipActive]}
+            style={[styles.filterChip, selectedCategory === c ? styles.filterChipActive : styles.filterChip]}
             onPress={() => setSelectedCategory(c)}
           >
-            <Text style={[styles.filterChipText, selectedCategory === c && styles.filterChipTextActive]}>
+            <Text style={[styles.filterChipText, selectedCategory === c ? styles.filterChipTextActive : styles.filterChipText]}>
               {c}
             </Text>
           </TouchableOpacity>
@@ -222,9 +231,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#EDE0CC',
     marginHorizontal: 3,
+    borderWidth: 1,
+    borderColor: '#D4C4A8',
   },
   filterChipActive: {
     backgroundColor: '#7B5E3C',
+    borderColor: '#7B5E3C',
+  },
+  filterChipActiveAll: {
+    backgroundColor: '#3D2B1F',
+    borderColor: '#3D2B1F',
   },
   filterChipText: {
     fontSize: 13,
@@ -232,6 +248,10 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: '#FFF',
+    fontWeight: 'bold',
+  },
+  filterChipTextActiveAll: {
+    color: '#E8DCC8',
     fontWeight: 'bold',
   },
   list: { padding: 14, paddingBottom: 40 },
