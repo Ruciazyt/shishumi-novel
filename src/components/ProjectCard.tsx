@@ -36,6 +36,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.75}
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={`${project.title}，${dynastyName}，${totalChars}字`}
       >
         {/* 装饰边框 - 古籍装帧风格 */}
         <View style={styles.decorationBorder} />

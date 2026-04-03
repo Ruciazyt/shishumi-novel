@@ -6,8 +6,6 @@ let _idCounter = 0;
 const generateId = (): string => `${Date.now()}-${++_idCounter}-${Math.random().toString(36).slice(2, 9)}`;
 
 const PROJECTS_KEY = 'shishumi_projects';
-const STORAGE_VERSION_KEY = 'shishumi_storage_version';
-const CURRENT_STORAGE_VERSION = 2;
 
 /** 内存缓存：避免每次操作都解析全量 JSON（Read-through cache） */
 let _cachedRaw: string | null = null;
