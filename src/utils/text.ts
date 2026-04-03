@@ -14,14 +14,17 @@ export const countChineseChars = (text: string): number => {
 
 /**
  * 截断文本到指定长度，超出部分用省略号替代
+ * 安全处理：确保不会在 surrogate pair（如 emoji）中间截断
  * @param text 原始文本
  * @param maxLen 最大长度（默认30）
  * @param suffix 省略符（默认"…"）
  */
 export const truncateText = (text: string, maxLen: number = 30, suffix: string = '…'): string => {
   if (!text) return '';
-  if (text.length <= maxLen) return text;
-  return text.slice(0, maxLen).trimEnd() + suffix;
+  // 使用 Array.from 按 Unicode code point 分割，避免截断 emoji/surrogate pair
+  const chars = Array.from(text);
+  if (chars.length <= maxLen) return text;
+  return chars.slice(0, maxLen).join('').trimEnd() + suffix;
 };
 
 /**

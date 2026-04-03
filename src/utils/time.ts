@@ -44,13 +44,13 @@ const describeTimeDiff = (diffMs: number): { label: string; isJustNow: boolean }
 /**
  * 格式化最后保存时间（EditorScreen 字数统计栏使用）
  * @param date Date 对象或 null
- * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"14:05"
+ * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"3天前"、"3月15日"
  */
 export const formatLastSaved = (date: Date | null): string => {
   if (!date) return '';
   const diffMs = Date.now() - date.getTime();
   const { label } = describeTimeDiff(diffMs);
   if (label) return label;
-  // 超过24小时，显示时:分
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  // 超过24小时，复用 formatRelativeTime 显示日期上下文
+  return formatRelativeTime(date.getTime());
 };
