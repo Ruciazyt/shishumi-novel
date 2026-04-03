@@ -531,7 +531,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
     marginBottom: Spacing.sm,
-    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   card: {

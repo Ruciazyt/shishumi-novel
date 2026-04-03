@@ -492,7 +492,7 @@ export const EditorScreen: React.FC = () => {
       </View>
 
       {/* Editor */}
-      <ScrollView style={styles.editorContainer}>
+      <ScrollView style={styles.editorContainer} keyboardDismissMode="on-drag">
         <TextInput
           style={styles.editor}
           placeholder={dynastyMeta.placeholder}
