@@ -25,23 +25,34 @@ if (!GITHUB_TOKEN) {
 }
 const appJson = JSON.parse(fs.readFileSync(APP_JSON, 'utf8'));
 
-// ── 1. Bump versionCode ────────────────────────────────────────────────
+// ── 1. Bump version ───────────────────────────────────────────────────
+const now = new Date();
+const timeStr = now.toLocaleString('en-US', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+  hour12: false,
+}).replace(/\//g, '').replace(/, /, '-').replace(/ /, '').replace(/:/, '');
+const versionTag = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${timeStr.slice(8)}`;
+
+const newVersion = versionTag;
+const oldVersion = appJson.expo.version;
+console.log(`📦 expo.version: ${oldVersion} → ${newVersion}`);
+appJson.expo.version = newVersion;
+
+// bump versionCode（git commit count）
 const currentCode = appJson.expo.android?.versionCode ?? 0;
 const newCode = parseInt(execSync('git rev-list --count HEAD', { cwd: __dirname + '/..' }).toString().trim(), 10);
+console.log(`📦 versionCode: ${currentCode} → ${newCode}`);
+appJson.expo.android = appJson.expo.android || {};
+appJson.expo.android.versionCode = newCode;
 
-if (newCode <= currentCode) {
-  console.log(`⚠️  versionCode 无变化（当前=${currentCode}, git count=${newCode}），跳过 bump`);
-} else {
-  console.log(`📦 versionCode: ${currentCode} → ${newCode}`);
-  appJson.expo.android = appJson.expo.android || {};
-  appJson.expo.android.versionCode = newCode;
-  fs.writeFileSync(APP_JSON, JSON.stringify(appJson, null, 2) + '\n');
-}
+fs.writeFileSync(APP_JSON, JSON.stringify(appJson, null, 2) + '\n');
 
-// ── 2. Git commit versionCode change ───────────────────────────────────
+// ── 2. Git commit version bump ───────────────────────────────────────
 try {
   execSync('git add app.json', { cwd: __dirname + '/..', stdio: 'ignore' });
-  execSync(`git commit -m "chore: bump android versionCode to ${newCode}"`, { cwd: __dirname + '/..', stdio: 'ignore' });
+  execSync(`git commit -m "chore: bump version to ${newVersion} (code ${newCode})"`, { cwd: __dirname + '/..', stdio: 'ignore' });
   console.log('✅ 版本号变更已 commit');
 } catch {
   console.log('⚠️  无 commit 或 git 不可用');
@@ -79,7 +90,7 @@ console.log(`✅ APK 生成成功: ${apkPath}`);
 
 // ── 6. Create GitHub Release ───────────────────────────────────────────
 async function createRelease() {
-  const tagName = `v${newCode}`;
+  const tagName = `v${newVersion}`;
   const apkData = fs.readFileSync(apkPath);
   const apkFileName = path.basename(apkPath);
 
