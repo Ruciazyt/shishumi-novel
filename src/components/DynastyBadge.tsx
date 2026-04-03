@@ -16,9 +16,9 @@ export const DynastyBadge: React.FC<{
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   return (
     <View style={styles.badge}>
-      <Text style={textStyle}>{name}</Text>
+      <Text style={textStyle} allowFontScaling={false}>{name}</Text>
       {subtext ? (
-        <Text style={size === 'xs' ? styles.subtextXs : styles.subtextSm} numberOfLines={1}>
+        <Text style={size === 'xs' ? styles.subtextXs : styles.subtextSm} numberOfLines={1} allowFontScaling={false}>
           {subtext}
         </Text>
       ) : null}

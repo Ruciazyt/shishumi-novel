@@ -80,19 +80,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     loadData();
   }, []);
 
-  const prevLoadingRef = React.useRef(state.loading);
-  useEffect(() => {
-    // state.loading 从 true → false 时（初始加载完成），确保 projects 被保存
-    // 防止 ADD_PROJECT 发生在加载期间导致项目未被持久化
-    if (prevLoadingRef.current === true && state.loading === false) {
-      saveProjects(state.projects).catch(err => {
-        console.error('[AppContext] saveProjects (loading complete) failed:', err);
-      });
-    }
-    prevLoadingRef.current = state.loading;
-  }, [state.loading]);
-
-  // 监听 projects 变化，保存所有变更
+  // 监听 projects 变化，保存所有变更（仅在非 loading 状态）
+  // 注意：SET_PROJECTS 同时改变 projects 和 loading，
+  // 因此无需额外的 loading-complete effect — 本 effect 在 projects 变化时已覆盖保存。
   useEffect(() => {
     if (!state.loading) {
       saveProjects(state.projects).catch(err => {
