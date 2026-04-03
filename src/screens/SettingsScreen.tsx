@@ -105,7 +105,7 @@ export const SettingsScreen: React.FC = () => {
     }
 
     const comparison = compareVersions(currentVersion, latestRelease.version);
-    if (comparison < 0) {
+    if (comparison > 0) {
       // 有新版本
       const downloadUrl = latestRelease.downloadUrl;
       if (downloadUrl) {
