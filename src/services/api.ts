@@ -17,7 +17,7 @@ export type ApiType = 'qwen' | 'openai' | 'minimax';
 
 export const API_PROVIDERS = [
   { id: 'qwen', name: '通义千问 (DashScope)', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions' },
-  { id: 'minimax', name: 'MiniMax', baseUrl: 'https://api.minimaxi.com/anthropic/v1' },
+  { id: 'minimax', name: 'MiMo', baseUrl: 'https://api.xiaomimimo.com/v1' },
   { id: 'openai', name: 'OpenAI 兼容接口', baseUrl: '' }, // 用户自定义
 ];
 
@@ -28,6 +28,12 @@ export const QWEN_MODELS: { id: string; name: string }[] = [
   { id: 'qwen-long', name: 'qwen-long（长文本·200万上下文）' },
 ];
 
+export const MINIMAX_MODELS: { id: string; name: string }[] = [
+  { id: 'mimo-v2-flash', name: 'MiMo v2 Flash（快速·经济）' },
+  { id: 'mimo-v2-pro', name: 'MiMo v2 Pro（增强·高精度）' },
+  { id: 'mimo-v2-omni', name: 'MiMo v2 Omni（全能）' },
+];
+
 export const OPENAI_MODELS: { id: string; name: string }[] = [
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini（快速·经济）' },
   { id: 'gpt-4o', name: 'GPT-4o（增强·平衡）' },
@@ -36,11 +42,15 @@ export const OPENAI_MODELS: { id: string; name: string }[] = [
 ];
 
 export const getAvailableModels = (apiType: ApiType) => {
-  return apiType === 'qwen' ? QWEN_MODELS : OPENAI_MODELS;
+  if (apiType === 'qwen') return QWEN_MODELS;
+  if (apiType === 'minimax') return MINIMAX_MODELS;
+  return OPENAI_MODELS;
 };
 
 export const DEFAULT_MODEL = (apiType: ApiType) => {
-  return apiType === 'qwen' ? 'qwen-turbo' : 'gpt-4o-mini';
+  if (apiType === 'qwen') return 'qwen-turbo';
+  if (apiType === 'minimax') return 'mimo-v2-flash';
+  return 'gpt-4o-mini';
 };
 
 /**
