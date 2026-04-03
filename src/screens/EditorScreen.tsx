@@ -22,6 +22,7 @@ import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constan
 import { getDynastyById, DYNASTY_WRITING_TIPS, DYNASTY_PLACEHOLDERS, DYNASTY_SUMMARIES, DYNASTIES } from '../data/dynasties';
 import { updateChapter, saveDynasty } from '../services/storage';
 import { countChars } from '../utils/text';
+import { formatLastSaved } from '../utils/time';
 
 import { DynastyBadge } from '../components/DynastyBadge';
 import { RootStackParamList, AIAssistantType, DynastyId } from '../types';
@@ -45,6 +46,8 @@ export const EditorScreen: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  // 30秒递增计数器，强制 statsBarRightContent 重新计算相对时间
+  const [tick, setTick] = useState(0);
   const [writingTipVisible, setWritingTipVisible] = useState(false);
   const [dynastyModalVisible, setDynastyModalVisible] = useState(false);
 
@@ -213,6 +216,12 @@ export const EditorScreen: React.FC = () => {
     const timer = setTimeout(() => setJustSaved(false), 2000);
     return () => clearTimeout(timer);
   }, [justSaved]);
+
+  // 30秒定时器：更新相对时间显示（如"自动保存于 X分钟前"）
+  useEffect(() => {
+    const timer = setInterval(() => setTick(t => t + 1), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleAIPress = (type: AIAssistantType) => {
     setAiType(type);
@@ -393,13 +402,10 @@ export const EditorScreen: React.FC = () => {
       return <Text style={styles.savedIndicator}>✓ 已保存</Text>;
     }
     if (lastSavedAt) {
-      const diffMs = Date.now() - lastSavedAt.getTime();
-      const diffMin = Math.floor(diffMs / 60000);
-      const hh = lastSavedAt.getHours().toString().padStart(2, '0');
-      const mm = lastSavedAt.getMinutes().toString().padStart(2, '0');
+      const label = formatLastSaved(lastSavedAt);
       return (
         <Text style={styles.savedIndicator}>
-          {diffMin >= 5 ? `${diffMin}分钟前自动保存` : `自动保存于 ${hh}:${mm}`}
+          {label === '刚刚' ? '刚刚自动保存' : `${label}自动保存`}
         </Text>
       );
     }
@@ -407,7 +413,7 @@ export const EditorScreen: React.FC = () => {
       return <Text style={styles.unsavedIndicator}>● 未保存</Text>;
     }
     return null;
-  }, [isSaving, justSaved, lastSavedAt, hasUnsavedChanges]);
+  }, [isSaving, justSaved, lastSavedAt, hasUnsavedChanges, tick]);
 
   return (
     <KeyboardAvoidingView
