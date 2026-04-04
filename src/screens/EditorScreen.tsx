@@ -402,7 +402,7 @@ export const EditorScreen: React.FC = () => {
     if (lastSavedAt) return 'autoSaved';
     if (hasUnsavedChangesRef.current) return 'unsaved';
     return null;
-  }, [isSaving, justSaved, lastSavedAt, tick]);
+  }, [isSaving, justSaved, lastSavedAt]);
 
   /** 格式化自动保存时间文案 */
   const autoSaveLabel = React.useMemo(() => {

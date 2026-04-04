@@ -148,7 +148,7 @@ export const HomeScreen: React.FC = () => {
             <Text style={styles.headerSubtitle}>历史小说创作</Text>
           </View>
           <View style={styles.headerDecoration}>
-            <Text style={styles.headerDecorationText}>📜</Text>
+            <Text style={styles.headerDecorationText} accessible={false}>📜</Text>
           </View>
         </View>
         {stats.totalProjects > 0 && (
@@ -167,7 +167,7 @@ export const HomeScreen: React.FC = () => {
         onPress={() => navigation.navigate('Inspiration')}
       >
         <View style={styles.inspirationBannerLeft}>
-          <Text style={styles.inspirationBannerEmoji}>🔍</Text>
+          <Text style={styles.inspirationBannerEmoji} accessible={false}>🔍</Text>
           <View>
             <Text style={styles.inspirationBannerTitle}>历史探秘</Text>
             <Text style={styles.inspirationBannerSubtitle}>野史传说 · 悬案之谜 · 创作灵感</Text>
@@ -199,7 +199,7 @@ export const HomeScreen: React.FC = () => {
         ListEmptyComponent={
           <View style={styles.empty}>
             <View style={styles.emptyDecoration}>
-              <Text style={styles.emptyIcon}>📖</Text>
+              <Text style={styles.emptyIcon} accessible={false}>📖</Text>
             </View>
             <Text style={styles.emptyTitle}>墨未落，纸尚新</Text>
             <Text style={styles.emptySubtitle}>点击右下角按钮，开始您的创作</Text>

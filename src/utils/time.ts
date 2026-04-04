@@ -1,4 +1,9 @@
 /**
+ * Precompiled constant: milliseconds in one day
+ */
+const MS_PER_DAY = 86400000;
+
+/**
  * 格式化时间戳为易读相对时间字符串
  * @param timestamp Unix毫秒时间戳
  * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"3天前"、"3月15日"
@@ -6,13 +11,13 @@
 export const formatRelativeTime = (timestamp: number): string => {
   if (!timestamp) return '';
   const diff = Date.now() - timestamp;
-  const days = Math.floor(diff / 86400000);
 
-  if (days < 30) {
-    // 复用 describeTimeDiff，消除 DRY 重复
+  // 30天内使用相对时间描述
+  if (diff < 30 * MS_PER_DAY) {
     return describeTimeDiff(diff);
   }
 
+  // 超过30天显示日期
   const date = new Date(timestamp);
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -25,8 +30,7 @@ export const formatRelativeTime = (timestamp: number): string => {
 
 /**
  * 计算时间差（毫秒）对应的相对时间描述
- * 内部辅助函数，避免 formatRelativeTime 和 formatLastSaved 之间的逻辑重复
- * @returns 相对时间文案，超过 24h 返回空字符串（由调用方自行处理）
+ * @returns 相对时间文案
  */
 const describeTimeDiff = (diffMs: number): string => {
   if (diffMs < 60000) return '刚刚';
@@ -34,19 +38,17 @@ const describeTimeDiff = (diffMs: number): string => {
   if (totalMinutes < 60) return `${totalMinutes}分钟前`;
   const totalHours = Math.floor(totalMinutes / 60);
   if (totalHours < 24) return `${totalHours}小时前`;
-  return ''; // 调用方需自行处理超过24h的情况
+  const totalDays = Math.floor(diffMs / MS_PER_DAY);
+  return `${totalDays}天前`;
 };
 
 /**
  * 格式化最后保存时间（EditorScreen 字数统计栏使用）
  * @param date Date 对象或 null
- * @returns 如 "刚刚"、"3分钟前"、"2小时前"
+ * @returns 如 "刚刚"、"3分钟前"、"2小时前"、"3天前"
  */
 export const formatLastSaved = (date: Date | null): string => {
   if (!date) return '';
   const diffMs = Date.now() - date.getTime();
-  const label = describeTimeDiff(diffMs);
-  if (label) return label;
-  // 超过24小时，复用 formatRelativeTime 显示日期上下文
-  return formatRelativeTime(date.getTime());
+  return describeTimeDiff(diffMs);
 };
