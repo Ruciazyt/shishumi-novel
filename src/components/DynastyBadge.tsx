@@ -42,9 +42,9 @@ export const DynastyBadge: React.FC<{
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel}
     >
-      <Text style={[textStyle, { color: dynColor }]} allowFontScaling={false}>{name}</Text>
+      <Text style={[textStyle, { color: dynColor }]} numberOfLines={1}>{name}</Text>
       {subtext ? (
-        <Text style={subtextStyle} numberOfLines={1} allowFontScaling={false}>
+        <Text style={subtextStyle} numberOfLines={1}>
           {subtext}
         </Text>
       ) : null}
