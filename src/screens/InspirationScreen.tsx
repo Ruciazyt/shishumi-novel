@@ -218,6 +218,9 @@ export default function InspirationScreen({ navigation }: Props) {
 
   // 防抖搜索 timer ref：避免每次按键都触发 API 调用
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // searchQueryRef：跟踪当前搜索文本，用于 handleAISearch 按钮回调稳定引用
+  // （避免 searchQuery 在 useCallback deps 中导致 handleAISearch 每次输入都重建）
+  const searchQueryRef = useRef('');
 
   // 组件卸载时清除待发的 debounce 定时器，防止卸载后回调仍执行导致状态更新
   useEffect(() => {
@@ -262,7 +265,7 @@ export default function InspirationScreen({ navigation }: Props) {
 
     try {
       const result = await callAI({
-        type: 'historical',
+        type: 'inspiration',
         text: query,
       });
 
@@ -287,6 +290,7 @@ export default function InspirationScreen({ navigation }: Props) {
   // 防抖搜索：用户输入后等待 300ms 无新输入再触发，避免频繁 API 调用
   const handleSearchInputChange = useCallback((text: string) => {
     setSearchQuery(text);
+    searchQueryRef.current = text;
     if (searchDebounceRef.current) {
       clearTimeout(searchDebounceRef.current);
     }
@@ -299,7 +303,7 @@ export default function InspirationScreen({ navigation }: Props) {
   }, []); // stable — executeAISearch 只在组件顶层定义，不依赖外部变量
 
   const handleAISearch = useCallback(() => {
-    const query = searchQuery.trim();
+    const query = searchQueryRef.current.trim();
     if (!query) return;
     // 立即清除待定的防抖计时器，直接执行搜索
     if (searchDebounceRef.current) {
@@ -307,7 +311,7 @@ export default function InspirationScreen({ navigation }: Props) {
       searchDebounceRef.current = null;
     }
     executeAISearch(query);
-  }, [searchQuery]); // searchQuery 作为 dependency，确保读取最新值
+  }, []); // searchQueryRef.current 始终为最新值，无需 deps
 
   const clearAISearch = () => {
     setAiResults([]);
