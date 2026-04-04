@@ -221,6 +221,9 @@ export default function InspirationScreen({ navigation }: Props) {
     setAiResults([]);
     setAiError('');
     setExpandedId(null);
+    // 重置筛选器：AI 搜索时隐藏筛选器，清除搜索后恢复"全部"状态
+    setSelectedCategory('全部');
+    setSelectedDynasty('全部');
 
     try {
       const result = await callAI({
@@ -251,6 +254,9 @@ export default function InspirationScreen({ navigation }: Props) {
     setAiError('');
     setSearched(false);
     setSearchQuery('');
+    // 清除搜索时同步重置筛选器，确保恢复浏览模式时处于干净状态
+    setSelectedCategory('全部');
+    setSelectedDynasty('全部');
   };
 
   // useCallback 包装 renderItem，保证 FlatList receive stable render function reference

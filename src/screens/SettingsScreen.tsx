@@ -27,9 +27,7 @@ import { DYNASTIES, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { type DynastyId } from '../types';
 import { DynastySelector } from '../components/DynastySelector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { saveDynasty } from '../services/storage';
-
-const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
+import { saveDynasty, CUSTOM_DYNASTY_KEY } from '../services/storage';
 
 export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();

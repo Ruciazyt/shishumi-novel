@@ -18,14 +18,12 @@ import { useApp } from '../context/AppContext';
 import { ChapterList } from '../components/ChapterList';
 import { DynastyBadge } from '../components/DynastyBadge';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
-import { addChapter, updateChapter, deleteChapter, updateProject } from '../services/storage';
+import { addChapter, updateChapter, deleteChapter, updateProject, CUSTOM_DYNASTY_KEY } from '../services/storage';
 import { countChars } from '../utils/text';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDynastyById, DYNASTY_WRITING_TIPS } from '../data/dynasties';
 import { Chapter, DynastyId, RootStackParamList } from '../types';
 import { DynastySelector } from '../components/DynastySelector';
-
-const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ProjectScreenRouteProp = RouteProp<RootStackParamList, 'Project'>;

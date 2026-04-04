@@ -169,6 +169,8 @@ export const deleteChapter = async (projectId: string, chapterId: string): Promi
 };
 
 const DYNASTY_KEY = 'shishumi_dynasty';
+/** Storage key for custom dynasty name (used by both ProjectScreen and SettingsScreen) */
+export const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
 export const getDynasty = async (): Promise<string> => {
   try {
