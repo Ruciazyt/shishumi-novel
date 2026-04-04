@@ -257,6 +257,7 @@ export const SettingsScreen: React.FC = () => {
               secureTextEntry={!apiKeyVisible}
               autoCapitalize="none"
               autoCorrect={false}
+              accessibilityLabel="API密钥输入框"
             />
             <TouchableOpacity
               style={styles.visibilityButton}
@@ -283,6 +284,7 @@ export const SettingsScreen: React.FC = () => {
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
+            accessibilityLabel="API接口地址输入框"
           />
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomUrl}>
             <Text style={styles.saveButtonText}>保存接口地址</Text>
@@ -359,6 +361,7 @@ export const SettingsScreen: React.FC = () => {
                 value={customDynastyInput}
                 onChangeText={setCustomDynastyInput}
                 maxLength={20}
+                accessibilityLabel="自定义朝代名称输入框"
               />
               <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomDynasty}>
                 <Text style={styles.saveButtonText}>保存自定义朝代</Text>

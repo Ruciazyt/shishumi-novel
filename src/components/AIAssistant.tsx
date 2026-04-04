@@ -447,10 +447,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                     </View>
                   ) : (
                     <>
-                      <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                      <TouchableOpacity style={styles.resetButton} onPress={resetState} accessibilityLabel="重新输入" accessibilityRole="button">
                         <Text style={styles.resetButtonText}>重新输入</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+                      <TouchableOpacity style={styles.copyButton} onPress={handleCopy} accessibilityLabel="复制AI返回结果" accessibilityRole="button">
                         <Text style={[styles.copyButtonText, copied && styles.copyButtonTextCopied]}>
                           {copyButtonText}
                         </Text>
@@ -459,6 +459,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                         style={[styles.insertButton, !result && styles.insertButtonDisabled]}
                         onPress={handleInsert}
                         disabled={!result}
+                        accessibilityLabel="将AI返回结果插入到编辑器" accessibilityRole="button"
                       >
                         <Text style={[styles.insertButtonText, !result && styles.insertButtonTextDisabled]}>插入文本</Text>
                       </TouchableOpacity>

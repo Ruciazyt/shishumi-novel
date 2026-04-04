@@ -369,6 +369,9 @@ export default function InspirationScreen({ navigation }: Props) {
             onSubmitEditing={handleAISearch}
             returnKeyType="search"
             maxLength={100}
+            accessibilityLabel="历史话题搜索"
+            autoCapitalize="none"
+            autoCorrect={false}
           />
           {aiSearching ? (
             <ActivityIndicator size="small" color={Colors.vermillion} style={styles.searchBtn} />
