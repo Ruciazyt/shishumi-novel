@@ -48,15 +48,7 @@ const ChapterItem = React.memo<ChapterItemProps>(
         </View>
       </TouchableOpacity>
     );
-  },
-  // 自定义比较：只有当 chapter 内容/标题、index 或回调变化时才重绘
-  (prev, next) =>
-    prev.chapter.content === next.chapter.content &&
-    prev.chapter.title === next.chapter.title &&
-    prev.index === next.index &&
-    prev.onPress === next.onPress &&
-    prev.onLongPress === next.onLongPress
-);
+});
 
 ChapterItem.displayName = 'ChapterItem';
 
