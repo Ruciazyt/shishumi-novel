@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.gold,
     fontWeight: '600',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   statsText: {
     fontSize: FontSize.xs,
