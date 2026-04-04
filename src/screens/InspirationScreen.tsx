@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   FlatList, LayoutAnimation, Platform, UIManager,
@@ -199,6 +199,9 @@ export default function InspirationScreen({ navigation }: Props) {
   const [aiError, setAiError] = useState<string>('');
   const [searched, setSearched] = useState(false);
 
+  // 防抖搜索 timer ref：避免每次按键都触发 API 调用
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const filtered = useMemo(() => {
     return INSPIRATIONS.filter(item => {
       const catMatch = selectedCategory === '全部' || item.category === selectedCategory;
@@ -218,8 +221,7 @@ export default function InspirationScreen({ navigation }: Props) {
     });
   }, []);
 
-  const handleAISearch = async () => {
-    const query = searchQuery.trim();
+  const executeAISearch = async (query: string) => {
     if (!query) return;
 
     setAiSearching(true);
@@ -254,6 +256,31 @@ export default function InspirationScreen({ navigation }: Props) {
       setAiSearching(false);
     }
   };
+
+  // 防抖搜索：用户输入后等待 300ms 无新输入再触发，避免频繁 API 调用
+  const handleSearchInputChange = useCallback((text: string) => {
+    setSearchQuery(text);
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+    searchDebounceRef.current = setTimeout(() => {
+      const trimmed = text.trim();
+      if (trimmed) {
+        executeAISearch(trimmed);
+      }
+    }, 300);
+  }, []); // stable — executeAISearch 只在组件顶层定义，不依赖外部变量
+
+  const handleAISearch = useCallback(() => {
+    const query = searchQuery.trim();
+    if (!query) return;
+    // 立即清除待定的防抖计时器，直接执行搜索
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = null;
+    }
+    executeAISearch(query);
+  }, [searchQuery]); // searchQuery 作为 dependency，确保读取最新值
 
   const clearAISearch = () => {
     setAiResults([]);
@@ -306,7 +333,7 @@ export default function InspirationScreen({ navigation }: Props) {
             placeholder="输入历史话题，让 AI 为你探索..."
             placeholderTextColor={Colors.textLight}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={handleSearchInputChange}
             onSubmitEditing={handleAISearch}
             returnKeyType="search"
             maxLength={100}
@@ -357,6 +384,12 @@ export default function InspirationScreen({ navigation }: Props) {
               <Text style={styles.aiSectionTitle}>🔮 AI 为你找到的灵感</Text>
               {aiResults.map(item => <InspirationCard key={item.id} item={item} isAI={true} isExpanded={expandedId === item.id} onToggle={toggleExpand} />)}
             </>
+          ) : !aiError && !aiSearching && searched ? (
+            <View style={styles.aiEmptyContainer}>
+              <Text style={styles.aiEmptyIcon}>🔍</Text>
+              <Text style={styles.aiEmptyText}>未找到相关灵感</Text>
+              <Text style={styles.aiEmptyHint}>试试其他关键词，如"安史之乱""郑和下西洋"</Text>
+            </View>
           ) : null}
         </View>
       )}
@@ -494,6 +527,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.vermillion,
     marginBottom: Spacing.sm + 4,
+  },
+  // AI 搜索空结果状态
+  aiEmptyContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xxl,
+  },
+  aiEmptyIcon: {
+    fontSize: 36,
+    marginBottom: Spacing.md,
+  },
+  aiEmptyText: {
+    fontSize: FontSize.md,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+    marginBottom: Spacing.xs,
+  },
+  aiEmptyHint: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.lg,
   },
   aiErrorContainer: {
     backgroundColor: Colors.backgroundCard,
