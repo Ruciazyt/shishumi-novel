@@ -202,8 +202,14 @@ export default function InspirationScreen({ navigation }: Props) {
   }, [selectedCategory, selectedDynasty]);
 
   const toggleExpand = useCallback((id: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedId(prev => (prev === id ? null : id));
+    // 仅在展开状态实际变化时触发布局动画，避免冗余动画调用
+    setExpandedId(prev => {
+      const next = prev === id ? null : id;
+      if (next !== prev) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      }
+      return next;
+    });
   }, []);
 
   const handleAISearch = async () => {
