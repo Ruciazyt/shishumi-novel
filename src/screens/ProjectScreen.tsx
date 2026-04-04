@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -349,6 +350,15 @@ export const ProjectScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
+            <TouchableOpacity
+              style={styles.keyboardDismissChapter}
+              onPress={Keyboard.dismiss}
+              accessibilityLabel="收起键盘"
+              accessibilityRole="button"
+            >
+              <Text style={styles.keyboardDismissChapterText}>⌨ 收起键盘</Text>
+            </TouchableOpacity>
+
             <View style={styles.formGroup}>
               <Text style={styles.label}>章节标题</Text>
               <TextInput
@@ -631,6 +641,16 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 20,
+    color: Colors.textSecondary,
+  },
+  keyboardDismissChapter: {
+    alignSelf: 'flex-end',
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  keyboardDismissChapterText: {
+    fontSize: FontSize.sm,
     color: Colors.textSecondary,
   },
   dynastyTipsScroll: {
