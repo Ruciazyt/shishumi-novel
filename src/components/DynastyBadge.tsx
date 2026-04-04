@@ -42,8 +42,15 @@ export const DynastyBadge: React.FC<{
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   const subtextStyle = size === 'xs' ? styles.subtextXs : styles.subtextSm;
 
+  const accessibilityLabel = subtext ? `${name}，${subtext}` : name;
+
   return (
-    <View style={[styles.badge, { backgroundColor: badgeBg, borderColor: badgeBorder }]}>
+    <View
+      style={[styles.badge, { backgroundColor: badgeBg, borderColor: badgeBorder }]}
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
+    >
       <Text style={[textStyle, { color: textColor }]} allowFontScaling={false}>{name}</Text>
       {subtext ? (
         <Text style={subtextStyle} numberOfLines={1} allowFontScaling={false}>

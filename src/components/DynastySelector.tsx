@@ -57,6 +57,9 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
             selected === d.id && styles.dynastyButtonActive,
           ]}
           onPress={() => onSelect(d.id as DynastyId)}
+          accessibilityRole="button"
+          accessibilityLabel={`选择朝代：${d.name}`}
+          accessibilityState={{ selected: selected === d.id }}
         >
           <Text
             style={[
@@ -75,6 +78,9 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
             selected === 'custom' && styles.dynastyButtonActive,
           ]}
           onPress={() => onSelect('custom' as DynastyId)}
+          accessibilityRole="button"
+          accessibilityLabel={`选择朝代：${customLabel}`}
+          accessibilityState={{ selected: selected === 'custom' }}
         >
           <Text
             style={[
