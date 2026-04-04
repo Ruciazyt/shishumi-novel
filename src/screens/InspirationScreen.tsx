@@ -30,6 +30,16 @@ const DYNASTY_COLORS: Record<string, string> = {
   '其他': Colors.textSecondary,
 };
 
+/** 将 6 位 hex 颜色转换为 rgba 字符串（用于半透明标签背景） */
+const hexToRgba = (hex: string, alpha: number): string => {
+  const clean = hex.replace('#', '');
+  if (clean.length !== 6) return hex;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
 type InspirationScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Inspiration">;
 
 interface Props {
@@ -68,17 +78,15 @@ function BulletSection({
   items,
   titleColor,
   itemColor,
-  isFirst,
 }: {
   title: string;
   items: string[];
   titleColor?: string;
   itemColor?: string;
-  isFirst?: boolean;
 }) {
   if (!items || items.length === 0) return null;
   return (
-    <View style={[styles.section, !isFirst && { marginTop: 12 }]}>
+    <View style={styles.section}>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
       {items.map((text, i) => (
         <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]}>· {text}</Text>
@@ -152,10 +160,10 @@ const InspirationCard = React.memo<{
       )}
       <View style={styles.cardHeader}>
         <View style={styles.tagRow}>
-          <View style={[styles.tag, { backgroundColor: catColor + '22' }]}>
+          <View style={[styles.tag, { backgroundColor: hexToRgba(catColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
           </View>
-          <View style={[styles.tag, { backgroundColor: dynColor + '22' }]}>
+          <View style={[styles.tag, { backgroundColor: hexToRgba(dynColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: dynColor }]}>{item.dynasty}</Text>
           </View>
         </View>
@@ -167,7 +175,7 @@ const InspirationCard = React.memo<{
 
       {isExpanded && (
         <View style={styles.cardBody}>
-          <BulletSection title="📖 正史记载" items={item.historicalFacts} isFirst />
+          <BulletSection title="📖 正史记载" items={item.historicalFacts} />
           <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
           <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
           <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
