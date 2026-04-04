@@ -63,17 +63,17 @@ function parseAIResult(text: string): Inspiration | null {
   }
 }
 
-/** Reusable bullet-list section */
-function BulletSection({
-  title,
-  items,
-  titleColor,
-  itemColor,
-}: {
+/** Reusable bullet-list section — React.memo avoids re-render when parent card re-renders */
+const BulletSection = React.memo<{
   title: string;
   items: string[];
   titleColor?: string;
   itemColor?: string;
+}>(function BulletSection({
+  title,
+  items,
+  titleColor,
+  itemColor,
 }) {
   if (!items || items.length === 0) return null;
   return (
@@ -84,7 +84,8 @@ function BulletSection({
       ))}
     </View>
   );
-}
+});
+BulletSection.displayName = 'BulletSection';
 
 /** Horizontal filter chip row */
 const FilterChipRow = React.memo(function FilterChipRow({
