@@ -131,8 +131,10 @@ const extractErrorMessage = (error: unknown, attempt = 1): string => {
     if (typeof data === 'string' && data.length > 0) return data;
 
     if (typeof resp.status === 'number') {
+      if (resp.status === 400) return '请求格式错误，请检查输入内容';
       if (resp.status === 401) return 'API密钥无效，请检查设置';
       if (resp.status === 403) return 'API密钥权限不足';
+      if (resp.status === 422) return '请求内容不符合AI服务政策，请修改后重试';
       if (resp.status === 429) return '请求过于频繁，请稍后再试';
       if (resp.status >= 500) return 'AI服务暂不可用，请稍后再试';
       return `请求失败（HTTP ${resp.status}）`;
