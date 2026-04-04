@@ -25,7 +25,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 // 复用 constants/colors.ts 中定义的朝代色，Others fallback 到 textSecondary
-const DYNASTY_COLORS: Record<string, string> = {
+const DYNASTY_TAG_COLORS: Record<string, string> = {
   ...DynastyColors,
   '其他': Colors.textSecondary,
 };
@@ -136,7 +136,7 @@ const InspirationCard = React.memo<{
   onToggle: (id: string) => void;
 }>(({ item, isAI, isExpanded, onToggle }) => {
   const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
-  const dynColor = DYNASTY_COLORS[item.dynasty] || Colors.textSecondary;
+  const dynColor = DYNASTY_TAG_COLORS[item.dynasty] || Colors.textSecondary;
 
   return (
     <TouchableOpacity
