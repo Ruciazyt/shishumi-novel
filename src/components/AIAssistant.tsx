@@ -156,10 +156,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     [state.dynasty]
   );
 
-  const canSubmit = !loading && (
-    (aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist')
-      ? sceneText.trim().length > 0
-      : inputText.trim().length > 0
+  const canSubmit = useMemo(
+    () =>
+      !loading &&
+      ((aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist')
+        ? sceneText.trim().length > 0
+        : inputText.trim().length > 0),
+    [loading, aiType, sceneText, inputText]
   );
 
   const handleSubmit = useCallback(async () => {
