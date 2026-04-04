@@ -87,7 +87,7 @@ function BulletSection({
 }
 
 /** Horizontal filter chip row */
-function FilterChipRow({
+const FilterChipRow = React.memo(function FilterChipRow({
   items,
   selected,
   onSelect,
@@ -127,7 +127,8 @@ function FilterChipRow({
       })}
     </ScrollView>
   );
-}
+});
+FilterChipRow.displayName = 'FilterChipRow';
 
 
 /** 灵感卡片组件：React.memo 避免 FlatList 展开/收起时所有卡片无谓重绘 */
