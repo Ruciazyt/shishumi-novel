@@ -1,24 +1,52 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors, rgba } from '../constants/colors';
 
 /**
  * Reusable dynasty badge component.
- * Centralizes the vermillion badge style used across HomeScreen, ProjectScreen,
+ * Centralizes the badge style used across HomeScreen, ProjectScreen,
  * EditorScreen, and ChapterList to avoid duplication and ensure consistency.
+ *
+ * @param variant - 'vermillion' (default, red badge) or 'dynasty' (uses DynastyColors).
+ *                  Use 'dynasty' when displaying dynasty identity badges to leverage
+ *                  the per-dynasty color system; use 'vermillion' for generic accent badges.
  */
 export const DynastyBadge: React.FC<{
   name: string;
   subtext?: string;
   /** Font size: 'sm' (14px, for project info) or 'xs' (12px, for stats bar). Defaults to 'sm'. */
   size?: 'sm' | 'xs';
-}> = React.memo(({ name, subtext, size = 'sm' }) => {
+  /**
+   * Badge color variant.
+   * - 'vermillion': fixed vermillion red (default) — consistent accent for UI chrome.
+   * - 'dynasty':    per-dynasty color from DynastyColors — visually distinguishes each era.
+   *                 Falls back to vermillion if the dynasty name has no entry in DynastyColors.
+   * Defaults to 'vermillion' for backwards compatibility.
+   */
+  variant?: 'vermillion' | 'dynasty';
+}> = React.memo(({ name, subtext, size = 'sm', variant = 'vermillion' }) => {
+  const dynColor = DynastyColors[name] ?? Colors.vermillion;
+  const badgeBg =
+    variant === 'dynasty'
+      ? rgba(dynColor, 0.12)
+      : ColorsAlpha.vermillionBadgeBg;
+  const badgeBorder =
+    variant === 'dynasty'
+      ? rgba(dynColor, 0.30)
+      : ColorsAlpha.vermillionBadgeBorder;
+  const textColor =
+    variant === 'dynasty'
+      ? dynColor
+      : Colors.vermillion;
+
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
+  const subtextStyle = size === 'xs' ? styles.subtextXs : styles.subtextSm;
+
   return (
-    <View style={styles.badge}>
-      <Text style={textStyle} allowFontScaling={false}>{name}</Text>
+    <View style={[styles.badge, { backgroundColor: badgeBg, borderColor: badgeBorder }]}>
+      <Text style={[textStyle, { color: textColor }]} allowFontScaling={false}>{name}</Text>
       {subtext ? (
-        <Text style={size === 'xs' ? styles.subtextXs : styles.subtextSm} numberOfLines={1} allowFontScaling={false}>
+        <Text style={subtextStyle} numberOfLines={1} allowFontScaling={false}>
           {subtext}
         </Text>
       ) : null}
@@ -30,9 +58,7 @@ DynastyBadge.displayName = 'DynastyBadge';
 
 const styles = StyleSheet.create({
   badge: {
-    backgroundColor: ColorsAlpha.vermillionBadgeBg,
     borderWidth: 1,
-    borderColor: ColorsAlpha.vermillionBadgeBorder,
     borderRadius: BorderRadius.round,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
@@ -42,12 +68,10 @@ const styles = StyleSheet.create({
   },
   textSm: {
     fontSize: FontSize.sm,
-    color: Colors.vermillion,
     fontWeight: '600',
   },
   textXs: {
     fontSize: FontSize.xs,
-    color: Colors.vermillion,
     fontWeight: '600',
     letterSpacing: 1,
   },
