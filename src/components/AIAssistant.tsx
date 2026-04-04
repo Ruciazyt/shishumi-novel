@@ -70,17 +70,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }
   }, [initialType]);
 
-  // 清除 hint 定时器（稳定引用，供 useCallback 依赖使用）
-  const clearHintTimer = useCallback(() => {
+  // 重置状态（完全自包含，不产生额外的 useCallback 依赖链）
+  const resetState = useCallback(() => {
     if (hintTimerRef.current) {
       clearTimeout(hintTimerRef.current);
       hintTimerRef.current = null;
     }
-  }, []);
-
-  // 重置状态（useCallback 避免 useEffect 中不必要的依赖触发）
-  const resetState = useCallback(() => {
-    clearHintTimer();
     setInputText('');
     setSceneText('');
     setResult('');
@@ -88,7 +83,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setLoadingHint('');
     setCopied(false);
     cancelledRef.current = false;
-  }, [clearHintTimer]);
+  }, []);
 
   /** 清空输入框（保留结果区域） */
   const handleClearInput = useCallback(() => {
@@ -111,9 +106,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       }
       cancelledRef.current = false;
       requestActiveRef.current = false;
-      // Inline state resets directly to avoid the stale-closure risk created by
-      // resetState depending on clearHintTimer (clearHintTimer is stable by design,
-      // but this pattern is cleaner and avoids the implicit dependency chain).
+      // Inline state resets directly — avoids stale closure risk and keeps
+      // the visible===false effect self-contained without calling resetState.
       setInputText('');
       setSceneText('');
       setResult('');
@@ -150,12 +144,17 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
         }
       }, 5000);
     } else {
-      clearHintTimer();
+      if (hintTimerRef.current) { clearTimeout(hintTimerRef.current); hintTimerRef.current = null; }
       if (isMountedRef.current) {
         setLoadingHint('');
       }
     }
-    return () => clearHintTimer();
+    return () => {
+      if (hintTimerRef.current) {
+        clearTimeout(hintTimerRef.current);
+        hintTimerRef.current = null;
+      }
+    };
   }, [loading]);
 
   // 切换类型时清除无关输入，防止旧内容残留
