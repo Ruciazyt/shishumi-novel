@@ -111,6 +111,8 @@ function FilterChipRow({
               isActive && (isAll ? styles.filterChipActiveAll : styles.filterChipActive),
             ]}
             onPress={() => onSelect(item)}
+            accessibilityLabel={`筛选：${item}`}
+            accessibilityRole="button"
           >
             <Text
               style={[
@@ -143,6 +145,8 @@ const InspirationCard = React.memo<{
       style={[styles.card, isAI && styles.cardAI]}
       activeOpacity={0.8}
       onPress={() => onToggle(item.id)}
+      accessibilityLabel={`${item.title}，${item.category}，${item.dynasty}，${isExpanded ? '已展开，点击收起' : '已折叠，点击展开'}`}
+      accessibilityRole="button"
     >
       {/* 装饰边框 - 古籍装帧风格，与 ProjectCard 保持一致 */}
       <View style={styles.decorationBorder} />

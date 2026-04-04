@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,21 +25,6 @@ import { countChars } from '../utils/text';
 import { Project, RootStackParamList, DynastyId } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-/** 包装组件：稳定化 onPress/onLongPress 引用，让 React.memo 真正生效 */
-const MemoizedProjectCard = React.memo<{
-  project: Project;
-  onPress: (project: Project) => void;
-  onLongPress: (project: Project) => void;
-}>(({ project, onPress, onLongPress }) => (
-  <ProjectCard
-    project={project}
-    onPress={() => onPress(project)}
-    onLongPress={() => onLongPress(project)}
-  />
-));
-MemoizedProjectCard.displayName = 'MemoizedProjectCard';
-
 
 export const HomeScreen: React.FC = () => {
   const { state, dispatch } = useApp();
@@ -138,13 +123,13 @@ export const HomeScreen: React.FC = () => {
     );
   }, [dispatch]);
 
-  /** FlatList renderItem — useCallback 包装，避免内联函数引用每次重建 */
+  /** FlatList renderItem — useCallback 包装，箭头函数捕获 item 适配 ProjectCard 的 ()=>void 类型 */
   const renderProjectItem = useCallback(
     ({ item }: { item: Project }) => (
-      <MemoizedProjectCard
+      <ProjectCard
         project={item}
-        onPress={handleProjectPress}
-        onLongPress={handleProjectLongPress}
+        onPress={() => handleProjectPress(item)}
+        onLongPress={() => handleProjectLongPress(item)}
       />
     ),
     [handleProjectPress, handleProjectLongPress]
