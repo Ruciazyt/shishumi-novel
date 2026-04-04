@@ -44,6 +44,9 @@ export const EditorScreen: React.FC = () => {
   const [aiType, setAiType] = useState<AIAssistantType>('polish');
   const hasUnsavedChangesRef = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Ref for editor ScrollView — used to auto-scroll to inserted AI content
+  const editorScrollRef = useRef<ScrollView>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   // 30秒递增计数器，强制 statsBarRightContent 重新计算相对时间
@@ -313,6 +316,8 @@ export const EditorScreen: React.FC = () => {
     setContent(newContent);
     pendingContentRef.current = newContent;
     recordHistory(newContent);
+    // Auto-scroll editor to show newly inserted AI content
+    editorScrollRef.current?.scrollToEnd({ animated: true });
   };
 
   if (!project || !chapter) {
@@ -504,7 +509,7 @@ export const EditorScreen: React.FC = () => {
       </View>
 
       {/* Editor */}
-      <ScrollView style={styles.editorContainer} keyboardDismissMode="on-drag">
+      <ScrollView ref={editorScrollRef} style={styles.editorContainer} keyboardDismissMode="on-drag">
         <TextInput
           style={styles.editor}
           placeholder={dynastyMeta.placeholder}
@@ -512,6 +517,8 @@ export const EditorScreen: React.FC = () => {
           value={content}
           onChangeText={handleContentChange}
           multiline
+          autoCapitalize="none"
+          autoCorrect={false}
         />
       </ScrollView>
 
