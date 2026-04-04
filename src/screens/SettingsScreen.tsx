@@ -173,9 +173,10 @@ export const SettingsScreen: React.FC = () => {
       if (fetched.length === 0) {
         Alert.alert('获取失败', '未能获取到模型列表，请检查 API 地址和密钥是否正确');
       } else {
-        setModels(fetched);
-        if (!fetched.find(m => m.id === selectedModel)) {
-          const first = fetched[0].id;
+        const sorted = [...fetched].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+        setModels(sorted);
+        if (!sorted.find(m => m.id === selectedModel)) {
+          const first = sorted[0].id;
           setSelectedModel(first);
           await setModel(first);
         }

@@ -111,9 +111,21 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       }
       cancelledRef.current = false;
       requestActiveRef.current = false;
-      resetState();
+      // Inline state resets directly to avoid the stale-closure risk created by
+      // resetState depending on clearHintTimer (clearHintTimer is stable by design,
+      // but this pattern is cleaner and avoids the implicit dependency chain).
+      setInputText('');
+      setSceneText('');
+      setResult('');
+      setError('');
+      setLoadingHint('');
+      setCopied(false);
+      if (hintTimerRef.current) {
+        clearTimeout(hintTimerRef.current);
+        hintTimerRef.current = null;
+      }
     }
-  }, [visible, resetState]);
+  }, [visible]);
 
   // 组件卸载时标记
   useEffect(() => {
