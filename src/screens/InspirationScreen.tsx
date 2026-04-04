@@ -155,7 +155,8 @@ export default function InspirationScreen({ navigation }: Props) {
     executeAISearch(query);
   }, [executeAISearch]);
 
-  const clearAISearch = () => {
+  // useCallback 保证稳定引用，避免 FlatList onPress 接受到每次渲染重建的函数引用
+  const clearAISearch = useCallback(() => {
     setAiResults([]);
     setAiError('');
     setSearched(false);
@@ -163,7 +164,7 @@ export default function InspirationScreen({ navigation }: Props) {
     // 清除搜索时同步重置筛选器，确保恢复浏览模式时处于干净状态
     setSelectedCategory('全部');
     setSelectedDynasty('全部');
-  };
+  }, []);
 
   // useCallback 包装 renderItem，保证 FlatList receive stable render function reference
   // FlatList 要求签名 ({ item, index }) => ReactElement，isAI 固定为 false（AI 结果单独处理）

@@ -61,8 +61,6 @@ export const ColorsAlpha = {
   inkShadowMedium: rgba(Colors.ink, 0.1),
   /** 金色 8% 透明度 — 用于灵感卡片背景 */
   goldCardBg: rgba(Colors.gold, 0.08),
-  /** 纸色深 — 用于灵感卡片边框 */
-  paperCardBorder: Colors.paperDark,
 } as const;
 
 /**
