@@ -4,7 +4,6 @@ import { AIRequest, AIResponse } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DYNASTIES } from '../data/dynasties';
 
-const API_TYPE_KEY = 'shishumi_api_type';
 const API_KEY_STORAGE_KEY = 'shishumi_api_key';
 const API_BASE_URL_KEY = 'shishumi_api_base_url';
 const MODEL_STORAGE_KEY = 'shishumi_model';
@@ -13,63 +12,23 @@ const MAX_RETRIES = 3;
 /** 系统提示词：始终作为第一条消息注入，确保 AI 输出符合历史小说风格 */
 const SYSTEM_PROMPT = '你是一位专业的中国古代历史小说作家。请始终使用典雅、简洁的书面中文进行回复。回复内容应契合历史小说的叙事风格——语言含蓄内敛，描写简洁有力，避免现代口语、网络用语和过于直白的表达。对话应符合古代说话习惯，适当使用文言词汇和古典意象。';
 
-export type ApiType = 'qwen' | 'openai' | 'minimax';
-
-export const API_PROVIDERS = [
-  { id: 'qwen', name: '通义千问 (DashScope)', baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions' },
-  { id: 'minimax', name: 'MiniMax', baseUrl: 'https://api.minimaxi.com/v1' },
-  { id: 'openai', name: 'OpenAI 兼容接口', baseUrl: '' }, // 用户自定义
-];
-
-export const QWEN_MODELS: { id: string; name: string }[] = [
-  { id: 'qwen-turbo', name: 'qwen-turbo（快速·经济）' },
-  { id: 'qwen-plus', name: 'qwen-plus（增强·平衡）' },
-  { id: 'qwen-max', name: 'qwen-max（最强·高精度）' },
-  { id: 'qwen-long', name: 'qwen-long（长文本·200万上下文）' },
-];
-
-export const MINIMAX_MODELS: { id: string; name: string }[] = [
-  { id: 'mimo-v2-flash', name: 'MiMo v2 Flash（快速·经济）' },
-  { id: 'mimo-v2-pro', name: 'MiMo v2 Pro（增强·高精度）' },
-  { id: 'mimo-v2-omni', name: 'MiMo v2 Omni（全能）' },
-];
-
-export const OPENAI_MODELS: { id: string; name: string }[] = [
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini（快速·经济）' },
-  { id: 'gpt-4o', name: 'GPT-4o（增强·平衡）' },
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo（最强）' },
-  { id: 'custom', name: '自定义模型' },
-];
-
-export const getAvailableModels = (apiType: ApiType) => {
-  if (apiType === 'qwen') return QWEN_MODELS;
-  if (apiType === 'minimax') return MINIMAX_MODELS;
-  return OPENAI_MODELS;
-};
-
-export const DEFAULT_MODEL = (apiType: ApiType) => {
-  if (apiType === 'qwen') return 'qwen-turbo';
-  if (apiType === 'minimax') return 'mimo-v2-flash';
-  return 'gpt-4o-mini';
-};
-
 /**
- * Fetch available models from an OpenAI-compatible API endpoint.
+ * Fetch available models from an OpenAI-compatible /v1/models endpoint.
  * Returns a list of { id, name } objects.
- * Fails silently — returns empty array on error.
+ * Returns empty array on any error.
  */
 export const fetchAvailableModels = async (
   apiKey: string,
   baseUrl: string
 ): Promise<{ id: string; name: string }[]> => {
   try {
-    // Strip trailing slash and /chat/completions suffix to get the models endpoint
-    const modelsUrl = baseUrl.replace(/\/chat\/completions\/?$/, '') + '/models';
+    // Build models URL: strip trailing slash and /chat/completions suffix
+    const cleanUrl = baseUrl.replace(/\/+$/, '').replace(/\/chat\/completions\/?$/, '');
+    const modelsUrl = cleanUrl + '/models';
     const response = await axios.get(modelsUrl, {
       headers: { Authorization: `Bearer ${apiKey}` },
       timeout: 10000,
     });
-    // OpenAI-compatible format: response.data.data is an array of model objects
     const data = response.data;
     if (Array.isArray(data?.data)) {
       return data.data.map((m: { id: string }) => ({ id: m.id, name: m.id }));
@@ -81,19 +40,6 @@ export const fetchAvailableModels = async (
 };
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const getApiType = async (): Promise<ApiType> => {
-  try {
-    const stored = await AsyncStorage.getItem(API_TYPE_KEY);
-    return (stored as ApiType) || 'qwen';
-  } catch {
-    return 'qwen';
-  }
-};
-
-export const setApiType = async (type: ApiType): Promise<void> => {
-  await AsyncStorage.setItem(API_TYPE_KEY, type);
-};
 
 export const getApiKey = async (): Promise<string | null> => {
   try {
@@ -110,11 +56,9 @@ export const setApiKey = async (apiKey: string): Promise<void> => {
 export const getApiBaseUrl = async (): Promise<string> => {
   try {
     const stored = await AsyncStorage.getItem(API_BASE_URL_KEY);
-    if (stored) return stored;
-    // 默认返回千问的URL
-    return API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
+    return stored || '';
   } catch {
-    return API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
+    return '';
   }
 };
 
@@ -124,10 +68,9 @@ export const setApiBaseUrl = async (url: string): Promise<void> => {
 
 export const getModel = async (): Promise<string> => {
   try {
-    const stored = await AsyncStorage.getItem(MODEL_STORAGE_KEY);
-    return stored || DEFAULT_MODEL(await getApiType());
+    return await AsyncStorage.getItem(MODEL_STORAGE_KEY) || '';
   } catch {
-    return DEFAULT_MODEL('qwen');
+    return '';
   }
 };
 
@@ -171,17 +114,13 @@ const extractErrorMessage = (error: unknown, attempt = 1, maxRetries = MAX_RETRI
 
   const err = error as Record<string, unknown>;
 
-  // axios 错误：err.response 存在
   const errResponse = err.response;
   if (errResponse && typeof errResponse === 'object') {
     const resp = errResponse as Record<string, unknown>;
     const data = resp.data;
 
-    // data 为对象时，尝试提取 error.message 或直接的 message 字段
     if (data && typeof data === 'object') {
       const d = data as Record<string, unknown>;
-      // 通义千问标准错误格式: { error: { message: "..." } }
-      // OpenAI 兼容格式: { error: { message: "..." } } 或 { message: "..." }
       const errorObj = d['error'];
       const msg = (errorObj && typeof errorObj === 'object')
         ? (errorObj as Record<string, unknown>)['message']
@@ -189,28 +128,23 @@ const extractErrorMessage = (error: unknown, attempt = 1, maxRetries = MAX_RETRI
       if (typeof msg === 'string') return msg;
     }
 
-    // data 为字符串时直接返回（如 "Rate limit exceeded"）
     if (typeof data === 'string' && data.length > 0) return data;
 
-    // HTTP 状态码映射
     if (typeof resp.status === 'number') {
       if (resp.status === 401) return 'API密钥无效，请检查设置';
       if (resp.status === 403) return 'API密钥权限不足';
       if (resp.status === 429) return '请求过于频繁，请稍后再试';
       if (resp.status >= 500) return 'AI服务暂不可用，请稍后再试';
-      // 其他 HTTP 错误（400/404/422 等）返回状态码描述
       return `请求失败（HTTP ${resp.status}）`;
     }
   }
 
-  // 网络层错误（未收到服务器响应）
   const code = err.code as string | undefined;
   if (code === 'ECONNABORTED') return '请求超时，请重试';
   if (code === 'ERR_NETWORK' || code === 'ENOTFOUND' || code === 'ECONNREFUSED') {
     return '网络连接失败，请检查网络';
   }
 
-  // 兜底：返回 err.message 或默认文本
   return (err.message as string | undefined) || '调用失败';
 };
 
@@ -225,17 +159,21 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       getApiBaseUrl(),
       getModel(),
     ]);
+
+    if (!baseUrl) {
+      return { success: false, error: '请先在设置中配置API接口地址' };
+    }
+    if (!model) {
+      return { success: false, error: '请先在设置中获取并选择模型' };
+    }
+
     const prompt = buildPrompt(request);
 
-    // 构建请求头
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
     };
 
-    // Authorization header - both qwen and OpenAI-compatible use Bearer
-    headers['Authorization'] = `Bearer ${apiKey}`;
-
-    // 构建请求体
     const body: Record<string, unknown> = {
       model,
       messages: [
@@ -250,7 +188,6 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       timeout: 30000,
     });
 
-    // 通用的 OpenAI 兼容格式解析
     const content = response.data.choices?.[0]?.message?.content;
     if (content) {
       return { success: true, data: content };
@@ -261,7 +198,6 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     const code = err.code as string | undefined;
     const httpStatus = (err.response as Record<string, unknown> | undefined)?.status as number | undefined;
 
-    // 判断是否值得重试：网络层错误（无 response）或服务端错误/限流
     const isNetworkError = !httpStatus;
     const isRetryable =
       code === 'ECONNABORTED' ||
@@ -273,13 +209,11 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
       (httpStatus !== undefined && httpStatus >= 500);
 
     if (isRetryable && attempt < MAX_RETRIES) {
-      // 指数退避：2s → 4s → 8s
       const delay = Math.pow(2, attempt) * 1000;
       await sleep(delay);
       return callAI(request, attempt + 1);
     }
 
-    // 重试耗尽或不可重试的错误，返回带上下文的错误信息
     const baseError = extractErrorMessage(error, attempt, MAX_RETRIES);
     if (attempt > 1) {
       return { success: false, error: `${baseError}（已重试${attempt - 1}次）` };

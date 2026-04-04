@@ -13,11 +13,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import {
-  getApiKey, setApiKey, getApiType, setApiType,
+  getApiKey, setApiKey,
   getApiBaseUrl, setApiBaseUrl,
   getModel, setModel,
-  getAvailableModels, DEFAULT_MODEL, fetchAvailableModels,
-  API_PROVIDERS, type ApiType
+  fetchAvailableModels,
 } from '../services/api';
 import {
   checkForUpdate, showUpdateDialog, downloadAndInstall,
@@ -34,7 +33,6 @@ const CUSTOM_DYNASTY_KEY = 'shishumi_custom_dynasty';
 
 export const SettingsScreen: React.FC = () => {
   const { state, dispatch } = useApp();
-  const [apiType, setApiTypeState] = useState<ApiType>('qwen');
   const [apiKey, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [customBaseUrl, setCustomBaseUrl] = useState('');
@@ -45,25 +43,18 @@ export const SettingsScreen: React.FC = () => {
   const [customDynastyInput, setCustomDynastyInput] = useState('');
   const [models, setModels] = useState<{ id: string; name: string }[]>([]);
   const [fetchingModels, setFetchingModels] = useState(false);
-  const availableModels = models.length > 0 ? models : getAvailableModels(apiType);
   const currentVersion = getAppVersion();
 
   useEffect(() => {
     const loadData = async () => {
-      const [type, key, url, model] = await Promise.all([
-        getApiType(),
+      const [key, url, model] = await Promise.all([
         getApiKey(),
         getApiBaseUrl(),
         getModel(),
       ]);
-      setApiTypeState(type);
       if (key) setApiKeyInput(key);
-      if (type === 'openai') {
-        setCustomBaseUrl(url);
-      }
-      setSelectedModel(model);
-      setModels(getAvailableModels(type));
-      // Load custom dynasty name if in custom mode
+      if (url) setCustomBaseUrl(url);
+      if (model) setSelectedModel(model);
       if (state.dynasty === 'custom') {
         const customName = await AsyncStorage.getItem(CUSTOM_DYNASTY_KEY);
         if (customName) {
@@ -75,8 +66,6 @@ export const SettingsScreen: React.FC = () => {
     loadData();
   }, []);
 
-  // 每次进入设置页面时检查更新
-  // 使用 sequenceRef 确保只有最新请求能更新 state（防止 re-focus 后旧请求覆盖新数据）
   const sequenceRef = React.useRef(0);
   const checkUpdate = useCallback(async () => {
     const seq = ++sequenceRef.current;
@@ -94,20 +83,17 @@ export const SettingsScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       checkUpdate();
-      return () => { sequenceRef.current = -999; }; // 标记为已废弃，阻止进行中旧请求更新 state
+      return () => { sequenceRef.current = -999; };
     }, [checkUpdate])
   );
 
   const handleUpdatePress = () => {
     if (!latestRelease) {
-      // 没有检测到新版本，手动检查
       checkUpdate();
       return;
     }
-
     const comparison = compareVersions(currentVersion, latestRelease.version);
     if (comparison > 0) {
-      // 有新版本
       const downloadUrl = latestRelease.downloadUrl;
       if (downloadUrl) {
         showUpdateDialog(
@@ -116,7 +102,6 @@ export const SettingsScreen: React.FC = () => {
           () => {}
         );
       } else {
-        // 没有 APK，直接打开 release 页面
         Alert.alert(
           '发现新版本',
           `${latestRelease.version}\n\n点击确定查看更新详情`,
@@ -130,24 +115,7 @@ export const SettingsScreen: React.FC = () => {
         );
       }
     } else {
-      // 已是最新版本
       Alert.alert('已是最新版本', `当前版本 ${currentVersion} 已是最新版本`);
-    }
-  };
-
-  const handleApiTypeChange = async (newType: ApiType) => {
-    setApiTypeState(newType);
-    await setApiType(newType);
-    const newDefault = DEFAULT_MODEL(newType);
-    setSelectedModel(newDefault);
-    await setModel(newDefault);
-    setModels(getAvailableModels(newType));
-    if (newType === 'qwen') {
-      const qwenUrl = API_PROVIDERS.find(p => p.id === 'qwen')!.baseUrl;
-      await setApiBaseUrl(qwenUrl);
-    } else if (newType === 'minimax') {
-      const minimaxUrl = API_PROVIDERS.find(p => p.id === 'minimax')!.baseUrl;
-      await setApiBaseUrl(minimaxUrl);
     }
   };
 
@@ -161,7 +129,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleSaveCustomUrl = async () => {
-    if (apiType !== 'qwen' && !customBaseUrl.trim()) {
+    if (!customBaseUrl.trim()) {
       Alert.alert('错误', '请输入API接口地址');
       return;
     }
@@ -175,10 +143,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleDynastyChange = async (dynastyId: DynastyId) => {
-    if (dynastyId === 'custom') {
-      // Don't dispatch yet; custom name input handles final save
-      return;
-    }
+    if (dynastyId === 'custom') return;
     dispatch({ type: 'SET_DYNASTY', payload: dynastyId });
     await saveDynasty(dynastyId);
   };
@@ -211,10 +176,10 @@ export const SettingsScreen: React.FC = () => {
         Alert.alert('获取失败', '未能获取到模型列表，请检查 API 地址和密钥是否正确');
       } else {
         setModels(fetched);
-        // Auto-select first model if current selection not in list
         if (!fetched.find(m => m.id === selectedModel)) {
-          setSelectedModel(fetched[0].id);
-          await setModel(fetched[0].id);
+          const first = fetched[0].id;
+          setSelectedModel(first);
+          await setModel(first);
         }
       }
     } catch (e: unknown) {
@@ -230,7 +195,6 @@ export const SettingsScreen: React.FC = () => {
     [state.dynasty]
   );
 
-  // 判断是否有可用更新
   const hasUpdate = latestRelease && compareVersions(currentVersion, latestRelease.version) > 0;
 
   return (
@@ -273,37 +237,9 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* API 类型选择 */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>API 接口类型</Text>
-        <View style={styles.card}>
-          <View style={styles.apiTypeSelector}>
-            {API_PROVIDERS.map(provider => (
-              <TouchableOpacity
-                key={provider.id}
-                style={[
-                  styles.apiTypeItem,
-                  apiType === provider.id && styles.apiTypeItemActive,
-                ]}
-                onPress={() => handleApiTypeChange(provider.id as ApiType)}
-              >
-                <Text
-                  style={[
-                    styles.apiTypeName,
-                    apiType === provider.id && styles.apiTypeNameActive,
-                  ]}
-                >
-                  {provider.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
-
       {/* API 配置 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>API 配置</Text>
+        <Text style={styles.sectionTitle}>API 配置（OpenAI 兼容格式）</Text>
         <View style={styles.card}>
           <Text style={styles.label}>API Key</Text>
           <View style={styles.inputRow}>
@@ -330,26 +266,22 @@ export const SettingsScreen: React.FC = () => {
             <Text style={styles.saveButtonText}>保存密钥</Text>
           </TouchableOpacity>
 
-          {apiType !== 'qwen' && (
-            <>
-              <View style={styles.apiUrlSection}>
-                <Text style={styles.label}>接口地址 {apiType === 'openai' ? '（OpenAI 兼容）' : ''}</Text>
-              </View>
-              <TextInput
-                style={styles.input}
-                placeholder={apiType === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://api.minimaxi.com/anthropic/v1'}
-                placeholderTextColor={Colors.textLight}
-                value={customBaseUrl}
-                onChangeText={setCustomBaseUrl}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-              />
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomUrl}>
-                <Text style={styles.saveButtonText}>保存接口地址</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <View style={styles.apiUrlSection}>
+            <Text style={styles.label}>接口地址</Text>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="https://api.openai.com/v1"
+            placeholderTextColor={Colors.textLight}
+            value={customBaseUrl}
+            onChangeText={setCustomBaseUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+          />
+          <TouchableOpacity style={styles.saveButton} onPress={handleSaveCustomUrl}>
+            <Text style={styles.saveButtonText}>保存接口地址</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -358,48 +290,48 @@ export const SettingsScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>模型选择</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>
-            {apiType === 'qwen'
-              ? '不同模型在速度、费用和生成质量上有差异'
-              : '选择您的 API 提供商支持的模型'}
+            保存 API 密钥和接口地址后，点击获取可用模型
           </Text>
-          {(apiType === 'openai' || apiType === 'minimax') && (
-            <TouchableOpacity
-              style={styles.fetchModelsButton}
-              onPress={handleFetchModels}
-              disabled={fetchingModels}
-            >
-              {fetchingModels ? (
-                <ActivityIndicator size="small" color={Colors.textOnVermillion} />
-              ) : (
-                <Text style={styles.fetchModelsButtonText}>🔄 获取可用模型</Text>
-              )}
-            </TouchableOpacity>
-          )}
-          <View style={styles.modelList}>
-            {availableModels.map(model => (
-              <TouchableOpacity
-                key={model.id}
-                style={[
-                  styles.modelItem,
-                  selectedModel === model.id && styles.modelItemActive,
-                ]}
-                onPress={() => handleModelChange(model.id)}
-              >
-                <Text
+          <TouchableOpacity
+            style={styles.fetchModelsButton}
+            onPress={handleFetchModels}
+            disabled={fetchingModels}
+          >
+            {fetchingModels ? (
+              <ActivityIndicator size="small" color={Colors.textOnVermillion} />
+            ) : (
+              <Text style={styles.fetchModelsButtonText}>🔄 获取可用模型</Text>
+            )}
+          </TouchableOpacity>
+          {models.length > 0 ? (
+            <View style={styles.modelList}>
+              {models.map(model => (
+                <TouchableOpacity
+                  key={model.id}
                   style={[
-                    styles.modelName,
-                    selectedModel === model.id && styles.modelNameActive,
+                    styles.modelItem,
+                    selectedModel === model.id && styles.modelItemActive,
                   ]}
-                  numberOfLines={1}
+                  onPress={() => handleModelChange(model.id)}
                 >
-                  {model.name}
-                </Text>
-                {selectedModel === model.id && (
-                  <Text style={styles.modelCheck}>✓</Text>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text
+                    style={[
+                      styles.modelName,
+                      selectedModel === model.id && styles.modelNameActive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {model.name}
+                  </Text>
+                  {selectedModel === model.id && (
+                    <Text style={styles.modelCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.emptyModels}>暂无模型，请先保存 API 配置后点击获取</Text>
+          )}
         </View>
       </View>
 
@@ -574,33 +506,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontWeight: '500',
   },
-  apiTypeSelector: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  apiTypeItem: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.paperDark,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  apiTypeItemActive: {
-    backgroundColor: Colors.vermillion,
-    borderColor: Colors.vermillion,
-  },
-  apiTypeName: {
-    fontSize: FontSize.sm,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  apiTypeNameActive: {
-    color: Colors.textOnVermillion,
-    fontWeight: '600',
-  },
   label: {
     fontSize: FontSize.sm,
     color: Colors.textSecondary,
@@ -694,6 +599,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.gold,
     fontWeight: '600',
+  },
+  emptyModels: {
+    fontSize: FontSize.sm,
+    color: Colors.textLight,
+    textAlign: 'center',
+    paddingVertical: Spacing.md,
   },
   detailTitle: {
     fontSize: FontSize.lg,
