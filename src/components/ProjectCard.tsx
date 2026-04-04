@@ -48,7 +48,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = React.memo(
             <Text style={styles.title} numberOfLines={1}>
               {project.title}
             </Text>
-            <DynastyBadge name={dynastyName} />
+            <DynastyBadge name={dynastyName} variant="dynasty" />
           </View>
 
           <Text style={styles.description} numberOfLines={2}>
