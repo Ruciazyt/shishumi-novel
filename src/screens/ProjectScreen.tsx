@@ -47,6 +47,8 @@ export const ProjectScreen: React.FC = () => {
   const [editCustomDynastyName, setEditCustomDynastyName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [isSavingProject, setIsSavingProject] = useState(false);
+  // Loading state for edit project modal: prevents async race that causes empty custom dynasty name flash
+  const [isLoadingEditModal, setIsLoadingEditModal] = useState(false);
 
   if (!project) {
     return (
@@ -175,18 +177,20 @@ export const ProjectScreen: React.FC = () => {
   }, [chapterTitle, editingChapter, dispatch, project]);
 
   /** 打开项目编辑弹窗，初始化表单数据 */
-  const handleEditProject = useCallback(() => {
+  const handleEditProject = useCallback(async () => {
+    setIsLoadingEditModal(true);
     setEditTitle(project.title);
     setEditDynasty(project.dynasty as DynastyId);
     setEditDescription(project.description);
     if ((project.dynasty as string) === 'custom') {
-      AsyncStorage.getItem(CUSTOM_DYNASTY_KEY).then(name => {
-        setEditCustomDynastyName(name || '');
-      });
+      // Await before opening modal to prevent empty dynasty name flash
+      const name = await AsyncStorage.getItem(CUSTOM_DYNASTY_KEY);
+      setEditCustomDynastyName(name || '');
     } else {
       setEditCustomDynastyName('');
     }
     setEditModalVisible(true);
+    setIsLoadingEditModal(false);
   }, [project]);
 
   /** 保存项目编辑 */
@@ -230,10 +234,13 @@ export const ProjectScreen: React.FC = () => {
         <TouchableOpacity
           onPress={handleEditProject}
           style={styles.editButton}
+          disabled={isLoadingEditModal}
           accessibilityLabel="编辑项目"
           accessibilityRole="button"
         >
-          <Text style={styles.editButtonText}>编辑</Text>
+          <Text style={styles.editButtonText}>
+            {isLoadingEditModal ? '加载中' : '编辑'}
+          </Text>
         </TouchableOpacity>
       </View>
 

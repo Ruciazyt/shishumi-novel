@@ -103,8 +103,14 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   // 只有组件真正卸载时 isMountedRef 才变为 false
   useEffect(() => {
     if (!visible) {
-      requestActiveRef.current = false;
+      // Abort any in-flight request when modal closes, preventing memory leaks
+      // and state updates on an unmounted component
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       cancelledRef.current = false;
+      requestActiveRef.current = false;
       resetState();
     }
   }, [visible, resetState]);
