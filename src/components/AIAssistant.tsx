@@ -355,6 +355,20 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               <Text style={styles.keyboardDismissText}>⌨️ 收起</Text>
             </TouchableOpacity>
 
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+                <View style={styles.errorActions}>
+                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                    <Text style={styles.resetButtonText}>重新输入</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.retryButton} onPress={handleSubmit}>
+                    <Text style={styles.retryButtonText}>重试</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
+
             {aiType === 'poetry' || aiType === 'buddhist' || aiType === 'taoist' ? (
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>场景描述</Text>
@@ -400,20 +414,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                 </View>
               </View>
             )}
-
-            {error ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
-                <View style={styles.errorActions}>
-                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
-                    <Text style={styles.resetButtonText}>重新输入</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.retryButton} onPress={handleSubmit}>
-                    <Text style={styles.retryButtonText}>重试</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : null}
 
             {loading ? (
               <View style={styles.loadingContainer}>

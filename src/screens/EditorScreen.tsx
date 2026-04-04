@@ -884,10 +884,6 @@ const styles = StyleSheet.create({
   navRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: Spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    marginTop: Spacing.xs,
     gap: Spacing.sm,
   },
   navChapterBtn: {
@@ -915,7 +911,6 @@ const styles = StyleSheet.create({
   // Toolbar - Chapter Progress Chip
   chapterProgressChip: {
     width: '100%',
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: Spacing.xs,
@@ -923,6 +918,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
     backgroundColor: ColorsAlpha.goldBorder,
     borderRadius: BorderRadius.md,
+    // 上边框分隔 AI 按钮区和章节导航区
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    marginTop: Spacing.sm,
   },
   chapterProgressChipText: {
     fontSize: FontSize.xs,
