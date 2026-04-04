@@ -1,3 +1,5 @@
+import { DYNASTIES } from './dynasties';
+
 export interface Inspiration {
   id: string;
   title: string;
@@ -10,11 +12,14 @@ export interface Inspiration {
   characterIdeas?: string[];      // 人物设定灵感
 }
 
+
 export const CATEGORIES: Inspiration['category'][] = [
   '野史传说', '历史悬案', '帝王之谜', '战争秘闻', '人物逸事'
 ];
 
-export const DYNASTIES_FILTER = ['全部', '明朝', '清朝', '宋朝', '唐朝', '元朝', '其他'];
+// Canonical dynasty list for filter UI — order must match DYNASTIES in dynasties.ts
+// '全部' is added by InspirationScreen; '其他' stays at end for unmatched dynasties.
+export const DYNASTIES_FILTER: string[] = [...DYNASTIES.map(d => d.name), '其他'];
 
 export const INSPIRATIONS: Inspiration[] = [
   {

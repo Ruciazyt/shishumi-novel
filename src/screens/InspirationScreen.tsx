@@ -256,7 +256,7 @@ export default function InspirationScreen({ navigation }: Props) {
     [expandedId, toggleExpand]
   );
 
-  const dynastyItems = ['全部', ...DYNASTIES_FILTER.filter(d => d !== '全部')];
+  const dynastyItems = ['全部', ...DYNASTIES_FILTER];
   const categoryItems = ['全部', ...CATEGORIES];
 
   return (
