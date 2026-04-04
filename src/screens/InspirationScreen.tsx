@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   FlatList, LayoutAnimation, Platform, UIManager,
@@ -201,6 +201,16 @@ export default function InspirationScreen({ navigation }: Props) {
 
   // 防抖搜索 timer ref：避免每次按键都触发 API 调用
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 组件卸载时清除待发的 debounce 定时器，防止卸载后回调仍执行导致状态更新
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = null;
+      }
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return INSPIRATIONS.filter(item => {
