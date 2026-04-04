@@ -25,23 +25,14 @@ export const DynastyBadge: React.FC<{
    */
   variant?: 'vermillion' | 'dynasty';
 }> = React.memo(({ name, subtext, size = 'sm', variant = 'vermillion' }) => {
-  const dynColor = DynastyColors[name] ?? Colors.vermillion;
-  const badgeBg =
-    variant === 'dynasty'
-      ? rgba(dynColor, 0.12)
-      : ColorsAlpha.vermillionBadgeBg;
-  const badgeBorder =
-    variant === 'dynasty'
-      ? rgba(dynColor, 0.30)
-      : ColorsAlpha.vermillionBadgeBorder;
-  const textColor =
-    variant === 'dynasty'
-      ? dynColor
-      : Colors.vermillion;
+  const isDynastyVariant = variant === 'dynasty';
+  // dynasty variant: look up DynastyColors, fall back to vermillion; vermillion variant: always vermillion
+  const dynColor = isDynastyVariant ? (DynastyColors[name] ?? Colors.vermillion) : Colors.vermillion;
+  const badgeBg = isDynastyVariant ? rgba(dynColor, 0.12) : ColorsAlpha.vermillionBadgeBg;
+  const badgeBorder = isDynastyVariant ? rgba(dynColor, 0.30) : ColorsAlpha.vermillionBadgeBorder;
 
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   const subtextStyle = size === 'xs' ? styles.subtextXs : styles.subtextSm;
-
   const accessibilityLabel = subtext ? `${name}，${subtext}` : name;
 
   return (
@@ -51,7 +42,7 @@ export const DynastyBadge: React.FC<{
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel}
     >
-      <Text style={[textStyle, { color: textColor }]} allowFontScaling={false}>{name}</Text>
+      <Text style={[textStyle, { color: dynColor }]} allowFontScaling={false}>{name}</Text>
       {subtext ? (
         <Text style={subtextStyle} numberOfLines={1} allowFontScaling={false}>
           {subtext}

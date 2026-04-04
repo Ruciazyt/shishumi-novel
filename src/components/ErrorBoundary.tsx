@@ -20,6 +20,8 @@ interface State {
  * 参考 Phase 3.3 任务计划。
  */
 export class ErrorBoundary extends Component<Props, State> {
+  static displayName = 'ErrorBoundary';
+
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null };
