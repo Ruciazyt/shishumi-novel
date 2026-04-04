@@ -9,26 +9,28 @@ import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '..
 import { callAI } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+// 使用设计系统语义化颜色，保持与 App 整体风格一致
 const CATEGORY_COLORS: Record<string, string> = {
-  '野史传说': '#8B4513',
-  '历史悬案': '#4A5568',
-  '帝王之谜': '#6B21A8',
-  '战争秘闻': '#B91C1C',
-  '人物逸事': '#0369A1',
+  '野史传说': Colors.goldDark,       // 土金色 — 古韵
+  '历史悬案': Colors.textSecondary,  // 灰色
+  '帝王之谜': Colors.vermillion,    // 朱砂红 — 权谋
+  '战争秘闻': Colors.error,          // 错误红 — 血战
+  '人物逸事': Colors.inkLight,       // 墨浅色 — 文人
 };
 
 const DYNASTY_COLORS: Record<string, string> = {
-  '明朝': '#C53030',
-  '清朝': '#2B6CB0',
-  '宋朝': '#D69E2E',
-  '唐朝': '#805AD5',
-  '元朝': '#319231',
-  '其他': '#718096',
+  '明朝': Colors.error,        // 朱红
+  '清朝': '#2B6CB0',           // 蓝青（保持历史朝代特色，无对应设计色时用近似）
+  '宋朝': Colors.gold,        // 金色
+  '唐朝': Colors.vermillion,  // 朱砂
+  '元朝': Colors.success,     // 绿色
+  '其他': Colors.textSecondary,
 };
 
 type InspirationScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Inspiration">;
@@ -88,7 +90,7 @@ function BulletSection({
   );
 }
 
-/** Horizontal filter chip row — deduplicates dynasty/category filter blocks */
+/** Horizontal filter chip row */
 function FilterChipRow({
   items,
   selected,
@@ -176,7 +178,7 @@ export default function InspirationScreen({ navigation }: Props) {
       } else {
         Alert.alert('AI 搜索失败', result.error || '请检查 API 配置');
       }
-    } catch (e) {
+    } catch {
       Alert.alert('错误', '搜索过程中发生错误');
     } finally {
       setAiSearching(false);
@@ -191,8 +193,8 @@ export default function InspirationScreen({ navigation }: Props) {
 
   const renderItem = (item: Inspiration, isAI = false) => {
     const isExpanded = expandedId === item.id;
-    const catColor = CATEGORY_COLORS[item.category] || '#718096';
-    const dynColor = DYNASTY_COLORS[item.dynasty] || '#718096';
+    const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
+    const dynColor = DYNASTY_COLORS[item.dynasty] || Colors.textSecondary;
 
     return (
       <TouchableOpacity
@@ -223,9 +225,9 @@ export default function InspirationScreen({ navigation }: Props) {
         {isExpanded && (
           <View style={styles.cardBody}>
             <BulletSection title="📖 正史记载" items={item.historicalFacts} isFirst />
-            <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor="#8B4513" itemColor="#5A3E28" />
-            <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor="#6B21A8" itemColor="#6B21A8" />
-            <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor="#0369A1" itemColor="#0369A1" />
+            <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
+            <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
+            <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
           </View>
         )}
 
@@ -263,7 +265,7 @@ export default function InspirationScreen({ navigation }: Props) {
           <TextInput
             style={styles.searchInput}
             placeholder="输入历史话题，让 AI 为你探索..."
-            placeholderTextColor="#B0A090"
+            placeholderTextColor={Colors.textLight}
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={handleAISearch}
@@ -271,7 +273,7 @@ export default function InspirationScreen({ navigation }: Props) {
             maxLength={100}
           />
           {aiSearching ? (
-            <ActivityIndicator size="small" color="#7B5E3C" style={styles.searchBtn} />
+            <ActivityIndicator size="small" color={Colors.vermillion} style={styles.searchBtn} />
           ) : (
             <TouchableOpacity
               style={[styles.searchBtn, searchQuery.trim() ? styles.searchBtnActive : null]}
@@ -296,7 +298,7 @@ export default function InspirationScreen({ navigation }: Props) {
         <View style={styles.aiSection}>
           {aiSearching ? (
             <View style={styles.aiLoading}>
-              <ActivityIndicator size="small" color="#7B5E3C" />
+              <ActivityIndicator size="small" color={Colors.vermillion} />
               <Text style={styles.aiLoadingText}>AI 正在为你探索历史...</Text>
             </View>
           ) : aiResults.length > 0 ? (
@@ -346,29 +348,36 @@ export default function InspirationScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FDF6EC' },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#E8DCC8',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundCard,
     borderBottomWidth: 1,
-    borderBottomColor: '#D4C4A8',
+    borderBottomColor: ColorsAlpha.goldBorder,
   },
-  backBtn: { padding: 4 },
-  backBtnText: { fontSize: 16, color: '#7B5E3C' },
+  backBtn: { padding: Spacing.xs },
+  backBtnText: { fontSize: FontSize.md, color: Colors.vermillion },
   headerSpacer: { width: 50 },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#5C3D2E' },
-  subtitle: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4 },
-  subtitleText: { fontSize: 13, color: '#8B7355', fontStyle: 'italic' },
+  headerTitle: { fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.textPrimary },
+  subtitle: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.sm + 2,
+    paddingBottom: Spacing.xs,
+  },
+  subtitleText: { fontSize: FontSize.sm, color: Colors.textLight, fontStyle: 'italic' },
   searchSection: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: '#F0E6D2',
+    paddingHorizontal: Spacing.md - 2,
+    paddingVertical: Spacing.sm + 2,
+    backgroundColor: Colors.paperDark,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0D4C0',
+    borderBottomColor: Colors.border,
   },
   searchRow: {
     flexDirection: 'row',
@@ -376,153 +385,174 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    fontSize: 14,
-    color: '#3D2B1F',
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.round,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    fontSize: FontSize.sm,
+    color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: '#D4C4A8',
+    borderColor: Colors.border,
   },
   searchBtn: {
-    marginLeft: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#E8DCC8',
+    marginLeft: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: BorderRadius.round,
+    backgroundColor: Colors.paperDark,
     borderWidth: 1,
-    borderColor: '#D4C4A8',
+    borderColor: Colors.border,
   },
   searchBtnActive: {
-    backgroundColor: '#7B5E3C',
-    borderColor: '#7B5E3C',
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
   },
   searchBtnText: {
-    fontSize: 14,
-    color: '#8B7355',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
     fontWeight: 'bold',
   },
   searchBtnTextActive: {
-    color: '#FFF',
+    color: Colors.textOnVermillion,
   },
   clearBtn: {
-    marginTop: 6,
+    marginTop: Spacing.xs + 2,
     alignSelf: 'flex-start',
   },
   clearBtnText: {
-    fontSize: 12,
-    color: '#B0A090',
+    fontSize: FontSize.xs,
+    color: Colors.textLight,
   },
   aiSection: {
-    paddingHorizontal: 14,
-    paddingTop: 12,
+    paddingHorizontal: Spacing.md - 2,
+    paddingTop: Spacing.sm + 4,
   },
   aiLoading: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: Spacing.lg,
   },
   aiLoadingText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#8B7355',
+    marginLeft: Spacing.sm,
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
     fontStyle: 'italic',
   },
   aiSectionTitle: {
-    fontSize: 14,
+    fontSize: FontSize.sm,
     fontWeight: 'bold',
-    color: '#6B21A8',
-    marginBottom: 10,
+    color: Colors.vermillion,
+    marginBottom: Spacing.sm + 4,
   },
   filterRow: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: Spacing.md - 2,
+    paddingVertical: Spacing.sm,
     maxHeight: 44,
   },
   filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: '#EDE0CC',
-    marginHorizontal: 3,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 2,
+    borderRadius: BorderRadius.round,
+    backgroundColor: Colors.paperDark,
+    marginHorizontal: Spacing.xs,
     borderWidth: 1,
-    borderColor: '#D4C4A8',
+    borderColor: Colors.border,
   },
   filterChipActive: {
-    backgroundColor: '#7B5E3C',
-    borderColor: '#7B5E3C',
+    backgroundColor: Colors.vermillion,
+    borderColor: Colors.vermillion,
   },
   filterChipActiveAll: {
-    backgroundColor: '#3D2B1F',
-    borderColor: '#3D2B1F',
+    backgroundColor: Colors.inkDark,
+    borderColor: Colors.inkDark,
   },
   filterChipText: {
-    fontSize: 13,
-    color: '#8B7355',
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
   },
   filterChipTextActive: {
-    color: '#FFF',
+    color: Colors.textOnVermillion,
     fontWeight: 'bold',
   },
   filterChipTextActiveAll: {
-    color: '#E8DCC8',
+    color: Colors.paper,
     fontWeight: 'bold',
   },
-  list: { padding: 14, paddingBottom: 40 },
+  list: { padding: Spacing.md - 2, paddingBottom: 40 },
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md + 2,
+    marginBottom: Spacing.sm + 4,
     borderWidth: 1,
-    borderColor: '#E8DCC8',
-    shadowColor: '#8B7355',
+    borderColor: Colors.border,
+    shadowColor: Colors.ink,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
   },
   cardAI: {
-    borderColor: '#9B59B6',
+    borderColor: Colors.vermillion,
     borderWidth: 1.5,
-    backgroundColor: '#FAF5FF',
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
   },
   aiBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#6B21A8',
-    paddingHorizontal: 8,
+    backgroundColor: Colors.vermillion,
+    paddingHorizontal: Spacing.sm + 2,
     paddingVertical: 2,
-    borderRadius: 10,
-    marginBottom: 8,
+    borderRadius: BorderRadius.round,
+    marginBottom: Spacing.sm,
   },
   aiBadgeText: {
-    fontSize: 11,
-    color: '#FFF',
+    fontSize: FontSize.xs,
+    color: Colors.textOnVermillion,
     fontWeight: 'bold',
   },
   cardHeader: {},
-  tagRow: { flexDirection: 'row', marginBottom: 8 },
+  tagRow: { flexDirection: 'row', marginBottom: Spacing.sm },
   tag: {
-    paddingHorizontal: 8,
+    paddingHorizontal: Spacing.sm + 2,
     paddingVertical: 2,
-    borderRadius: 10,
-    marginRight: 6,
+    borderRadius: BorderRadius.round,
+    marginRight: Spacing.sm,
   },
-  tagText: { fontSize: 11, fontWeight: 'bold' },
-  cardTitle: { fontSize: 17, fontWeight: 'bold', color: '#3D2B1F', marginBottom: 6, lineHeight: 24 },
-  summary: { fontSize: 14, color: '#6B5B4F', lineHeight: 22 },
+  tagText: { fontSize: FontSize.xs, fontWeight: 'bold' },
+  cardTitle: {
+    fontSize: FontSize.lg - 2,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs + 2,
+    lineHeight: 24,
+  },
+  summary: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 22,
+  },
   cardBody: {
-    marginTop: 14,
-    paddingTop: 14,
+    marginTop: Spacing.sm + 4,
+    paddingTop: Spacing.sm + 4,
     borderTopWidth: 1,
-    borderTopColor: '#F0E6D2',
+    borderTopColor: ColorsAlpha.goldBorder,
   },
   section: {},
-  sectionTitle: { fontSize: 14, fontWeight: 'bold', color: '#3D2B1F', marginBottom: 6 },
-  bulletItem: { fontSize: 13.5, color: '#5C4A3A', lineHeight: 22, paddingLeft: 4, marginBottom: 3 },
-  expandHint: { alignItems: 'center', marginTop: 10 },
-  expandText: { fontSize: 12, color: '#B0A090' },
-  empty: { padding: 40, alignItems: 'center' },
-  emptyText: { fontSize: 15, color: '#B0A090' },
+  sectionTitle: {
+    fontSize: FontSize.sm,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs + 2,
+  },
+  bulletItem: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 22,
+    paddingLeft: 4,
+    marginBottom: 3,
+  },
+  expandHint: { alignItems: 'center', marginTop: Spacing.sm + 4 },
+  expandText: { fontSize: FontSize.xs, color: Colors.textLight },
+  empty: { padding: Spacing.xxl, alignItems: 'center' },
+  emptyText: { fontSize: FontSize.sm, color: Colors.textLight },
 });
