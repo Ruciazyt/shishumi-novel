@@ -107,7 +107,7 @@ const buildPrompt = (request: AIRequest): string => {
 };
 
 /** 从 axios error 对象中安全提取错误消息 */
-const extractErrorMessage = (error: unknown, attempt = 1): string => {
+const extractErrorMessage = (error: unknown): string => {
   if (!error || typeof error !== 'object') {
     return '调用失败';
   }
@@ -241,7 +241,7 @@ export const callAI = async (
       return callAI(request, attempt + 1, signal);
     }
 
-    const baseError = extractErrorMessage(error, attempt);
+    const baseError = extractErrorMessage(error);
     if (attempt > 1) {
       return { success: false, error: `${baseError}（已重试${attempt - 1}次）` };
     }

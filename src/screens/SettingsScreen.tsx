@@ -342,6 +342,7 @@ export const SettingsScreen: React.FC = () => {
           <DynastySelector
             selected={state.dynasty as DynastyId}
             onSelect={handleDynastyChange}
+            showCustom={false}
           />
           {state.dynasty === 'custom' && (
             <View style={styles.customDynastySection}>
