@@ -107,7 +107,7 @@ const buildPrompt = (request: AIRequest): string => {
 };
 
 /** 从 axios error 对象中安全提取错误消息 */
-const extractErrorMessage = (error: unknown, attempt = 1, maxRetries = MAX_RETRIES): string => {
+const extractErrorMessage = (error: unknown, attempt = 1): string => {
   if (!error || typeof error !== 'object') {
     return '调用失败';
   }
@@ -144,11 +144,26 @@ const extractErrorMessage = (error: unknown, attempt = 1, maxRetries = MAX_RETRI
   if (code === 'ERR_NETWORK' || code === 'ENOTFOUND' || code === 'ECONNREFUSED') {
     return '网络连接失败，请检查网络';
   }
+  if (code === 'ERR_CANCELED') return '请求已取消';
 
   return (err.message as string | undefined) || '调用失败';
 };
 
-export const callAI = async (request: AIRequest, attempt = 1): Promise<AIResponse> => {
+/**
+ * Call AI with optional abort signal support.
+ * Returns early with an error if the signal is already aborted.
+ * On abort during retry loop, throws an error that propagates to caller.
+ */
+export const callAI = async (
+  request: AIRequest,
+  attempt = 1,
+  signal?: AbortSignal
+): Promise<AIResponse> => {
+  // Respect abort signal even before the first request
+  if (signal?.aborted) {
+    return { success: false, error: '请求已取消' };
+  }
+
   try {
     const apiKey = await getApiKey();
     if (!apiKey) {
@@ -186,6 +201,8 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
     const response = await axios.post(baseUrl, body, {
       headers,
       timeout: 30000,
+      // AbortController signal — axios will throw ERR_CANCELED on abort
+      signal,
     });
 
     const content = response.data.choices?.[0]?.message?.content;
@@ -196,25 +213,33 @@ export const callAI = async (request: AIRequest, attempt = 1): Promise<AIRespons
   } catch (error: unknown) {
     const err = error as Record<string, unknown>;
     const code = err.code as string | undefined;
+
+    // If the request was aborted, propagate abort immediately without retry
+    if (code === 'ERR_CANCELED' || signal?.aborted) {
+      return { success: false, error: '请求已取消' };
+    }
+
     const httpStatus = (err.response as Record<string, unknown> | undefined)?.status as number | undefined;
 
-    const isNetworkError = !httpStatus;
     const isRetryable =
       code === 'ECONNABORTED' ||
       code === 'ERR_NETWORK' ||
       code === 'ENOTFOUND' ||
       code === 'ECONNREFUSED' ||
-      isNetworkError ||
       httpStatus === 429 ||
       (httpStatus !== undefined && httpStatus >= 500);
 
     if (isRetryable && attempt < MAX_RETRIES) {
+      // Check signal before sleeping to avoid sleeping on aborted request
+      if (signal?.aborted) {
+        return { success: false, error: '请求已取消' };
+      }
       const delay = Math.pow(2, attempt) * 1000;
       await sleep(delay);
-      return callAI(request, attempt + 1);
+      return callAI(request, attempt + 1, signal);
     }
 
-    const baseError = extractErrorMessage(error, attempt, MAX_RETRIES);
+    const baseError = extractErrorMessage(error, attempt);
     if (attempt > 1) {
       return { success: false, error: `${baseError}（已重试${attempt - 1}次）` };
     }

@@ -51,6 +51,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const requestActiveRef = useRef(false);
   // 追踪当前请求是否已被用户取消
   const cancelledRef = useRef(false);
+  // AbortController ref：支持取消进行中的 HTTP 请求，避免响应 race
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 始终读取最新的 inputText/sceneText，避免 handleSubmit 中的 stale closure
   const inputTextRef = useRef('');
@@ -188,6 +190,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       }
     }
 
+    // 中止上一请求（如果存在）
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     Keyboard.dismiss();
     setLoading(true);
     setError('');
@@ -202,7 +211,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       text: currentInputText,
       dynasty: currentDynasty,
       scene: isSceneType ? currentSceneText : undefined,
-    });
+    }, 1, controller.signal);
 
     // 只有在组件仍挂载且当前请求未被 modal 关闭阻断时才更新状态
     // cancelledRef 也会阻断响应处理
@@ -226,6 +235,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       hintTimerRef.current = null;
     }
     setLoadingHint('');
+    // 真正中止进行中的 HTTP 请求
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   }, []);
 
   const handleInsert = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   FlatList, LayoutAnimation, Platform, UIManager,
@@ -128,6 +128,62 @@ function FilterChipRow({
   );
 }
 
+
+/** 灵感卡片组件：React.memo 避免 FlatList 展开/收起时所有卡片无谓重绘 */
+const InspirationCard = React.memo<{
+  item: Inspiration;
+  isAI: boolean;
+  isExpanded: boolean;
+  onToggle: (id: string) => void;
+}>(({ item, isAI, isExpanded, onToggle }) => {
+  const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
+  const dynColor = DYNASTY_COLORS[item.dynasty] || Colors.textSecondary;
+
+  return (
+    <TouchableOpacity
+      style={[styles.card, isAI && styles.cardAI]}
+      activeOpacity={0.8}
+      onPress={() => onToggle(item.id)}
+    >
+      {isAI && (
+        <View style={styles.aiBadge}>
+          <Text style={styles.aiBadgeText}>🤖 AI 创作</Text>
+        </View>
+      )}
+      <View style={styles.cardHeader}>
+        <View style={styles.tagRow}>
+          <View style={[styles.tag, { backgroundColor: catColor + '22' }]}>
+            <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
+          </View>
+          <View style={[styles.tag, { backgroundColor: dynColor + '22' }]}>
+            <Text style={[styles.tagText, { color: dynColor }]}>{item.dynasty}</Text>
+          </View>
+        </View>
+        <Text style={styles.cardTitle}>{item.title}</Text>
+        <Text style={styles.summary} numberOfLines={isExpanded ? undefined : 2}>
+          {item.summary}
+        </Text>
+      </View>
+
+      {isExpanded && (
+        <View style={styles.cardBody}>
+          <BulletSection title="📖 正史记载" items={item.historicalFacts} isFirst />
+          <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
+          <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
+          <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
+        </View>
+      )}
+
+      <View style={styles.expandHint}>
+        <Text style={styles.expandText}>
+          {isExpanded ? '▲ 点击收起' : '▼ 点击展开详情'}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
+InspirationCard.displayName = 'InspirationCard';
+
 export default function InspirationScreen({ navigation }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<string>('全部');
   const [selectedDynasty, setSelectedDynasty] = useState<string>('全部');
@@ -188,54 +244,18 @@ export default function InspirationScreen({ navigation }: Props) {
     setSearchQuery('');
   };
 
-  const renderItem = (item: Inspiration, isAI = false) => {
-    const isExpanded = expandedId === item.id;
-    const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
-    const dynColor = DYNASTY_COLORS[item.dynasty] || Colors.textSecondary;
-
-    return (
-      <TouchableOpacity
-        style={[styles.card, isAI && styles.cardAI]}
-        activeOpacity={0.8}
-        onPress={() => toggleExpand(item.id)}
-      >
-        {isAI && (
-          <View style={styles.aiBadge}>
-            <Text style={styles.aiBadgeText}>🤖 AI 创作</Text>
-          </View>
-        )}
-        <View style={styles.cardHeader}>
-          <View style={styles.tagRow}>
-            <View style={[styles.tag, { backgroundColor: catColor + '22' }]}>
-              <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
-            </View>
-            <View style={[styles.tag, { backgroundColor: dynColor + '22' }]}>
-              <Text style={[styles.tagText, { color: dynColor }]}>{item.dynasty}</Text>
-            </View>
-          </View>
-          <Text style={styles.cardTitle}>{item.title}</Text>
-          <Text style={styles.summary} numberOfLines={isExpanded ? undefined : 2}>
-            {item.summary}
-          </Text>
-        </View>
-
-        {isExpanded && (
-          <View style={styles.cardBody}>
-            <BulletSection title="📖 正史记载" items={item.historicalFacts} isFirst />
-            <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
-            <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
-            <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
-          </View>
-        )}
-
-        <View style={styles.expandHint}>
-          <Text style={styles.expandText}>
-            {isExpanded ? '▲ 点击收起' : '▼ 点击展开详情'}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  // useCallback 包装 renderItem，保证 FlatList receive stable render function reference
+  const renderItem = useCallback(
+    (item: Inspiration, isAI = false) => (
+      <InspirationCard
+        item={item}
+        isAI={isAI}
+        isExpanded={expandedId === item.id}
+        onToggle={toggleExpand}
+      />
+    ),
+    [expandedId, toggleExpand]
+  );
 
   const dynastyItems = ['全部', ...DYNASTIES_FILTER.filter(d => d !== '全部')];
   const categoryItems = ['全部', ...CATEGORIES];
