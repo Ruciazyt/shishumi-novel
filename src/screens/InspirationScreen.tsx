@@ -52,7 +52,7 @@ function parseAIResult(text: string): Inspiration | null {
       title: parsed.title,
       dynasty: parsed.dynasty,
       category: parsed.category,
-      summary: parsed.summary || '',
+      summary: typeof parsed.summary === 'string' ? parsed.summary : '',
       historicalFacts: Array.isArray(parsed.historicalFacts) ? parsed.historicalFacts.slice(0, 5) : [],
       folkVersions: Array.isArray(parsed.folkVersions) ? parsed.folkVersions.slice(0, 5) : [],
       creativeAngles: Array.isArray(parsed.creativeAngles) ? parsed.creativeAngles.slice(0, 5) : [],
@@ -262,7 +262,7 @@ export default function InspirationScreen({ navigation }: Props) {
   // useCallback 包装 renderItem，保证 FlatList receive stable render function reference
   // FlatList 要求签名 ({ item, index }) => ReactElement，isAI 固定为 false（AI 结果单独处理）
   const renderItem = useCallback(
-    ({ item }: { item: Inspiration; index: number }) => (
+    ({ item }: { item: Inspiration }) => (
       <InspirationCard
         item={item}
         isAI={false}
