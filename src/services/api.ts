@@ -202,7 +202,7 @@ export const callAI = async (
 
     const response = await axios.post(baseUrl, body, {
       headers,
-      timeout: 30000,
+      timeout: 60000,
       // AbortController signal — axios will throw ERR_CANCELED on abort
       signal,
     });

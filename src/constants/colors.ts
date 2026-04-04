@@ -33,6 +33,7 @@ export const Colors = {
 
   // 状态色
   success: '#4CAF50',
+  steppeGrass: '#6B8060',  // 草原苍茫 —  muted olive green
   warning: '#FF9800',
   error: '#F44336',
 } as const;
@@ -108,7 +109,7 @@ export const FontSize = {
 export const DynastyColors: Record<string, string> = {
   唐朝: Colors.vermillion,   // 朱砂红 — 盛世华彩
   宋朝: Colors.gold,          // 金色 — 风雅精致
-  元朝: Colors.success,       // 绿色 — 草原苍茫
+  元朝: Colors.steppeGrass,   // 草原苍茫 — muted olive green
   明朝: Colors.inkLight,       // 墨浅色 — 典雅厚重
   清朝: Colors.inkDark,       // 墨色 — 末世苍凉（更厚重的晚近感）
 } as const;
