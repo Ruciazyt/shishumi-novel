@@ -144,6 +144,8 @@ const InspirationCard = React.memo<{
       activeOpacity={0.8}
       onPress={() => onToggle(item.id)}
     >
+      {/* 装饰边框 - 古籍装帧风格，与 ProjectCard 保持一致 */}
+      <View style={styles.decorationBorder} />
       {isAI && (
         <View style={styles.aiBadge}>
           <Text style={styles.aiBadgeText}>🤖 AI 创作</Text>
@@ -570,7 +572,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.md + 2,
     marginBottom: Spacing.sm + 4,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -579,11 +580,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
+    overflow: 'hidden',
   },
   cardAI: {
     borderColor: Colors.vermillion,
     borderWidth: 1.5,
     backgroundColor: ColorsAlpha.vermillionBadgeBg,
+  },
+  decorationBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: Colors.vermillion,
   },
   aiBadge: {
     alignSelf: 'flex-start',
@@ -592,13 +602,17 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: BorderRadius.round,
     marginBottom: Spacing.sm,
+    marginTop: Spacing.sm + 4,
   },
   aiBadgeText: {
     fontSize: FontSize.xs,
     color: Colors.textOnVermillion,
     fontWeight: 'bold',
   },
-  cardHeader: {},
+  cardHeader: {
+    padding: Spacing.md + 2,
+    paddingTop: Spacing.sm + 2,
+  },
   tagRow: { flexDirection: 'row', marginBottom: Spacing.sm },
   tag: {
     paddingHorizontal: Spacing.sm + 2,
