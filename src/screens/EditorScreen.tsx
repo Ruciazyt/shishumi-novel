@@ -341,13 +341,7 @@ export const EditorScreen: React.FC = () => {
   const canRedo = historyIndex < history.length - 1;
 
   // 统计字数（useMemo 避免每次按键重复计算）
-  const { charCount, wordCount } = React.useMemo(() => {
-    const trimmed = content.trim();
-    return {
-      charCount: countChars(content),
-      wordCount: trimmed ? trimmed.split(/\s+/).length : 0,
-    };
-  }, [content]);
+  const charCount = React.useMemo(() => countChars(content), [content]);
 
   /** 章节导航：使用 projectRef 避免 project 引用变化导致回调重建 */
   const handlePrevChapter = useCallback(async () => {
@@ -490,7 +484,7 @@ export const EditorScreen: React.FC = () => {
             </View>
           )}
           <Text style={styles.statsText}>
-            {charCount} 字{wordCount > 0 ? ` · ${wordCount} 词` : ''}
+            {charCount.toLocaleString()} 字
           </Text>
         </View>
         <View style={styles.statsBarRight}>

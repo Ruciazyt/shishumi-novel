@@ -127,11 +127,17 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const handleSaveCustomUrl = async () => {
-    if (!customBaseUrl.trim()) {
+    const trimmed = customBaseUrl.trim();
+    if (!trimmed) {
       Alert.alert('错误', '请输入API接口地址');
       return;
     }
-    await setApiBaseUrl(customBaseUrl.trim());
+    // Basic URL scheme validation: must start with http:// or https://
+    if (!/^https?:\/\//i.test(trimmed)) {
+      Alert.alert('错误', '接口地址必须以 http:// 或 https:// 开头');
+      return;
+    }
+    await setApiBaseUrl(trimmed);
     Alert.alert('成功', '接口地址已保存');
   };
 
