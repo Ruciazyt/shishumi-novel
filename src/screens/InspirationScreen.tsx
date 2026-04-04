@@ -200,10 +200,10 @@ export default function InspirationScreen({ navigation }: Props) {
     });
   }, [selectedCategory, selectedDynasty]);
 
-  const toggleExpand = (id: string) => {
+  const toggleExpand = useCallback((id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedId(expandedId === id ? null : id);
-  };
+    setExpandedId(prev => (prev === id ? null : id));
+  }, []);
 
   const handleAISearch = async () => {
     const query = searchQuery.trim();
