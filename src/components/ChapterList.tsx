@@ -26,7 +26,6 @@ const ChapterItem = React.memo<ChapterItemProps>(
         {/* 章节序号徽章 */}
         <View
           style={styles.chapterNumber}
-          accessible={true}
           accessibilityLabel={`第${index + 1}章 ${chapter.title}`}
           accessibilityRole="text"
         >
@@ -100,7 +99,7 @@ export const ChapterList: React.FC<ChapterListProps> = React.memo(({
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <View style={styles.empty} accessible accessibilityLabel="暂无章节列表，点击右下角按钮新建章节">
+          <View style={styles.empty} accessibilityLabel="暂无章节列表，点击右下角按钮新建章节">
             <Text style={styles.emptyIcon}>🖋</Text>
             <Text style={styles.emptyText}>暂无章节</Text>
             <Text style={styles.emptyHint}>点击右下角 + 按钮新建第一章</Text>

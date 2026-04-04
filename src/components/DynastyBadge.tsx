@@ -38,7 +38,6 @@ export const DynastyBadge: React.FC<{
   return (
     <View
       style={[styles.badge, { backgroundColor: badgeBg, borderColor: badgeBorder }]}
-      accessible
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel}
     >
