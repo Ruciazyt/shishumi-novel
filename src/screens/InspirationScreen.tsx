@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   FlatList, LayoutAnimation, Platform, UIManager,
-  TextInput, ActivityIndicator, Alert
+  TextInput, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '../data/inspirations';
@@ -190,6 +190,7 @@ export default function InspirationScreen({ navigation }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [aiSearching, setAiSearching] = useState(false);
   const [aiResults, setAiResults] = useState<Inspiration[]>([]);
+  const [aiError, setAiError] = useState<string>('');
   const [searched, setSearched] = useState(false);
 
   const filtered = useMemo(() => {
@@ -212,6 +213,7 @@ export default function InspirationScreen({ navigation }: Props) {
     setAiSearching(true);
     setSearched(true);
     setAiResults([]);
+    setAiError('');
     setExpandedId(null);
 
     try {
@@ -224,14 +226,15 @@ export default function InspirationScreen({ navigation }: Props) {
         const parsed = parseAIResult(result.data);
         if (parsed) {
           setAiResults([parsed]);
+          setAiError('');
         } else {
-          Alert.alert('提示', 'AI 返回格式无法解析，请换个关键词重试');
+          setAiError('AI 返回格式无法解析，请换个关键词重试');
         }
       } else {
-        Alert.alert('AI 搜索失败', result.error || '请检查 API 配置');
+        setAiError(result.error || 'AI 搜索失败，请检查 API 配置');
       }
     } catch {
-      Alert.alert('错误', '搜索过程中发生错误');
+      setAiError('搜索过程中发生错误，请稍后重试');
     } finally {
       setAiSearching(false);
     }
@@ -239,16 +242,18 @@ export default function InspirationScreen({ navigation }: Props) {
 
   const clearAISearch = () => {
     setAiResults([]);
+    setAiError('');
     setSearched(false);
     setSearchQuery('');
   };
 
   // useCallback 包装 renderItem，保证 FlatList receive stable render function reference
+  // FlatList 要求签名 ({ item, index }) => ReactElement，isAI 固定为 false（AI 结果单独处理）
   const renderItem = useCallback(
-    (item: Inspiration, isAI = false) => (
+    ({ item }: { item: Inspiration; index: number }) => (
       <InspirationCard
         item={item}
-        isAI={isAI}
+        isAI={false}
         isExpanded={expandedId === item.id}
         onToggle={toggleExpand}
       />
@@ -317,10 +322,22 @@ export default function InspirationScreen({ navigation }: Props) {
               <ActivityIndicator size="small" color={Colors.vermillion} />
               <Text style={styles.aiLoadingText}>AI 正在为你探索历史...</Text>
             </View>
+          ) : aiError ? (
+            <View style={styles.aiErrorContainer}>
+              <Text style={styles.aiErrorText}>{aiError}</Text>
+              <View style={styles.aiErrorActions}>
+                <TouchableOpacity style={styles.retryButton} onPress={handleAISearch}>
+                  <Text style={styles.retryButtonText}>重试</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.clearButton} onPress={clearAISearch}>
+                  <Text style={styles.clearButtonText}>清除</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           ) : aiResults.length > 0 ? (
             <>
               <Text style={styles.aiSectionTitle}>🔮 AI 为你找到的灵感</Text>
-              {aiResults.map(item => renderItem(item, true))}
+              {aiResults.map(item => <InspirationCard key={item.id} item={item} isAI={true} isExpanded={expandedId === item.id} onToggle={toggleExpand} />)}
             </>
           ) : null}
         </View>
@@ -348,7 +365,7 @@ export default function InspirationScreen({ navigation }: Props) {
       {!searched && (
         <FlatList
           data={filtered}
-          renderItem={({ item }) => renderItem(item, false)}
+          renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
@@ -459,6 +476,49 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.vermillion,
     marginBottom: Spacing.sm + 4,
+  },
+  aiErrorContainer: {
+    backgroundColor: Colors.backgroundCard,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.error,
+    marginBottom: Spacing.sm,
+  },
+  aiErrorText: {
+    fontSize: FontSize.sm,
+    color: Colors.error,
+    marginBottom: Spacing.md,
+    lineHeight: 22,
+  },
+  aiErrorActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.md,
+  },
+  retryButton: {
+    backgroundColor: Colors.vermillion,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  retryButtonText: {
+    color: Colors.textOnVermillion,
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+  },
+  clearButton: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.paperDark,
+  },
+  clearButtonText: {
+    color: Colors.textSecondary,
+    fontSize: FontSize.sm,
+    fontWeight: '600',
   },
   filterRow: {
     paddingHorizontal: Spacing.md - 2,
