@@ -61,6 +61,9 @@ export const EditorScreen: React.FC = () => {
   const projectRef = useRef(project);
   const chapterRef = useRef(chapter);
   const chapterIdRef = useRef(chapterId);
+  // Stable refs for navigation callbacks — avoids dispatch/navigation causing callback re-creates
+  const dispatchRef = useRef(dispatch);
+  const navigationRef = useRef(navigation);
   pendingContentRef.current = content;
   projectRef.current = project;
   chapterRef.current = chapter;
@@ -82,6 +85,12 @@ export const EditorScreen: React.FC = () => {
     isMountedRef.current = true;
     return () => { isMountedRef.current = false; };
   }, []);
+
+  // 同步 dispatch/navigation 到 ref，确保 nav callbacks 稳定
+  useEffect(() => {
+    dispatchRef.current = dispatch;
+    navigationRef.current = navigation;
+  }, [dispatch, navigation]);
 
   /** 持久化内容到 storage + dispatch 更新 project state，返回是否成功 */
   const persistContent = useCallback(async (
@@ -347,10 +356,10 @@ export const EditorScreen: React.FC = () => {
     const idx = p.chapters.findIndex(c => c.id === chapterId);
     if (idx > 0) {
       if (hasUnsavedChangesRef.current) await handleSave();
-      dispatch({ type: 'SET_CURRENT_PROJECT', payload: p });
-      navigation.navigate('Editor', { chapterId: p.chapters[idx - 1].id });
+      dispatchRef.current({ type: 'SET_CURRENT_PROJECT', payload: p });
+      navigationRef.current.navigate('Editor', { chapterId: p.chapters[idx - 1].id });
     }
-  }, [chapterId, dispatch, navigation, handleSave]);
+  }, [chapterId, handleSave]);
 
   const handleNextChapter = useCallback(async () => {
     const p = projectRef.current;
@@ -358,10 +367,10 @@ export const EditorScreen: React.FC = () => {
     const idx = p.chapters.findIndex(c => c.id === chapterId);
     if (idx < p.chapters.length - 1) {
       if (hasUnsavedChangesRef.current) await handleSave();
-      dispatch({ type: 'SET_CURRENT_PROJECT', payload: p });
-      navigation.navigate('Editor', { chapterId: p.chapters[idx + 1].id });
+      dispatchRef.current({ type: 'SET_CURRENT_PROJECT', payload: p });
+      navigationRef.current.navigate('Editor', { chapterId: p.chapters[idx + 1].id });
     }
-  }, [chapterId, dispatch, navigation, handleSave]);
+  }, [chapterId, handleSave]);
 
   // 朝代元数据：一次性获取，避免 4 个 useMemo 各自重复调用 getDynastyById
   const dynastyMeta = React.useMemo(() => {

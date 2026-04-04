@@ -117,11 +117,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     };
   }, []);
 
-  // 同步 aiTypeRef，确保 handleSubmit 总能读到最新值
-  useEffect(() => {
-    if (initialType) aiTypeRef.current = initialType;
-  }, [initialType]);
-
   // 同步 aiTypeRef 到当前选中的 aiType（用户切换类型标签页后也能正确提交）
   useLayoutEffect(() => {
     aiTypeRef.current = aiType;
