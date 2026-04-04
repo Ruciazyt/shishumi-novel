@@ -184,7 +184,7 @@ const InspirationCard = React.memo<{
           <BulletSection title="📖 正史记载" items={item.historicalFacts} />
           <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
           <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
-          <BulletSection title="👤 人物设定灵感" items={item.characterIdeas || []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
+          <BulletSection title="👤 人物设定灵感" items={item.characterIdeas ?? []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
         </View>
       )}
 
@@ -252,7 +252,7 @@ export default function InspirationScreen({ navigation }: Props) {
     });
   }, []);
 
-  const executeAISearch = async (query: string) => {
+  const executeAISearch = useCallback(async (query: string) => {
     if (!query) return;
 
     setAiSearching(true);
@@ -286,7 +286,7 @@ export default function InspirationScreen({ navigation }: Props) {
     } finally {
       setAiSearching(false);
     }
-  };
+  }, []);
 
   // 防抖搜索：用户输入后等待 300ms 无新输入再触发，避免频繁 API 调用
   const handleSearchInputChange = useCallback((text: string) => {
@@ -301,7 +301,7 @@ export default function InspirationScreen({ navigation }: Props) {
         executeAISearch(trimmed);
       }
     }, 300);
-  }, []); // stable — executeAISearch 只在组件顶层定义，不依赖外部变量
+  }, [executeAISearch]);
 
   const handleAISearch = useCallback(() => {
     const query = searchQueryRef.current.trim();
@@ -312,7 +312,7 @@ export default function InspirationScreen({ navigation }: Props) {
       searchDebounceRef.current = null;
     }
     executeAISearch(query);
-  }, []); // searchQueryRef.current 始终为最新值，无需 deps
+  }, [executeAISearch]);
 
   const clearAISearch = () => {
     setAiResults([]);
