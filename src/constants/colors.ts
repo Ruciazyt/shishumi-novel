@@ -100,3 +100,15 @@ export const FontSize = {
   xxl: 24,
   xxxl: 32,
 } as const;
+
+/**
+ * 朝代主题色 — 用于灵感探秘等功能的朝代标识色彩
+ * 优先复用已有设计系统颜色，确保整体视觉一致性
+ */
+export const DynastyColors: Record<string, string> = {
+  唐朝: Colors.vermillion,   // 朱砂红 — 盛世华彩
+  宋朝: Colors.gold,          // 金色 — 风雅精致
+  元朝: Colors.success,       // 绿色 — 草原苍茫
+  明朝: '#8B4513',            // 赭石褐 — 典雅厚重（无对应设计色，选用历史感近似色）
+  清朝: Colors.inkLight,      // 墨浅色 — 末世苍凉
+} as const;

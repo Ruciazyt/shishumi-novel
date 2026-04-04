@@ -9,7 +9,7 @@ import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '..
 import { callAI } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors } from '../constants/colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -24,12 +24,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   '人物逸事': Colors.inkLight,       // 墨浅色 — 文人
 };
 
+// 复用 constants/colors.ts 中定义的朝代色，Others fallback 到 textSecondary
 const DYNASTY_COLORS: Record<string, string> = {
-  '明朝': Colors.error,        // 朱红
-  '清朝': '#2B6CB0',           // 蓝青（保持历史朝代特色，无对应设计色时用近似）
-  '宋朝': Colors.gold,        // 金色
-  '唐朝': Colors.vermillion,  // 朱砂
-  '元朝': Colors.success,     // 绿色
+  ...DynastyColors,
   '其他': Colors.textSecondary,
 };
 

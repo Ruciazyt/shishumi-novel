@@ -46,7 +46,8 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
     return DYNASTY_SUMMARIES[name] || '';
   }, [selected, showSummary]);
 
-  const buttons = (
+  // 渲染朝代按钮列表（静态 JSX，无须 useMemo 包裹）
+  const renderButtons = () => (
     <>
       {DYNASTIES.map(d => (
         <TouchableOpacity
@@ -96,7 +97,7 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontalContent}
         >
-          {buttons}
+          {renderButtons()}
         </ScrollView>
         {showSummary && summary ? (
           <Text style={styles.summary} numberOfLines={2}>
@@ -110,7 +111,7 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
   return (
     <View>
       <View style={styles.wrapContent}>
-        {buttons}
+        {renderButtons()}
       </View>
       {showSummary && summary ? (
         <Text style={styles.summary} numberOfLines={2}>
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginRight: Spacing.sm,
+    // gap 由 wrapContent 提供，无需单独 marginRight
     marginBottom: Spacing.sm,
   },
   dynastyButtonActive: {
