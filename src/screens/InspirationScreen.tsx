@@ -9,7 +9,7 @@ import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '..
 import { callAI } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors, rgba } from '../constants/colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -30,15 +30,6 @@ const DYNASTY_COLORS: Record<string, string> = {
   '其他': Colors.textSecondary,
 };
 
-/** 将 6 位 hex 颜色转换为 rgba 字符串（用于半透明标签背景） */
-const hexToRgba = (hex: string, alpha: number): string => {
-  const clean = hex.replace('#', '');
-  if (clean.length !== 6) return hex;
-  const r = parseInt(clean.slice(0, 2), 16);
-  const g = parseInt(clean.slice(2, 4), 16);
-  const b = parseInt(clean.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-};
 
 type InspirationScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Inspiration">;
 
@@ -160,10 +151,10 @@ const InspirationCard = React.memo<{
       )}
       <View style={styles.cardHeader}>
         <View style={styles.tagRow}>
-          <View style={[styles.tag, { backgroundColor: hexToRgba(catColor, 0.13) }]}>
+          <View style={[styles.tag, { backgroundColor: rgba(catColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
           </View>
-          <View style={[styles.tag, { backgroundColor: hexToRgba(dynColor, 0.13) }]}>
+          <View style={[styles.tag, { backgroundColor: rgba(dynColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: dynColor }]}>{item.dynasty}</Text>
           </View>
         </View>
