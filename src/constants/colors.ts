@@ -110,6 +110,6 @@ export const DynastyColors: Record<string, string> = {
   唐朝: Colors.vermillion,   // 朱砂红 — 盛世华彩
   宋朝: Colors.gold,          // 金色 — 风雅精致
   元朝: Colors.steppeGrass,   // 草原苍茫 — muted olive green
-  明朝: Colors.inkLight,       // 墨浅色 — 典雅厚重
+  明朝: Colors.ink,            // 墨色 — 典雅厚重（明色厚重）
   清朝: Colors.inkDark,       // 墨色 — 末世苍凉（更厚重的晚近感）
 } as const;

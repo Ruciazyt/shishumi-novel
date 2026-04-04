@@ -241,6 +241,7 @@ export const ProjectScreen: React.FC = () => {
       <View style={styles.projectInfo}>
         <View style={styles.projectInfoContent}>
           <DynastyBadge
+            variant="dynasty"
             name={dynastyData?.name || (project.dynasty === 'custom' ? '自定义/架空' : project.dynasty)}
           />
           <Text style={styles.description} numberOfLines={2}>
