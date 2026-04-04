@@ -140,6 +140,13 @@ const InspirationCard = React.memo<{
   const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
   const dynColor = DYNASTY_TAG_COLORS[item.dynasty] || Colors.textSecondary;
 
+  // 统计所有展开项总数，用于在折叠时显示"含N项内容"
+  const totalItems =
+    (item.historicalFacts?.length ?? 0) +
+    (item.folkVersions?.length ?? 0) +
+    (item.creativeAngles?.length ?? 0) +
+    (item.characterIdeas?.length ?? 0);
+
   return (
     <TouchableOpacity
       style={[styles.card, isAI && styles.cardAI]}
@@ -180,9 +187,18 @@ const InspirationCard = React.memo<{
       )}
 
       <View style={styles.expandHint}>
-        <Text style={styles.expandText}>
-          {isExpanded ? '▲ 点击收起' : '▼ 点击展开详情'}
-        </Text>
+        {isExpanded ? (
+          <Text style={styles.expandText}>▲ 点击收起</Text>
+        ) : (
+          <View style={styles.expandHintRow}>
+            {totalItems > 0 && (
+              <View style={styles.contentCountBadge}>
+                <Text style={styles.contentCountBadgeText}>含{totalItems}项内容</Text>
+              </View>
+            )}
+            <Text style={styles.expandText}>▼ 点击展开详情</Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -352,9 +368,9 @@ export default function InspirationScreen({ navigation }: Props) {
             <ActivityIndicator size="small" color={Colors.vermillion} style={styles.searchBtn} />
           ) : (
             <TouchableOpacity
-              style={[styles.searchBtn, searchQuery.trim() ? styles.searchBtnActive : null]}
+              style={[styles.searchBtn, searchQuery.trim() && !aiSearching ? styles.searchBtnActive : null]}
               onPress={handleAISearch}
-              disabled={!searchQuery.trim()}
+              disabled={!searchQuery.trim() || aiSearching}
             >
               <Text style={[styles.searchBtnText, searchQuery.trim() ? styles.searchBtnTextActive : null]}>
                 搜索
@@ -722,6 +738,16 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   expandHint: { alignItems: 'center', marginTop: Spacing.sm + 4 },
+  expandHintRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  contentCountBadge: {
+    backgroundColor: ColorsAlpha.vermillionBadgeBg,
+    borderRadius: BorderRadius.round,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: ColorsAlpha.vermillionBadgeBorder,
+  },
+  contentCountBadgeText: { fontSize: FontSize.xs, color: Colors.vermillion, fontWeight: '600' },
   expandText: { fontSize: FontSize.xs, color: Colors.textLight },
   empty: { padding: Spacing.xxl, alignItems: 'center' },
   emptyText: { fontSize: FontSize.sm, color: Colors.textLight },
