@@ -138,6 +138,18 @@ export const HomeScreen: React.FC = () => {
     );
   }, [dispatch]);
 
+  /** FlatList renderItem — useCallback 包装，避免内联函数引用每次重建 */
+  const renderProjectItem = useCallback(
+    ({ item }: { item: Project }) => (
+      <MemoizedProjectCard
+        project={item}
+        onPress={handleProjectPress}
+        onLongPress={handleProjectLongPress}
+      />
+    ),
+    [handleProjectPress, handleProjectLongPress]
+  );
+
   return (
     <View style={styles.container}>
       {/* Elegant Header - 古籍装帧风格 */}
@@ -179,13 +191,7 @@ export const HomeScreen: React.FC = () => {
       {/* Project List */}
       <FlatList
         data={sortedProjects}
-        renderItem={({ item }) => (
-          <MemoizedProjectCard
-            project={item}
-            onPress={handleProjectPress}
-            onLongPress={handleProjectLongPress}
-          />
-        )}
+        renderItem={renderProjectItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         refreshControl={
