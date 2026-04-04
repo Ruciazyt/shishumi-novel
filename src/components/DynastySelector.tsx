@@ -46,8 +46,9 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
     return DYNASTY_SUMMARIES[name] || '';
   }, [selected, showSummary]);
 
-  // 渲染朝代按钮列表（静态 JSX，无须 useMemo 包裹）
-  const renderButtons = () => (
+  // useMemo 缓存按钮 JSX — 避免每次渲染重新创建按钮数组，
+  // 只有 selected 或 onSelect 实际变化时才重算（DynastySelector 已用 React.memo 包装）
+  const dynastyButtons = useMemo(() => (
     <>
       {DYNASTIES.map(d => (
         <TouchableOpacity
@@ -93,7 +94,7 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
         </TouchableOpacity>
       )}
     </>
-  );
+  ), [selected, onSelect, showCustom, customLabel]);
 
   if (layout === 'horizontal') {
     return (
@@ -103,7 +104,7 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontalContent}
         >
-          {renderButtons()}
+          {dynastyButtons}
         </ScrollView>
         {showSummary && summary ? (
           <Text style={styles.summary} numberOfLines={2}>
@@ -117,7 +118,7 @@ export const DynastySelector: React.FC<DynastySelectorProps> = React.memo(({
   return (
     <View>
       <View style={styles.wrapContent}>
-        {renderButtons()}
+        {dynastyButtons}
       </View>
       {showSummary && summary ? (
         <Text style={styles.summary} numberOfLines={2}>
@@ -147,8 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.paperDark,
     borderWidth: 1,
     borderColor: Colors.border,
-    // gap 由 wrapContent 提供，无需单独 marginRight
-    marginBottom: Spacing.sm,
+    // gap 由 wrapContent 提供，无需单独 marginBottom/marginRight
   },
   dynastyButtonActive: {
     backgroundColor: Colors.vermillion,
