@@ -53,6 +53,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const cancelledRef = useRef(false);
   // AbortController ref：支持取消进行中的 HTTP 请求，避免响应 race
   const abortControllerRef = useRef<AbortController | null>(null);
+  // 追踪用户是否在 loading 期间尝试关闭 modal，待 loading 结束后再真正关闭（防止 Android 物理返回键 / 背景点击在请求期间意外关闭）
+  const pendingCloseRef = useRef(false);
 
   // 始终读取最新的 inputText/sceneText，避免 handleSubmit 中的 stale closure
   const inputTextRef = useRef('');
@@ -232,6 +234,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     // cancelledRef 也会阻断响应处理
     if (!isMountedRef.current || !requestActiveRef.current || cancelledRef.current) return;
     setLoading(false);
+    // loading 结束后检查用户是否在请求期间尝试关闭过 modal，若是则立即关闭
+    if (pendingCloseRef.current) {
+      pendingCloseRef.current = false;
+      resetState();
+      onClose();
+      return;
+    }
     if (response.success && response.data) {
       setResult(response.data);
     } else {
@@ -278,8 +287,23 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
 
   const handleClose = () => {
     Keyboard.dismiss();
+    if (loading) {
+      // 请求期间不能真正关闭：标记 pending，cancel 掉请求，待响应后延迟关闭
+      // 否则用户会看到空白 modal（请求结果被丢弃），体验极差
+      cancelledRef.current = true;
+      requestActiveRef.current = false;
+      pendingCloseRef.current = true;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      setLoading(false);
+      if (hintTimerRef.current) { clearTimeout(hintTimerRef.current); hintTimerRef.current = null; }
+      setLoadingHint('');
+      return;
+    }
     requestActiveRef.current = false;
-    cancelledRef.current = true; // 取消任何进行中的请求
+    cancelledRef.current = true;
     resetState();
     onClose();
   };
@@ -288,7 +312,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const copyButtonText = copied ? '已复制' : '复制';
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={handleClose}
+    >
       <KeyboardAvoidingView
         style={styles.modalContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
