@@ -44,6 +44,7 @@ export const EditorScreen: React.FC = () => {
   const [aiType, setAiType] = useState<AIAssistantType>('polish');
   const hasUnsavedChangesRef = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   // Ref for editor ScrollView — used to auto-scroll to inserted AI content
   const editorScrollRef = useRef<ScrollView>(null);
@@ -223,13 +224,15 @@ export const EditorScreen: React.FC = () => {
       const currentProject = projectRef.current;
       if (!currentProject || !currentChapter) return;
       if (latestContent === lastSavedContentRef.current) return; // 无变化则跳过
+      setIsAutoSaving(true);
       setIsSaving(true);
       const ok = await persistContent(latestContent, currentProject, currentChapter);
-      if (timerChapterId !== chapterIdRef.current) { setIsSaving(false); return; }
+      if (timerChapterId !== chapterIdRef.current) { setIsAutoSaving(false); setIsSaving(false); return; }
       if (ok) {
         setLastSavedAt(new Date());
         setJustSaved(true);
       }
+      setIsAutoSaving(false);
       setIsSaving(false);
     }, 10000);
     return () => { clearTimeout(timer); };
@@ -467,7 +470,7 @@ export const EditorScreen: React.FC = () => {
             accessibilityRole="button"
           >
             <Text style={[styles.saveButton, (!hasUnsavedChangesRef.current || isSaving) && styles.saveButtonDisabled]}>
-              {isSaving ? '保存中' : '保存'}
+              {isSaving ? (isAutoSaving ? '自动保存中...' : '保存中...') : '保存'}
             </Text>
           </TouchableOpacity>
         </View>
