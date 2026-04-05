@@ -58,6 +58,13 @@ export default function InspirationScreen({ navigation }: Props) {
   const [aiError, setAiError] = useState<string>('');
   const [searched, setSearched] = useState(false);
 
+  // Guard: prevents state updates after component unmount (e.g. user navigates away mid-AI-search)
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
+
   // 防抖搜索 timer ref：避免每次按键都触发 API 调用
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // searchQueryRef：跟踪当前搜索文本，用于 handleAISearch 按钮回调稳定引用
@@ -125,7 +132,10 @@ export default function InspirationScreen({ navigation }: Props) {
     } catch {
       setAiError('搜索过程中发生错误，请稍后重试');
     } finally {
-      setAiSearching(false);
+      // Only update state if component is still mounted (user may have navigated away)
+      if (isMountedRef.current) {
+        setAiSearching(false);
+      }
     }
   }, []);
 
