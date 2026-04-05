@@ -65,6 +65,9 @@ export default function InspirationScreen({ navigation }: Props) {
     return () => { isMountedRef.current = false; };
   }, []);
 
+  // AbortController ref：支持取消进行中的 HTTP 请求，避免搜索结果 race
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // 防抖搜索 timer ref：避免每次按键都触发 API 调用
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // searchQueryRef：跟踪当前搜索文本，用于 handleAISearch 按钮回调稳定引用
@@ -77,6 +80,11 @@ export default function InspirationScreen({ navigation }: Props) {
       if (searchDebounceRef.current) {
         clearTimeout(searchDebounceRef.current);
         searchDebounceRef.current = null;
+      }
+      // Abort any in-flight AI request on unmount
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
       }
     };
   }, []);
@@ -112,11 +120,19 @@ export default function InspirationScreen({ navigation }: Props) {
     setSelectedCategory('全部');
     setSelectedDynasty('全部');
 
+    // Cancel any in-flight request before starting a new one
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const result = await callAI({
         type: 'inspiration',
         text: query,
-      });
+      }, 1, controller.signal);
 
       if (result.success && result.data) {
         const parsed = parseAIResult(result.data);
@@ -130,9 +146,16 @@ export default function InspirationScreen({ navigation }: Props) {
         setAiError(result.error || 'AI 搜索失败，请检查 API 配置');
       }
     } catch {
-      setAiError('搜索过程中发生错误，请稍后重试');
+      // callAI throws only on network errors; result.error covers API-level errors
+      if (isMountedRef.current) {
+        setAiError('搜索过程中发生错误，请稍后重试');
+      }
     } finally {
       // Only update state if component is still mounted (user may have navigated away)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       if (isMountedRef.current) {
         setAiSearching(false);
       }
