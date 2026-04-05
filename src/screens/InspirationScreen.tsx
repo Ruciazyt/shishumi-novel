@@ -58,6 +58,15 @@ export default function InspirationScreen({ navigation }: Props) {
   const [aiError, setAiError] = useState<string>('');
   const [searched, setSearched] = useState(false);
 
+  // AI 搜索前保存筛选状态，清除时恢复，避免用户筛选偏好丢失
+  const preAISearchCategoryRef = useRef(selectedCategory);
+  const preAISearchDynastyRef = useRef(selectedDynasty);
+  // Refs 用于追踪最新筛选值（ref 更新不触发重渲染，保持 executeAISearch 稳定性）
+  const selectedCategoryRef = useRef(selectedCategory);
+  const selectedDynastyRef = useRef(selectedDynasty);
+  selectedCategoryRef.current = selectedCategory;
+  selectedDynastyRef.current = selectedDynasty;
+
   // Guard: prevents state updates after component unmount (e.g. user navigates away mid-AI-search)
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -119,6 +128,10 @@ export default function InspirationScreen({ navigation }: Props) {
     // 重置筛选器：AI 搜索时隐藏筛选器，清除搜索后恢复"全部"状态
     setSelectedCategory('全部');
     setSelectedDynasty('全部');
+
+    // 保存进入 AI 搜索前的筛选状态，清除时恢复
+    preAISearchCategoryRef.current = selectedCategoryRef.current;
+    preAISearchDynastyRef.current = selectedDynastyRef.current;
 
     // Cancel any in-flight request before starting a new one
     if (abortControllerRef.current) {
@@ -195,9 +208,9 @@ export default function InspirationScreen({ navigation }: Props) {
     setAiError('');
     setSearched(false);
     setSearchQuery('');
-    // 清除搜索时同步重置筛选器，确保恢复浏览模式时处于干净状态
-    setSelectedCategory('全部');
-    setSelectedDynasty('全部');
+    // 恢复 AI 搜索前的筛选偏好
+    setSelectedCategory(preAISearchCategoryRef.current);
+    setSelectedDynasty(preAISearchDynastyRef.current);
   }, []);
 
   // useCallback 包装 renderItem，保证 FlatList receive stable render function reference
