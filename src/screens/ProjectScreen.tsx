@@ -314,7 +314,7 @@ export const ProjectScreen: React.FC = () => {
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
             </View>
-            {dynastyData ? (
+            {dynastyData && project.dynasty !== 'custom' ? (
               <ScrollView style={styles.dynastyTipsScroll} showsVerticalScrollIndicator={false}>
                 <Text style={styles.dynastyWritingTips}>{DYNASTY_WRITING_TIPS[dynastyData.name] || ''}</Text>
               </ScrollView>

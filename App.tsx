@@ -18,13 +18,13 @@ import { RootStackParamList } from './src/types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
-const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
+const TabIcon = React.memo<{ name: string; focused: boolean }>(({ name, focused }) => (
   <View style={styles.tabIconContainer}>
     <Text style={[styles.tabIcon, focused && styles.tabIconFocused]}>
       {name === '项目' ? '📚' : '⚙️'}
     </Text>
   </View>
-);
+));
 
 const TabNavigator = () => (
   <Tab.Navigator
