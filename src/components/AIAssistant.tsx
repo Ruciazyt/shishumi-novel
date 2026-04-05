@@ -418,6 +418,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                     </TouchableOpacity>
                   )}
                 </View>
+                {sceneText.length > 1500 && (
+                  <Text style={styles.charCountWarning}>⚠️ 输入较长，建议精简至1500字以内以获得最佳处理效果</Text>
+                )}
               </View>
             ) : (
               <View style={styles.inputContainer}>
@@ -441,6 +444,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                     </TouchableOpacity>
                   )}
                 </View>
+                {inputText.length > 1500 && (
+                  <Text style={styles.charCountWarning}>⚠️ 输入较长，建议精简至1500字以内以获得最佳处理效果</Text>
+                )}
               </View>
             )}
 
@@ -617,6 +623,11 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.textLight,
     textAlign: 'right',
+    marginTop: Spacing.xs,
+  },
+  charCountWarning: {
+    fontSize: FontSize.xs,
+    color: Colors.warning,
     marginTop: Spacing.xs,
   },
   charCountRow: {
