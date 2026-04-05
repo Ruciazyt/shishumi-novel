@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   FlatList, LayoutAnimation, Platform, UIManager,
-  TextInput, ActivityIndicator
+  TextInput, ActivityIndicator, Keyboard
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '../data/inspirations';
@@ -229,6 +229,16 @@ export default function InspirationScreen({ navigation }: Props) {
             </TouchableOpacity>
           )}
         </View>
+        <View style={styles.keyboardDismissRow}>
+          <TouchableOpacity
+            style={styles.keyboardDismissBtn}
+            onPress={Keyboard.dismiss}
+            accessibilityLabel="收起键盘"
+            accessibilityRole="button"
+          >
+            <Text style={styles.keyboardDismissBtnText}>⌨ 收起键盘</Text>
+          </TouchableOpacity>
+        </View>
         {searched && !aiSearching && (
           <TouchableOpacity onPress={clearAISearch} style={styles.clearBtn}>
             <Text style={styles.clearBtnText}>✕ 清除 AI 结果，回到资料库</Text>
@@ -385,6 +395,23 @@ const styles = StyleSheet.create({
   clearBtnText: {
     fontSize: FontSize.xs,
     color: Colors.textLight,
+  },
+  keyboardDismissRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: Spacing.xs,
+  },
+  keyboardDismissBtn: {
+    paddingVertical: Spacing.xs + 2,
+    paddingHorizontal: Spacing.sm + 2,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.paperDark,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  keyboardDismissBtnText: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
   },
   aiSection: {
     paddingHorizontal: Spacing.md - 2,
