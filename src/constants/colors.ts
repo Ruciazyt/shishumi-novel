@@ -1,3 +1,7 @@
+// Precomputed RGBA values for ColorsAlpha — eliminates runtime rgba() calls.
+// Conversion: hex '#RRGGBB' → parseInt(RR,16), parseInt(GG,16), parseInt(BB,16)
+// Colors used: vermillion=#C73E3A, gold=#C9A962, ink=#2C2C2C
+
 export const Colors = {
   // 主色调
   ink: '#2C2C2C', // 墨色
@@ -39,7 +43,8 @@ export const Colors = {
 } as const;
 
 /**
- * 工具函数：hex 颜色 + alpha → rgba 字符串（用于 backgroundColor/borderColor 等）
+ * 工具函数：hex 颜色 + alpha → rgba 字符串
+ * 保留供外部使用（如 InspirationCard.tsx 动态标签色）
  */
 export const rgba = (hex: string, alpha: number): string => {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -48,19 +53,23 @@ export const rgba = (hex: string, alpha: number): string => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
+/**
+ * Precomputed alpha variants — avoids runtime rgba() computation.
+ * Format: 'rgba(R,G,B,A)' with all values explicitly stated.
+ */
 export const ColorsAlpha = {
   /** 朱砂红 8% 透明度 — 用于朝代徽章背景 */
-  vermillionBadgeBg: rgba(Colors.vermillion, 0.08),
+  vermillionBadgeBg: 'rgba(199,62,58,0.08)',
   /** 朱砂红 25% 透明度 — 用于朝代徽章边框 */
-  vermillionBadgeBorder: rgba(Colors.vermillion, 0.25),
+  vermillionBadgeBorder: 'rgba(199,62,58,0.25)',
   /** 金色 15% 透明度 — 用于装饰边框 */
-  goldBorder: rgba(Colors.gold, 0.15),
+  goldBorder: 'rgba(201,169,98,0.15)',
   /** 墨色 5% 透明度 — 用于轻柔阴影 */
-  inkShadow: rgba(Colors.ink, 0.05),
+  inkShadow: 'rgba(44,44,44,0.05)',
   /** 墨色 10% 透明度 — 用于卡片阴影 */
-  inkShadowMedium: rgba(Colors.ink, 0.1),
+  inkShadowMedium: 'rgba(44,44,44,0.1)',
   /** 金色 8% 透明度 — 用于灵感卡片背景 */
-  goldCardBg: rgba(Colors.gold, 0.08),
+  goldCardBg: 'rgba(201,169,98,0.08)',
 } as const;
 
 /**
@@ -111,3 +120,49 @@ export const DynastyColors: Record<string, string> = {
   明朝: Colors.ink,            // 墨色 — 典雅厚重（明色厚重）
   清朝: Colors.inkDark,       // 墨色 — 末世苍凉（更厚重的晚近感）
 } as const;
+
+/**
+ * Precompiled regex patterns (avoids re-creation on every function call)
+ */
+const WHITESPACE_REGEX = /\s/g;
+const MULTI_NEWLINE_REGEX = /\n\s*\n/;
+const CJK_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf]/g;
+
+/**
+ * 统计中文字符数（去除所有空白字符）
+ * 安全处理：非字符串输入返回 0，避免上游 reducer 崩溃
+ */
+export const countChars = (text: string): number =>
+  typeof text === 'string' ? text.replace(WHITESPACE_REGEX, '').length : 0;
+
+/**
+ * 统计文本中的中文字符数量（CJK Unified Ideographs + CJK Compatibility Ideographs）
+ * 适用于精确统计中文写作字数（不含标点和英文）
+ */
+export const countChineseChars = (text: string): number => {
+  const matches = (text || '').match(CJK_REGEX);
+  return matches ? matches.length : 0;
+};
+
+/**
+ * 截断文本到指定长度，超出部分用省略号替代
+ * 安全处理：确保不会在 surrogate pair（如 emoji）中间截断
+ * @param text 原始文本
+ * @param maxLen 最大长度（默认30）
+ * @param suffix 省略符（默认"…"）
+ */
+export const truncateText = (text: string, maxLen: number = 30, suffix: string = '…'): string => {
+  if (!text) return '';
+  // 使用 Array.from 按 Unicode code point 分割，避免截断 emoji/surrogate pair
+  const chars = Array.from(text);
+  if (chars.length <= maxLen) return text;
+  return chars.slice(0, maxLen).join('').trimEnd() + suffix;
+};
+
+/**
+ * 统计文本段落数量（以连续换行符分隔）
+ */
+export const countParagraphs = (text: string): number => {
+  if (!text.trim()) return 0;
+  return text.split(MULTI_NEWLINE_REGEX).filter(p => p.trim().length > 0).length;
+};

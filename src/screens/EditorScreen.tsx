@@ -311,9 +311,13 @@ export const EditorScreen: React.FC = () => {
     if (!trimmedText) return;
     // Normalize runs of 3+ newlines to 2 (prevents excessive blank lines
     // when inserting multiple times into content with existing paragraph breaks).
-    // Then strip trailing newlines so the \n\n prefix always works correctly.
+    // Then ensure at least \n\n at the end: if the normalized content already ends
+    // with \n\n (meaning there were paragraph breaks), preserve them to protect
+    // the original paragraph structure. Otherwise strip trailing newlines.
     const normalized = pendingContentRef.current.replace(/\n{3,}/g, '\n\n');
-    const baseContent = normalized.replace(/\n+$/, '');
+    const baseContent = normalized.endsWith('\n\n')
+      ? normalized
+      : normalized.replace(/\n+$/, '');
     const prefix = baseContent ? '\n\n' : '';
     const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
