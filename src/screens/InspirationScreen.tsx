@@ -151,6 +151,7 @@ export default function InspirationScreen({ navigation }: Props) {
       if (trimmed) {
         executeAISearch(trimmed);
       }
+      searchDebounceRef.current = null;
     }, 300);
   }, [executeAISearch]);
 

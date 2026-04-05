@@ -34,7 +34,7 @@ export const BulletSection = React.memo<{
 }) {
   if (!items || items.length === 0) return null;
   return (
-    <View style={styles.section}>
+    <View>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
       {items.map((text, i) => (
         <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]}>· {text}</Text>
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: ColorsAlpha.goldBorder,
   },
-  section: {},
   sectionTitle: {
     fontSize: FontSize.sm,
     fontWeight: 'bold',
