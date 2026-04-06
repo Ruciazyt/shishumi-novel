@@ -3,21 +3,8 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
 } from 'react-native';
 import { type Inspiration } from '../data/inspirations';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, rgba } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, rgba, CategoryColors } from '../constants/colors';
 import { DynastyBadge } from './DynastyBadge';
-
-/**
- * Category color mapping — centralized here for tag styling.
- * CATEGORY_COLORS was previously duplicated in InspirationCard.
- * Kept as a module-level const (created once at module load, not per-render).
- */
-const CATEGORY_COLORS: Record<string, string> = {
-  '野史传说': Colors.goldDark,
-  '历史悬案': Colors.textSecondary,
-  '帝王之谜': Colors.vermillion,
-  '战争秘闻': Colors.error,
-  '人物逸事': Colors.inkLight,
-};
 
 /** Reusable bullet-list section — React.memo avoids re-render when parent card re-renders */
 export const BulletSection = React.memo<{
@@ -99,7 +86,7 @@ export const InspirationCard = React.memo<{
   isExpanded: boolean;
   onToggle: (id: string) => void;
 }>(({ item, isAI, isExpanded, onToggle }) => {
-  const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
+  const catColor = CategoryColors[item.category] || Colors.textSecondary;
 
   // 统计所有展开项总数，用于在折叠时显示"含N项内容"
   const totalItems =
@@ -125,11 +112,11 @@ export const InspirationCard = React.memo<{
       )}
       <View style={styles.cardHeader}>
         <View style={styles.tagRow}>
-          {/* 分类标签：使用与 DynastyBadge 一致的 rgba 风格 */}
+          {/* 分类标签：使用与 DynastyBadge 一致的 rgba 风格，色彩源自 CategoryColors 设计令牌 */}
           <View style={[styles.tag, { backgroundColor: rgba(catColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
           </View>
-          {/* 朝代标签：统一使用 DynastyBadge 组件，移除 DYNASTY_TAG_COLORS 重复定义 */}
+          {/* 朝代标签：统一使用 DynastyBadge 组件 */}
           <DynastyBadge
             name={item.dynasty}
             size="xs"

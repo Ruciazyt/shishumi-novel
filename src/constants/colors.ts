@@ -121,6 +121,14 @@ export const DynastyColors: Record<string, string> = {
   清朝: Colors.inkDark,       // 墨色 — 末世苍凉（更厚重的晚近感）
 } as const;
 
-// === Text utilities consolidated in src/utils/text.ts (single source of truth) ===
-// Previously duplicated here: WHITESPACE_REGEX, MULTI_NEWLINE_REGEX, CJK_REGEX,
-// countChars, countChineseChars, truncateText, countParagraphs
+/**
+ * 灵感探秘分类标签色 — 集中管理，与 DynastyColors 保持同一层级
+ * 灵感卡片、过滤器均引用此常量，确保分类色彩全局一致
+ */
+export const CategoryColors: Record<string, string> = {
+  '野史传说': Colors.goldDark,
+  '历史悬案': Colors.textSecondary,
+  '帝王之谜': Colors.vermillion,
+  '战争秘闻': Colors.error,
+  '人物逸事': Colors.inkLight,
+} as const;
