@@ -8,18 +8,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '../data/inspirations';
 import { callAI } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { InspirationCard, FilterChipRow } from '../components/InspirationCard';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-type InspirationScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Inspiration">;
-
-interface Props {
-  navigation: InspirationScreenNavigationProp;
 }
 
 function parseAIResult(text: string): Inspiration | null {
@@ -48,7 +43,9 @@ function parseAIResult(text: string): Inspiration | null {
   }
 }
 
-export default function InspirationScreen({ navigation }: Props) {
+export default function InspirationScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Inspiration'>>();
+
   const [selectedCategory, setSelectedCategory] = useState<string>('全部');
   const [selectedDynasty, setSelectedDynasty] = useState<string>('全部');
   const [expandedId, setExpandedId] = useState<string | null>(null);
