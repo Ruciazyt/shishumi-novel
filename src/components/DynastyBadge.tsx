@@ -28,8 +28,16 @@ export const DynastyBadge: React.FC<{
   const isDynastyVariant = variant === 'dynasty';
   // dynasty variant: look up DynastyColors, fall back to vermillion; vermillion variant: always vermillion
   const dynColor = isDynastyVariant ? (DynastyColors[name] ?? Colors.vermillion) : Colors.vermillion;
-  const badgeBg = isDynastyVariant ? rgba(dynColor, 0.12) : ColorsAlpha.vermillionBadgeBg;
-  const badgeBorder = isDynastyVariant ? rgba(dynColor, 0.30) : ColorsAlpha.vermillionBadgeBorder;
+
+  // Precomputed alpha values for steppeGrass (元朝) eliminate runtime rgba() calls.
+  // For other dynasty colors, fall back to runtime rgba() computation.
+  const isSteppeGrass = dynColor === Colors.steppeGrass;
+  const badgeBg = isDynastyVariant
+    ? (isSteppeGrass ? ColorsAlpha.steppeGrassBadgeBg : rgba(dynColor, 0.12))
+    : ColorsAlpha.vermillionBadgeBg;
+  const badgeBorder = isDynastyVariant
+    ? (isSteppeGrass ? ColorsAlpha.steppeGrassBadgeBorder : rgba(dynColor, 0.30))
+    : ColorsAlpha.vermillionBadgeBorder;
 
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   const subtextStyle = size === 'xs' ? styles.subtextXs : styles.subtextSm;

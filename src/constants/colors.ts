@@ -70,6 +70,10 @@ export const ColorsAlpha = {
   inkShadowMedium: 'rgba(44,44,44,0.1)',
   /** 金色 8% 透明度 — 用于灵感卡片背景 */
   goldCardBg: 'rgba(201,169,98,0.08)',
+  /** 草原苍茫 12% 透明度 — 用于元朝徽章背景（与 DynastyBadge dynasty 变体一致） */
+  steppeGrassBadgeBg: 'rgba(107,128,96,0.12)',
+  /** 草原苍茫 30% 透明度 — 用于元朝徽章边框 */
+  steppeGrassBadgeBorder: 'rgba(107,128,96,0.30)',
 } as const;
 
 /**
