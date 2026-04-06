@@ -4,14 +4,13 @@ import {
 } from 'react-native';
 import { type Inspiration } from '../data/inspirations';
 import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors, rgba } from '../constants/colors';
+import { DynastyBadge } from './DynastyBadge';
 
-// 复用 constants/colors.ts 中定义的朝代色，Others fallback 到 textSecondary
-const DYNASTY_TAG_COLORS: Record<string, string> = {
-  ...DynastyColors,
-  '其他': Colors.textSecondary,
-};
-
-// 分类颜色映射
+/**
+ * Category color mapping — centralized here for tag styling.
+ * CATEGORY_COLORS was previously duplicated in InspirationCard.
+ * Kept as a module-level const (created once at module load, not per-render).
+ */
 const CATEGORY_COLORS: Record<string, string> = {
   '野史传说': Colors.goldDark,
   '历史悬案': Colors.textSecondary,
@@ -101,7 +100,6 @@ export const InspirationCard = React.memo<{
   onToggle: (id: string) => void;
 }>(({ item, isAI, isExpanded, onToggle }) => {
   const catColor = CATEGORY_COLORS[item.category] || Colors.textSecondary;
-  const dynColor = DYNASTY_TAG_COLORS[item.dynasty] || Colors.textSecondary;
 
   // 统计所有展开项总数，用于在折叠时显示"含N项内容"
   const totalItems =
@@ -127,12 +125,16 @@ export const InspirationCard = React.memo<{
       )}
       <View style={styles.cardHeader}>
         <View style={styles.tagRow}>
+          {/* 分类标签：使用与 DynastyBadge 一致的 rgba 风格 */}
           <View style={[styles.tag, { backgroundColor: rgba(catColor, 0.13) }]}>
             <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
           </View>
-          <View style={[styles.tag, { backgroundColor: rgba(dynColor, 0.13) }]}>
-            <Text style={[styles.tagText, { color: dynColor }]}>{item.dynasty}</Text>
-          </View>
+          {/* 朝代标签：统一使用 DynastyBadge 组件，移除 DYNASTY_TAG_COLORS 重复定义 */}
+          <DynastyBadge
+            name={item.dynasty}
+            size="xs"
+            variant="dynasty"
+          />
         </View>
         <Text style={styles.cardTitle}>{item.title}</Text>
         <Text style={styles.summary} numberOfLines={isExpanded ? undefined : 2}>
@@ -246,12 +248,16 @@ const styles = StyleSheet.create({
     padding: Spacing.md + 2,
     paddingTop: Spacing.sm + 2,
   },
-  tagRow: { flexDirection: 'row', marginBottom: Spacing.sm },
+  tagRow: {
+    flexDirection: 'row',
+    marginBottom: Spacing.sm,
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
   tag: {
     paddingHorizontal: Spacing.sm + 2,
     paddingVertical: 2,
     borderRadius: BorderRadius.round,
-    marginRight: Spacing.sm,
   },
   tagText: { fontSize: FontSize.xs, fontWeight: 'bold' },
   cardTitle: {
