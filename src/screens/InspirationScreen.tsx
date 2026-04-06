@@ -9,7 +9,7 @@ import { INSPIRATIONS, CATEGORIES, DYNASTIES_FILTER, type Inspiration } from '..
 import { callAI } from '../services/api';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, rgba } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha } from '../constants/colors';
 import { InspirationCard, FilterChipRow } from '../components/InspirationCard';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
