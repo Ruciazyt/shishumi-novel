@@ -50,5 +50,5 @@ export type RootStackParamList = {
   Project: { projectId: string };
   Editor: { chapterId: string };
   Settings: undefined;
-  Inspiration: undefined;
+  Inspiration: undefined; // 历史探秘入口
 };

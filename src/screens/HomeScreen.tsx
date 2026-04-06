@@ -35,6 +35,9 @@ export const HomeScreen: React.FC = () => {
 
   // 全局统计数据 — 单次遍历，累计章节数和总字数，避免 reduce 每轮重建累加器对象
   const stats = useMemo(() => {
+    if (state.projects.length === 0) {
+      return { totalProjects: 0, totalChapters: 0, totalChars: 0 };
+    }
     let totalChapters = 0;
     let totalChars = 0;
     for (const p of state.projects) {
