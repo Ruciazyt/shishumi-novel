@@ -1,6 +1,8 @@
 // Precomputed RGBA values for ColorsAlpha — eliminates runtime rgba() calls.
 // Conversion: hex '#RRGGBB' → parseInt(RR,16), parseInt(GG,16), parseInt(BB,16)
 // Colors used: vermillion=#C73E3A, gold=#C9A962, ink=#2C2C2C
+import type { InspirationCategory } from '../data/inspirations';
+
 
 export const Colors = {
   // 主色调
@@ -129,7 +131,7 @@ export const DynastyColors: Record<string, string> = {
  * 灵感探秘分类标签色 — 集中管理，与 DynastyColors 保持同一层级
  * 灵感卡片、过滤器均引用此常量，确保分类色彩全局一致
  */
-export const CategoryColors: Record<string, string> = {
+export const CategoryColors: Record<InspirationCategory, string> = {
   '野史传说': Colors.goldDark,
   '历史悬案': Colors.textSecondary,
   '帝王之谜': Colors.vermillion,

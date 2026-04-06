@@ -31,7 +31,7 @@ export interface Dynasty {
 }
 
 export interface AIRequest {
-  type: 'polish' | 'historical' | 'poetry' | 'buddhist' | 'taoist' | 'inspiration';
+  type: AIAssistantType | 'inspiration';
   text?: string;
   dynasty?: string;
   scene?: string;

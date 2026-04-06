@@ -12,6 +12,8 @@ export interface Inspiration {
   characterIdeas?: string[];      // 人物设定灵感
 }
 
+export type InspirationCategory = Inspiration["category"];
+
 
 export const CATEGORIES: Inspiration['category'][] = [
   '野史传说', '历史悬案', '帝王之谜', '战争秘闻', '人物逸事'
