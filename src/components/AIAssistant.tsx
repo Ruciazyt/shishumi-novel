@@ -37,12 +37,18 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [loadingHint, setLoadingHint] = useState('');
+  // Request-level timeout: set when 90s elapsed with no response
+  const [timeoutError, setTimeoutError] = useState(false);
   const [copied, setCopied] = useState(false);
   // 插入确认状态：点击"插入文本"后短暂显示"已插入"提示，再关闭 modal
   const [inserted, setInserted] = useState(false);
 
   // Timeout warning timer ref
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 90-second request-level timeout — auto-cancels if model hangs beyond UX-acceptable window
+  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // handleInsert setTimeout — cleaned up on unmount to avoid orphaned callbacks
+  const insertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 防止组件卸载后仍更新 state（仅在组件真正卸载时设为 false）
   const isMountedRef = useRef(true);
   // 始终读取最新的 aiType，避免 handleSubmit 因频繁变化的值而不必要地 re-create
@@ -120,6 +126,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
         clearTimeout(hintTimerRef.current);
         hintTimerRef.current = null;
       }
+      if (timeoutTimerRef.current) {
+        clearTimeout(timeoutTimerRef.current);
+        timeoutTimerRef.current = null;
+      }
+      setTimeoutError(false);
     }
   }, [visible]);
 
@@ -128,6 +139,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (insertTimerRef.current) {
+        clearTimeout(insertTimerRef.current);
+        insertTimerRef.current = null;
+      }
     };
   }, []);
 
@@ -140,11 +155,28 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
   useEffect(() => {
     if (loading) {
       setLoadingHint('');
+      setTimeoutError(false);
       hintTimerRef.current = setTimeout(() => {
         if (isMountedRef.current && requestActiveRef.current) {
           setLoadingHint('模型响应较慢，请稍候...');
         }
       }, 5000);
+      // 90秒请求超时：axios 60s 网络超时对用户太漫长，在此之前主动取消
+      timeoutTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current && requestActiveRef.current) {
+          setTimeoutError(true);
+          // 复用 handleCancel 逻辑：中止请求 + 清除 loading 状态 + 提示用户
+          cancelledRef.current = true;
+          requestActiveRef.current = false;
+          setLoading(false);
+          setLoadingHint('');
+          setError('请求超时，请检查网络或稍后重试');
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+          }
+        }
+      }, 90000);
     } else {
       if (hintTimerRef.current) { clearTimeout(hintTimerRef.current); hintTimerRef.current = null; }
       if (isMountedRef.current) {
@@ -155,6 +187,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       if (hintTimerRef.current) {
         clearTimeout(hintTimerRef.current);
         hintTimerRef.current = null;
+      }
+      if (timeoutTimerRef.current) {
+        clearTimeout(timeoutTimerRef.current);
+        timeoutTimerRef.current = null;
       }
     };
   }, [loading]);
@@ -219,6 +255,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setError('');
     setResult('');
     setCopied(false);
+    setTimeoutError(false);
     cancelledRef.current = false;
     // 标记当前请求处于活跃状态，modal 关闭后此标记为 false 可阻断旧响应
     requestActiveRef.current = true;
@@ -258,7 +295,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       clearTimeout(hintTimerRef.current);
       hintTimerRef.current = null;
     }
+    if (timeoutTimerRef.current) {
+      clearTimeout(timeoutTimerRef.current);
+      timeoutTimerRef.current = null;
+    }
     setLoadingHint('');
+    setTimeoutError(false);
     // 真正中止进行中的 HTTP 请求
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -271,7 +313,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setInserted(true);
     onInsertText(result);
     // 延迟关闭 modal，让用户看到"已插入"提示
-    setTimeout(() => {
+    if (insertTimerRef.current) clearTimeout(insertTimerRef.current);
+    insertTimerRef.current = setTimeout(() => {
       if (isMountedRef.current) onClose();
     }, 1200);
   };
@@ -384,7 +427,19 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
               <Text style={styles.keyboardDismissText}>⌨️ 收起</Text>
             </TouchableOpacity>
 
-            {error ? (
+            {timeoutError ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>⏱ 请求超时（90秒），请检查网络或稍后重试。如果问题持续，请尝试缩短输入内容。</Text>
+                <View style={styles.errorActions}>
+                  <TouchableOpacity style={styles.resetButton} onPress={resetState}>
+                    <Text style={styles.resetButtonText}>重新输入</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.retryButton} onPress={handleSubmit}>
+                    <Text style={styles.retryButtonText}>重试</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : error ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
                 <View style={styles.errorActions}>
