@@ -36,7 +36,7 @@ export const BulletSection = React.memo<{
     <View>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
       {items.map((text, i) => (
-        <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]}>· {text}</Text>
+        <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
       ))}
     </View>
   );
@@ -137,7 +137,7 @@ export const InspirationCard = React.memo<{
           />
         </View>
         <Text style={styles.cardTitle}>{item.title}</Text>
-        <Text style={styles.summary} numberOfLines={isExpanded ? undefined : 2}>
+        <Text style={styles.summary} numberOfLines={isExpanded ? undefined : 2} selectable>
           {item.summary}
         </Text>
       </View>
