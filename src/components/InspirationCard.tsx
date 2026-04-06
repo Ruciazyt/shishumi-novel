@@ -23,7 +23,7 @@ export const BulletSection = React.memo<{
     <View>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
       {items.map((text, i) => (
-        <Text key={i} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
+        <Text key={text} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
       ))}
     </View>
   );

@@ -183,7 +183,7 @@ export default function InspirationScreen({ navigation }: Props) {
       clearTimeout(searchDebounceRef.current);
     }
     searchDebounceRef.current = setTimeout(() => {
-      const trimmed = text.trim();
+      const trimmed = searchQueryRef.current.trim();
       if (trimmed) {
         executeAISearch(trimmed);
       }
