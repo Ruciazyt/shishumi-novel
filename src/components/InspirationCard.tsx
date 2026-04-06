@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
 } from 'react-native';
 import { type Inspiration } from '../data/inspirations';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors, rgba } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, rgba } from '../constants/colors';
 import { DynastyBadge } from './DynastyBadge';
 
 /**
