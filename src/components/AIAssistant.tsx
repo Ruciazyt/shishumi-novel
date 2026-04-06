@@ -274,7 +274,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     // loading 结束后检查用户是否在请求期间尝试关闭过 modal，若是则立即关闭
     if (pendingCloseRef.current) {
       pendingCloseRef.current = false;
-      resetState();
+      setInputText('');
+      setSceneText('');
+      setResult('');
+      setError('');
+      setLoadingHint('');
+      cancelledRef.current = false;
       onClose();
       return;
     }
@@ -347,7 +352,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }
     requestActiveRef.current = false;
     cancelledRef.current = true;
-    resetState();
+    setInputText('');
+    setSceneText('');
+    setResult('');
+    setError('');
+    setLoadingHint('');
+    cancelledRef.current = false;
     onClose();
   };
 
@@ -528,7 +538,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
                   <Text style={styles.resultCount}>{result.length} 字</Text>
                 </View>
                 <ScrollView style={styles.resultScroll} showsVerticalScrollIndicator={false}>
-                  <Text style={styles.resultText}>{result}</Text>
+                  <Text style={styles.resultText} selectable>{result}</Text>
                 </ScrollView>
                 <View style={styles.resultActions}>
                   {inserted ? (
