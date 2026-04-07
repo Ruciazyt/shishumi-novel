@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyColors, rgba } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, DynastyAlpha, DynastyColors } from '../constants/colors';
 
 /**
  * Reusable dynasty badge component.
@@ -29,14 +29,23 @@ export const DynastyBadge: React.FC<{
   // dynasty variant: look up DynastyColors, fall back to vermillion; vermillion variant: always vermillion
   const dynColor = isDynastyVariant ? (DynastyColors[name as keyof typeof DynastyColors] ?? Colors.vermillion) : Colors.vermillion;
 
-  // Precomputed alpha values for steppeGrass (元朝) eliminate runtime rgba() calls.
-  // For other dynasty colors, fall back to runtime rgba() computation.
-  const isSteppeGrass = dynColor === Colors.steppeGrass;
-  const badgeBg = isDynastyVariant
-    ? (isSteppeGrass ? ColorsAlpha.steppeGrassBadgeBg : rgba(dynColor, 0.12))
+  // Precomputed per-dynasty badge colors — all dynasties use precomputed values from
+  // DynastyAlpha (Tang/Song/Ming/Qing) or ColorsAlpha (Yuan/steppeGrass),
+  // eliminating runtime rgba() entirely.
+  const badgeBg: string = isDynastyVariant
+    ? (name === '唐朝' ? DynastyAlpha.tangBadgeBg
+      : name === '宋朝' ? DynastyAlpha.songBadgeBg
+      : name === '明朝' ? DynastyAlpha.mingBadgeBg
+      : name === '清朝' ? DynastyAlpha.qingBadgeBg
+      : ColorsAlpha.steppeGrassBadgeBg)
     : ColorsAlpha.vermillionBadgeBg;
-  const badgeBorder = isDynastyVariant
-    ? (isSteppeGrass ? ColorsAlpha.steppeGrassBadgeBorder : rgba(dynColor, 0.30))
+
+  const badgeBorder: string = isDynastyVariant
+    ? (name === '唐朝' ? DynastyAlpha.tangBadgeBorder
+      : name === '宋朝' ? DynastyAlpha.songBadgeBorder
+      : name === '明朝' ? DynastyAlpha.mingBadgeBorder
+      : name === '清朝' ? DynastyAlpha.qingBadgeBorder
+      : ColorsAlpha.steppeGrassBadgeBorder)
     : ColorsAlpha.vermillionBadgeBorder;
 
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
@@ -80,14 +89,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1,
   },
-  // sm variant: xs font + light color + marginTop + letterSpacing
   subtextSm: {
     fontSize: FontSize.xs,
     color: Colors.textLight,
     marginTop: 2,
     letterSpacing: 1,
   },
-  // xs variant: tighter letterSpacing for compact stats bar rendering
   subtextXs: {
     fontSize: FontSize.xs,
     color: Colors.textLight,

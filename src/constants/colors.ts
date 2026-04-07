@@ -138,3 +138,19 @@ export const CategoryColors: Record<InspirationCategory, string> = {
   '战争秘闻': Colors.error,
   '人物逸事': Colors.inkLight,
 } as const;
+
+/**
+ * Precomputed dynasty badge alpha variants — per-dynasty badge bg/border colors.
+ * Used by DynastyBadge variant="dynasty" to avoid runtime rgba() calls.
+ * Tang (#C73E3E→199,62,58), Song (#C9A962→201,169,98), Ming (#2C2C2C→44,44,44), Qing (#1A1A1A→26,26,26)
+ */
+export const DynastyAlpha = {
+  tangBadgeBg:    'rgba(199,62,58,0.12)',
+  tangBadgeBorder: 'rgba(199,62,58,0.30)',
+  songBadgeBg:    'rgba(201,169,98,0.12)',
+  songBadgeBorder: 'rgba(201,169,98,0.30)',
+  mingBadgeBg:    'rgba(44,44,44,0.12)',
+  mingBadgeBorder: 'rgba(44,44,44,0.30)',
+  qingBadgeBg:    'rgba(26,26,26,0.12)',
+  qingBadgeBorder: 'rgba(26,26,26,0.30)',
+} as const;
