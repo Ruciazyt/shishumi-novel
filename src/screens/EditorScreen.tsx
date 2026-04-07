@@ -308,16 +308,23 @@ export const EditorScreen: React.FC = () => {
 
   const handleInsertContent = useCallback((text: string) => {
     const trimmedText = text.trim();
-    if (!trimmedText) return;
     // Normalize runs of 3+ newlines to 2 (prevents excessive blank lines
     // when inserting multiple times into content with existing paragraph breaks).
-    // Then ensure at least \n\n at the end: if the normalized content already ends
+    const normalized = pendingContentRef.current.replace(/\n{3,}/g, '\n\n');
+    // Ensure at least \n\n at the end: if the normalized content already ends
     // with \n\n (meaning there were paragraph breaks), preserve them to protect
     // the original paragraph structure. Otherwise strip trailing newlines.
-    const normalized = pendingContentRef.current.replace(/\n{3,}/g, '\n\n');
     const baseContent = normalized.endsWith('\n\n')
       ? normalized
       : normalized.replace(/\n+$/, '');
+    if (!trimmedText) {
+      // Even when AI returns empty/whitespace, keep pendingContentRef in sync
+      // with the currently displayed (normalized) TextInput content. Otherwise
+      // pendingContentRef holds the previous AI result and corrupts the next
+      // manual edit: new text gets appended to the stale AI content.
+      pendingContentRef.current = normalized;
+      return;
+    }
     const prefix = baseContent ? '\n\n' : '';
     const newContent = baseContent + prefix + trimmedText;
     setContent(newContent);
