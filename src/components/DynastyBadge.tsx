@@ -29,24 +29,21 @@ export const DynastyBadge: React.FC<{
   // dynasty variant: look up DynastyColors, fall back to vermillion; vermillion variant: always vermillion
   const dynColor = isDynastyVariant ? (DynastyColors[name as keyof typeof DynastyColors] ?? Colors.vermillion) : Colors.vermillion;
 
-  // Precomputed per-dynasty badge colors — all dynasties use precomputed values from
-  // DynastyAlpha (Tang/Song/Ming/Qing) or ColorsAlpha (Yuan/steppeGrass),
-  // eliminating runtime rgba() entirely.
-  const badgeBg: string = isDynastyVariant
-    ? (name === '唐朝' ? DynastyAlpha.tangBadgeBg
-      : name === '宋朝' ? DynastyAlpha.songBadgeBg
-      : name === '明朝' ? DynastyAlpha.mingBadgeBg
-      : name === '清朝' ? DynastyAlpha.qingBadgeBg
-      : ColorsAlpha.steppeGrassBadgeBg)
-    : ColorsAlpha.vermillionBadgeBg;
+  // Lookup map: dynasty name → { badgeBg, badgeBorder }.
+  // All values are precomputed rgba strings from DynastyAlpha / ColorsAlpha —
+  // no runtime rgba() computation.  Adding a new dynasty only requires adding
+  // a new entry here (no new hardcoded strings scattered through conditionals).
+  const DYNASTY_BADGE_MAP: Record<string, { badgeBg: string; badgeBorder: string }> = {
+    唐朝:  { badgeBg: DynastyAlpha.tangBadgeBg,    badgeBorder: DynastyAlpha.tangBadgeBorder },
+    宋朝:  { badgeBg: DynastyAlpha.songBadgeBg,    badgeBorder: DynastyAlpha.songBadgeBorder },
+    明朝:  { badgeBg: DynastyAlpha.mingBadgeBg,    badgeBorder: DynastyAlpha.mingBadgeBorder },
+    清朝:  { badgeBg: DynastyAlpha.qingBadgeBg,    badgeBorder: DynastyAlpha.qingBadgeBorder },
+    元朝:  { badgeBg: ColorsAlpha.steppeGrassBadgeBg, badgeBorder: ColorsAlpha.steppeGrassBadgeBorder },
+  };
 
-  const badgeBorder: string = isDynastyVariant
-    ? (name === '唐朝' ? DynastyAlpha.tangBadgeBorder
-      : name === '宋朝' ? DynastyAlpha.songBadgeBorder
-      : name === '明朝' ? DynastyAlpha.mingBadgeBorder
-      : name === '清朝' ? DynastyAlpha.qingBadgeBorder
-      : ColorsAlpha.steppeGrassBadgeBorder)
-    : ColorsAlpha.vermillionBadgeBorder;
+  const { badgeBg, badgeBorder } = isDynastyVariant
+    ? (DYNASTY_BADGE_MAP[name] ?? { badgeBg: ColorsAlpha.vermillionBadgeBg, badgeBorder: ColorsAlpha.vermillionBadgeBorder })
+    : { badgeBg: ColorsAlpha.vermillionBadgeBg, badgeBorder: ColorsAlpha.vermillionBadgeBorder };
 
   const textStyle = size === 'xs' ? styles.textXs : styles.textSm;
   const subtextStyle = size === 'xs' ? styles.subtextXs : styles.subtextSm;
