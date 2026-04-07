@@ -1,8 +1,16 @@
-// Precomputed RGBA values for ColorsAlpha — eliminates runtime rgba() calls.
-// Conversion: hex '#RRGGBB' → parseInt(RR,16), parseInt(GG,16), parseInt(BB,16)
-// Colors used: vermillion=#C73E3A, gold=#C9A962, ink=#2C2C2C
 import type { InspirationCategory } from '../data/inspirations';
 
+/**
+ * 史书墨颜色系统
+ * - Colors: 主色板（hex）
+ * - ColorsAlpha: 透明度变体（预计算 rgba 字符串，避免运行时计算）
+ * - rgba(): 动态 rgba 工具函数（供需要动态 alpha 的场景使用）
+ * - Spacing / BorderRadius / FontSize: 设计令牌
+ */
+
+// ---------------------------------------------------------------------------
+// 主色板
+// ---------------------------------------------------------------------------
 
 export const Colors = {
   // 主色调
@@ -17,7 +25,7 @@ export const Colors = {
   vermillionLight: '#E05A57',
   vermillionDark: '#A62E2A',
 
-  // 金色点缀 - 用于 premium feel 和装饰元素
+  // 金色点缀
   gold: '#C9A962',
   goldLight: '#D4BC7D',
   goldDark: '#A8893E',
@@ -39,10 +47,14 @@ export const Colors = {
 
   // 状态色
   success: '#4CAF50',
-  steppeGrass: '#6B8060',  // 草原苍茫 —  muted olive green
+  steppeGrass: '#6B8060', // 草原苍茫
   warning: '#FF9800',
   error: '#F44336',
 } as const;
+
+// ---------------------------------------------------------------------------
+// 透明度变体 — 预计算 rgba 字符串，消除运行时 rgba() 计算开销
+// ---------------------------------------------------------------------------
 
 /**
  * 工具函数：hex 颜色 + alpha → rgba 字符串
@@ -55,32 +67,21 @@ export const rgba = (hex: string, alpha: number): string => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
-/**
- * Precomputed alpha variants — avoids runtime rgba() computation.
- * Format: 'rgba(R,G,B,A)' with all values explicitly stated.
- */
 export const ColorsAlpha = {
-  /** 朱砂红 8% 透明度 — 用于朝代徽章背景 */
   vermillionBadgeBg: 'rgba(199,62,58,0.08)',
-  /** 朱砂红 25% 透明度 — 用于朝代徽章边框 */
   vermillionBadgeBorder: 'rgba(199,62,58,0.25)',
-  /** 金色 15% 透明度 — 用于装饰边框 */
   goldBorder: 'rgba(201,169,98,0.15)',
-  /** 墨色 5% 透明度 — 用于轻柔阴影 */
   inkShadow: 'rgba(44,44,44,0.05)',
-  /** 墨色 10% 透明度 — 用于卡片阴影 */
   inkShadowMedium: 'rgba(44,44,44,0.1)',
-  /** 金色 8% 透明度 — 用于灵感卡片背景 */
   goldCardBg: 'rgba(201,169,98,0.08)',
-  /** 草原苍茫 12% 透明度 — 用于元朝徽章背景（与 DynastyBadge dynasty 变体一致） */
   steppeGrassBadgeBg: 'rgba(107,128,96,0.12)',
-  /** 草原苍茫 30% 透明度 — 用于元朝徽章边框 */
   steppeGrassBadgeBorder: 'rgba(107,128,96,0.30)',
 } as const;
 
-/**
- * 设计间距 - 8px 网格系统
- */
+// ---------------------------------------------------------------------------
+// 设计令牌
+// ---------------------------------------------------------------------------
+
 export const Spacing = {
   xs: 4,
   sm: 8,
@@ -90,9 +91,6 @@ export const Spacing = {
   xxl: 48,
 } as const;
 
-/**
- * 圆角系统
- */
 export const BorderRadius = {
   sm: 4,
   md: 8,
@@ -102,9 +100,6 @@ export const BorderRadius = {
   round: 9999,
 } as const;
 
-/**
- * 字体大小系统
- */
 export const FontSize = {
   xs: 12,
   sm: 14,
@@ -115,22 +110,18 @@ export const FontSize = {
   xxxl: 32,
 } as const;
 
-/**
- * 朝代主题色 — 用于灵感探秘等功能的朝代标识色彩
- * 优先复用已有设计系统颜色，确保整体视觉一致性
- */
+// ---------------------------------------------------------------------------
+// 朝代主题色 & 分类标签色
+// ---------------------------------------------------------------------------
+
 export const DynastyColors: Record<'唐朝' | '宋朝' | '元朝' | '明朝' | '清朝', string> = {
-  唐朝: Colors.vermillion,   // 朱砂红 — 盛世华彩
-  宋朝: Colors.gold,          // 金色 — 风雅精致
-  元朝: Colors.steppeGrass,   // 草原苍茫 — muted olive green
-  明朝: Colors.ink,            // 墨色 — 典雅厚重（明色厚重）
-  清朝: Colors.inkDark,       // 墨色 — 末世苍凉（更厚重的晚近感）
+  唐朝: Colors.vermillion,
+  宋朝: Colors.gold,
+  元朝: Colors.steppeGrass,
+  明朝: Colors.ink,
+  清朝: Colors.inkDark,
 } as const;
 
-/**
- * 灵感探秘分类标签色 — 集中管理，与 DynastyColors 保持同一层级
- * 灵感卡片、过滤器均引用此常量，确保分类色彩全局一致
- */
 export const CategoryColors: Record<InspirationCategory, string> = {
   '野史传说': Colors.goldDark,
   '历史悬案': Colors.textSecondary,
@@ -139,32 +130,21 @@ export const CategoryColors: Record<InspirationCategory, string> = {
   '人物逸事': Colors.inkLight,
 } as const;
 
-/**
- * Precomputed dynasty badge alpha variants — per-dynasty badge bg/border colors.
- * Used by DynastyBadge variant="dynasty" to avoid runtime rgba() calls.
- * Tang (#C73E3E→199,62,58), Song (#C9A962→201,169,98), Ming (#2C2C2C→44,44,44), Qing (#1A1A1A→26,26,26)
- */
 export const DynastyAlpha = {
-  tangBadgeBg:    'rgba(199,62,58,0.12)',
+  tangBadgeBg: 'rgba(199,62,58,0.12)',
   tangBadgeBorder: 'rgba(199,62,58,0.30)',
-  songBadgeBg:    'rgba(201,169,98,0.12)',
+  songBadgeBg: 'rgba(201,169,98,0.12)',
   songBadgeBorder: 'rgba(201,169,98,0.30)',
-  mingBadgeBg:    'rgba(44,44,44,0.12)',
+  mingBadgeBg: 'rgba(44,44,44,0.12)',
   mingBadgeBorder: 'rgba(44,44,44,0.30)',
-  qingBadgeBg:    'rgba(26,26,26,0.12)',
+  qingBadgeBg: 'rgba(26,26,26,0.12)',
   qingBadgeBorder: 'rgba(26,26,26,0.30)',
 } as const;
 
-/**
- * Precomputed category badge alpha variants — per-category tag background colors.
- * Used by InspirationCard for category tag badge to avoid runtime rgba() calls.
- * GoldDark (#A8893E→168,137,62), TextSecondary (#666666→102,102,102),
- * Vermillion (#C73E3A→199,62,58), Error (#F44336→244,67,54), InkLight (#4A4A4A→74,74,74)
- */
 export const CategoryAlpha = {
- 野史传说: 'rgba(168,137,62,0.13)',
-  历史悬案: 'rgba(102,102,102,0.13)',
-  帝王之谜: 'rgba(199,62,58,0.13)',
-  战争秘闻: 'rgba(244,67,54,0.13)',
-  人物逸事: 'rgba(74,74,74,0.13)',
+  '野史传说': 'rgba(168,137,62,0.13)',
+  '历史悬案': 'rgba(102,102,102,0.13)',
+  '帝王之谜': 'rgba(199,62,58,0.13)',
+  '战争秘闻': 'rgba(244,67,54,0.13)',
+  '人物逸事': 'rgba(74,74,74,0.13)',
 } as const;
