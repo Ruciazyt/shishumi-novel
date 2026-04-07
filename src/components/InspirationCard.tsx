@@ -12,18 +12,21 @@ export const BulletSection = React.memo<{
   items: string[];
   titleColor?: string;
   itemColor?: string;
+  /** Section index within the card — ensures unique keys across sections with identical titles */
+  sectionIndex: number;
 }>(function BulletSection({
   title,
   items,
   titleColor,
   itemColor,
+  sectionIndex,
 }) {
   if (!items || items.length === 0) return null;
   return (
     <View>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
       {items.map((text, i) => (
-        <Text key={`${title}-${i}`} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
+        <Text key={`${sectionIndex}-${i}`} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
       ))}
     </View>
   );
@@ -134,10 +137,10 @@ export const InspirationCard = React.memo<{
 
       {isExpanded && (
         <View style={styles.cardBody}>
-          <BulletSection title="📖 正史记载" items={item.historicalFacts} />
-          <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} />
-          <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} />
-          <BulletSection title="👤 人物设定灵感" items={item.characterIdeas ?? []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} />
+          <BulletSection title="📖 正史记载" items={item.historicalFacts} sectionIndex={0} />
+          <BulletSection title="📜 野史说法" items={item.folkVersions} titleColor={Colors.goldDark} itemColor={Colors.textSecondary} sectionIndex={1} />
+          <BulletSection title="✍️ 创作角度" items={item.creativeAngles} titleColor={Colors.vermillion} itemColor={Colors.textPrimary} sectionIndex={2} />
+          <BulletSection title="👤 人物设定灵感" items={item.characterIdeas ?? []} titleColor={Colors.inkLight} itemColor={Colors.textPrimary} sectionIndex={3} />
         </View>
       )}
 

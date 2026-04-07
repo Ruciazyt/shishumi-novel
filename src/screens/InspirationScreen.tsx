@@ -123,10 +123,9 @@ export default function InspirationScreen() {
     setAiError('');
     setExpandedId(null);
     // 重置筛选器：AI 搜索时隐藏筛选器，清除搜索后恢复"全部"状态
-    setSelectedCategory('全部');
-    setSelectedDynasty('全部');
-
     // 保存进入 AI 搜索前的筛选状态，清除时恢复
+    // 注意：不禁用 FlatList（searched=true 时已自动隐藏），保留用户筛选偏好，
+    // 避免 executeAISearch 中 reset 到'全部'导致 clearAISearch 无法恢复正确状态
     preAISearchCategoryRef.current = selectedCategoryRef.current;
     preAISearchDynastyRef.current = selectedDynastyRef.current;
 
