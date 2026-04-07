@@ -22,7 +22,7 @@ export const BulletSection = React.memo<{
   return (
     <View>
       <Text style={[styles.sectionTitle, titleColor ? { color: titleColor } : undefined]}>{title}</Text>
-      {items.map((text, i) => (
+      {items.map((text) => (
         <Text key={text} style={[styles.bulletItem, itemColor ? { color: itemColor } : undefined]} selectable>· {text}</Text>
       ))}
     </View>
@@ -88,12 +88,15 @@ export const InspirationCard = React.memo<{
 }>(({ item, isAI, isExpanded, onToggle }) => {
   const catColor = CategoryColors[item.category] || Colors.textSecondary;
 
-  // 统计所有展开项总数，用于在折叠时显示"含N项内容"
-  const totalItems =
-    (item.historicalFacts?.length ?? 0) +
-    (item.folkVersions?.length ?? 0) +
-    (item.creativeAngles?.length ?? 0) +
-    (item.characterIdeas?.length ?? 0);
+  // useMemo：避免每次渲染都重复计算数组长度（数组引用不变时直接复用缓存值）
+  const totalItems = React.useMemo(
+    () =>
+      (item.historicalFacts?.length ?? 0) +
+      (item.folkVersions?.length ?? 0) +
+      (item.creativeAngles?.length ?? 0) +
+      (item.characterIdeas?.length ?? 0),
+    [item.historicalFacts, item.folkVersions, item.creativeAngles, item.characterIdeas]
+  );
 
   return (
     <TouchableOpacity
