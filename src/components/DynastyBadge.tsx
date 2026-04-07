@@ -27,7 +27,7 @@ export const DynastyBadge: React.FC<{
 }> = React.memo(({ name, subtext, size = 'sm', variant = 'vermillion' }) => {
   const isDynastyVariant = variant === 'dynasty';
   // dynasty variant: look up DynastyColors, fall back to vermillion; vermillion variant: always vermillion
-  const dynColor = isDynastyVariant ? (DynastyColors[name] ?? Colors.vermillion) : Colors.vermillion;
+  const dynColor = isDynastyVariant ? (DynastyColors[name as keyof typeof DynastyColors] ?? Colors.vermillion) : Colors.vermillion;
 
   // Precomputed alpha values for steppeGrass (元朝) eliminate runtime rgba() calls.
   // For other dynasty colors, fall back to runtime rgba() computation.
