@@ -84,6 +84,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       clearTimeout(hintTimerRef.current);
       hintTimerRef.current = null;
     }
+    if (insertTimerRef.current) {
+      clearTimeout(insertTimerRef.current);
+      insertTimerRef.current = null;
+    }
     setInputText('');
     setSceneText('');
     setResult('');
@@ -129,6 +133,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
       if (timeoutTimerRef.current) {
         clearTimeout(timeoutTimerRef.current);
         timeoutTimerRef.current = null;
+      }
+      if (insertTimerRef.current) {
+        clearTimeout(insertTimerRef.current);
+        insertTimerRef.current = null;
       }
       setTimeoutError(false);
     }
