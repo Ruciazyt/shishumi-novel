@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
 } from 'react-native';
 import { type Inspiration } from '../data/inspirations';
-import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, rgba, CategoryColors } from '../constants/colors';
+import { Colors, Spacing, BorderRadius, FontSize, ColorsAlpha, CategoryColors, CategoryAlpha } from '../constants/colors';
 import { DynastyBadge } from './DynastyBadge';
 
 /** Reusable bullet-list section — React.memo avoids re-render when parent card re-renders */
@@ -118,8 +118,8 @@ export const InspirationCard = React.memo<{
       )}
       <View style={styles.cardHeader}>
         <View style={styles.tagRow}>
-          {/* 分类标签：使用与 DynastyBadge 一致的 rgba 风格，色彩源自 CategoryColors 设计令牌 */}
-          <View style={[styles.tag, { backgroundColor: rgba(catColor, 0.13) }]}>
+          {/* 分类标签：使用预计算透明度背景色（源自 CategoryAlpha 设计令牌） */}
+          <View style={[styles.tag, { backgroundColor: CategoryAlpha[item.category] }]}>
             <Text style={[styles.tagText, { color: catColor }]}>{item.category}</Text>
           </View>
           {/* 朝代标签：统一使用 DynastyBadge 组件 */}

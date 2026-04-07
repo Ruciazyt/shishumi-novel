@@ -154,3 +154,17 @@ export const DynastyAlpha = {
   qingBadgeBg:    'rgba(26,26,26,0.12)',
   qingBadgeBorder: 'rgba(26,26,26,0.30)',
 } as const;
+
+/**
+ * Precomputed category badge alpha variants — per-category tag background colors.
+ * Used by InspirationCard for category tag badge to avoid runtime rgba() calls.
+ * GoldDark (#A8893E→168,137,62), TextSecondary (#666666→102,102,102),
+ * Vermillion (#C73E3A→199,62,58), Error (#F44336→244,67,54), InkLight (#4A4A4A→74,74,74)
+ */
+export const CategoryAlpha = {
+ 野史传说: 'rgba(168,137,62,0.13)',
+  历史悬案: 'rgba(102,102,102,0.13)',
+  帝王之谜: 'rgba(199,62,58,0.13)',
+  战争秘闻: 'rgba(244,67,54,0.13)',
+  人物逸事: 'rgba(74,74,74,0.13)',
+} as const;
