@@ -103,11 +103,16 @@ export default function InspirationScreen() {
     });
   }, [selectedCategory, selectedDynasty]);
 
-  /** AI 结果也受朝代筛选器约束 — 否则"元朝"选中时 AI 仍返回"明朝"内容会误导用户 */
+  /** AI 结果同时受朝代和分类筛选器约束 */
   const filteredAIResults = useMemo(() => {
-    if (selectedDynasty === '全部') return aiResults;
-    return aiResults.filter(item => item.dynasty === selectedDynasty);
-  }, [aiResults, selectedDynasty]);
+    const catMatch = selectedCategory === '全部';
+    const dynMatch = selectedDynasty === '全部';
+    return aiResults.filter(item => {
+      const categoryOk = catMatch || item.category === selectedCategory;
+      const dynastyOk = dynMatch || item.dynasty === selectedDynasty;
+      return categoryOk && dynastyOk;
+    });
+  }, [aiResults, selectedCategory, selectedDynasty]);
 
   const toggleExpand = useCallback((id: string) => {
     // 仅在展开状态实际变化时触发布局动画，避免冗余动画调用
@@ -319,19 +324,19 @@ export default function InspirationScreen() {
             <>
               <Text style={styles.aiSectionTitle}>🔮 AI 为你找到的灵感</Text>
               {filteredAIResults.map(item => <InspirationCard key={item.id} item={item} isAI={true} isExpanded={expandedId === item.id} onToggle={toggleExpand} />)}
-              {selectedDynasty !== '全部' && aiResults.length > filteredAIResults.length && (
+              {(selectedDynasty !== '全部' || selectedCategory !== '全部') && aiResults.length > filteredAIResults.length && (
                 <Text style={styles.aiResultsNote}>
-                  💡 还有 {aiResults.length - filteredAIResults.length} 条结果（{selectedDynasty}），切换至"全部"朝代即可查看
+                  💡 还有 {aiResults.length - filteredAIResults.length} 条结果{selectedDynasty !== '全部' ? `（${selectedDynasty}）` : ''}{selectedCategory !== '全部' ? `（${selectedCategory}）` : ''}，切换至"全部"筛选即可查看全部
                 </Text>
               )}
             </>
           ) : !aiError && !aiSearching && searched && filteredAIResults.length === 0 ? (
             <View style={styles.aiEmptyContainer}>
               <Text style={styles.aiEmptyIcon}>🔍</Text>
-              {selectedDynasty !== '全部' && aiResults.length > 0 ? (
+              {(selectedDynasty !== '全部' || selectedCategory !== '全部') && aiResults.length > 0 ? (
                 <>
-                  <Text style={styles.aiEmptyText}>AI 返回了 {aiResults.length} 条灵感，但都与"{selectedDynasty}"无关</Text>
-                  <Text style={styles.aiEmptyHint}>切换至"全部"朝代，或尝试其他历史话题</Text>
+                  <Text style={styles.aiEmptyText}>AI 返回了 {aiResults.length} 条灵感，但不符合当前筛选条件</Text>
+                  <Text style={styles.aiEmptyHint}>切换至"全部"筛选，或尝试其他历史话题</Text>
                 </>
               ) : (
                 <>
