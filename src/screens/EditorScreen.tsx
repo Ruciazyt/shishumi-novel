@@ -354,6 +354,8 @@ export const EditorScreen: React.FC = () => {
 
   // 统计字数（useMemo 避免每次按键重复计算）
   const charCount = React.useMemo(() => countChars(content), [content]);
+  /** 内容过长时显示警告（>5000 字），提示用户注意分段 */
+  const isLongContent = charCount > 5000;
 
   /** 章节导航：使用 projectRef 避免 project 引用变化导致回调重建 */
   const handlePrevChapter = useCallback(async () => {
@@ -498,6 +500,9 @@ export const EditorScreen: React.FC = () => {
           <Text style={styles.statsText}>
             {charCount.toLocaleString()} 字
           </Text>
+          {isLongContent && (
+            <Text style={styles.contentLengthWarning}>内容较长，建议注意分段</Text>
+          )}
         </View>
         <View style={styles.statsBarRight}>
           {saveStatus === 'saving' && <Text style={styles.savingIndicator}>● 保存中</Text>}
@@ -814,6 +819,12 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: FontSize.xs,
     color: Colors.textSecondary,
+  },
+  contentLengthWarning: {
+    fontSize: FontSize.xs,
+    color: Colors.warning,
+    fontWeight: '600',
+    marginLeft: Spacing.xs,
   },
   savingIndicator: {
     fontSize: FontSize.xs,

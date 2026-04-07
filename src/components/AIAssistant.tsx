@@ -333,7 +333,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     }, 2000);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     Keyboard.dismiss();
     if (loading) {
       // 请求期间不能真正关闭：标记 pending，cancel 掉请求，待响应后延迟关闭
@@ -357,9 +357,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onIn
     setResult('');
     setError('');
     setLoadingHint('');
-    cancelledRef.current = false;
     onClose();
-  };
+  }, [onClose, loading]);
 
   // 复制按钮文字（显示 2 秒后恢复）
   const copyButtonText = copied ? '已复制' : '复制';
