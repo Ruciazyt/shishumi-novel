@@ -306,7 +306,7 @@ export const EditorScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  const handleInsertContent = (text: string) => {
+  const handleInsertContent = useCallback((text: string) => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
     // Normalize runs of 3+ newlines to 2 (prevents excessive blank lines
@@ -325,7 +325,7 @@ export const EditorScreen: React.FC = () => {
     recordHistory(newContent);
     // Auto-scroll editor to show newly inserted AI content
     editorScrollRef.current?.scrollToEnd({ animated: true });
-  };
+  }, []);
 
   if (!project || !chapter) {
     return (
