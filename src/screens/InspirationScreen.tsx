@@ -103,6 +103,12 @@ export default function InspirationScreen() {
     });
   }, [selectedCategory, selectedDynasty]);
 
+  /** AI 结果也受朝代筛选器约束 — 否则"元朝"选中时 AI 仍返回"明朝"内容会误导用户 */
+  const filteredAIResults = useMemo(() => {
+    if (selectedDynasty === '全部') return aiResults;
+    return aiResults.filter(item => item.dynasty === selectedDynasty);
+  }, [aiResults, selectedDynasty]);
+
   const toggleExpand = useCallback((id: string) => {
     // 仅在展开状态实际变化时触发布局动画，避免冗余动画调用
     setExpandedId(prev => {
@@ -309,16 +315,30 @@ export default function InspirationScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          ) : aiResults.length > 0 ? (
+          ) : filteredAIResults.length > 0 ? (
             <>
               <Text style={styles.aiSectionTitle}>🔮 AI 为你找到的灵感</Text>
-              {aiResults.map(item => <InspirationCard key={item.id} item={item} isAI={true} isExpanded={expandedId === item.id} onToggle={toggleExpand} />)}
+              {filteredAIResults.map(item => <InspirationCard key={item.id} item={item} isAI={true} isExpanded={expandedId === item.id} onToggle={toggleExpand} />)}
+              {selectedDynasty !== '全部' && aiResults.length > filteredAIResults.length && (
+                <Text style={styles.aiResultsNote}>
+                  💡 还有 {aiResults.length - filteredAIResults.length} 条结果（{selectedDynasty}），切换至"全部"朝代即可查看
+                </Text>
+              )}
             </>
-          ) : !aiError && !aiSearching && searched ? (
+          ) : !aiError && !aiSearching && searched && filteredAIResults.length === 0 ? (
             <View style={styles.aiEmptyContainer}>
               <Text style={styles.aiEmptyIcon}>🔍</Text>
-              <Text style={styles.aiEmptyText}>未找到相关灵感</Text>
-              <Text style={styles.aiEmptyHint}>试试其他关键词，如"安史之乱""郑和下西洋"</Text>
+              {selectedDynasty !== '全部' && aiResults.length > 0 ? (
+                <>
+                  <Text style={styles.aiEmptyText}>AI 返回了 {aiResults.length} 条灵感，但都与"{selectedDynasty}"无关</Text>
+                  <Text style={styles.aiEmptyHint}>切换至"全部"朝代，或尝试其他历史话题</Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.aiEmptyText}>未找到相关灵感</Text>
+                  <Text style={styles.aiEmptyHint}>试试其他关键词，如"安史之乱""郑和下西洋"</Text>
+                </>
+              )}
             </View>
           ) : null}
         </View>
@@ -476,6 +496,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.vermillion,
     marginBottom: Spacing.sm + 4,
+  },
+  aiResultsNote: {
+    fontSize: FontSize.xs,
+    color: Colors.textSecondary,
+    marginTop: Spacing.sm,
+    fontStyle: 'italic',
   },
   // AI 搜索空结果状态
   aiEmptyContainer: {
